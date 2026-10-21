@@ -1,0 +1,3542 @@
+[
+  {
+    "total_records": 23,
+    "total_searched": 7460988,
+    "articles": [
+      {
+        "doi": "10.1109/SEAA56994.2022.00061",
+        "title": "Bad Smells in Industrial Automation: Sniffing out Feature Envy",
+        "publisher": "IEEE",
+        "isbn": "978-1-6654-6153-5",
+        "rank": 1,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Bad Smells are sub-optimal software structures or patterns. They can obstruct the understandability of a software system and cause maintenance issues. As a result, it is critical to avoid Bad Smells. While the subject is well-researched in software engineering, it remains an unresolved issue in industrial automation, e.g., when developing control software in the context of a Cyber-Physical Production System (CPPS). In this short paper, we present possible detection methods for Feature Envy, a smell that indicates bad modularization of a software system. We explain how these methods can be applied to analyze control software developed in IEC 61499. We present first results as well as next steps.",
+        "article_number": "10011523",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10011523",
+        "html_url": "https://ieeexplore.ieee.org/document/10011523/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10011523/",
+        "publication_title": "2022 48th Euromicro Conference on Software Engineering and Advanced Applications (SEAA)",
+        "conference_location": "Gran Canaria, Spain",
+        "conference_dates": "31 Aug.-2 Sept. 2022",
+        "publication_number": 10011188,
+        "is_number": 10011189,
+        "publication_year": 2022,
+        "publication_date": "31 Aug.-2 Sept. 2022",
+        "start_page": "346",
+        "end_page": "349",
+        "citing_paper_count": 9,
+        "citing_patent_count": 0,
+        "download_count": 232,
+        "insert_date": "20230116",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Production systems",
+              "Automation",
+              "Maintenance engineering",
+              "Software systems",
+              "Feature extraction",
+              "Control systems",
+              "IEC Standards"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "distributed control system",
+              "CPS",
+              "CPPS",
+              "design smell",
+              "code smell",
+              "bad smell",
+              "anti-pattern",
+              "Feature Envy",
+              "metric",
+              "measure"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Autonomic System",
+              "Bad Smell",
+              "Feature Envy",
+              "Control Software",
+              "Software Engineering",
+              "Maintenance Issues",
+              "Distancing Measures",
+              "Distance Matrix",
+              "Flow Data",
+              "Flow Control",
+              "Automatic Detection",
+              "State Machine",
+              "Set Of Metrics",
+              "Functional Blocks",
+              "Part Of The Equation",
+              "Refactoring",
+              "Domain-specific Languages",
+              "Incoming Connections",
+              "Input Events"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-6654-6153-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-6654-6152-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA54631.2023.10275380",
+        "title": "IEC 61499 Skill-based Distributed Design Pattern",
+        "publisher": "IEEE",
+        "isbn": "979-8-3503-3992-5",
+        "issn": "1946-0740",
+        "rank": 2,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37090038855",
+              "id": 37090038855,
+              "full_name": "Anna-Lena Hager",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL SQI ISE, TU Vienna, Vienna, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37086492523",
+              "id": 37086492523,
+              "full_name": "Kristof Meixner",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL SQI ISE, TU Vienna, Vienna, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Cyber-physical production systems (CPPSs) are modern production systems that aim to integrate the latest techniques and technologies from IT to enable flexible/adaptive manufacturing. The IEC 61499 standardizes a domain-specific modeling language used for developing control software for distributed CPPSs. However, currently, IEC 61499 software misses concrete design guidelines, and those that exist are often not concrete enough to implement high-quality software, which makes changeability and refactoring error-prone and tedious. Furthermore, modularization and decoupling of hardware access and software functions are missing concrete design patterns. This paper aims to implement and test the concepts of skill-based design patterns for IEC 61499 for a concrete use case in a simulation. We employ a case study to demonstrate the approach’s feasibility, achieve the benefits of modularity, adaptability, and maintainability, and facilitate better error handling.",
+        "article_number": "10275380",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10275380",
+        "html_url": "https://ieeexplore.ieee.org/document/10275380/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10275380/",
+        "publication_title": "2023 IEEE 28th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Sinaia, Romania",
+        "conference_dates": "12-15 Sept. 2023",
+        "publication_number": 10275065,
+        "is_number": 10275329,
+        "publication_year": 2023,
+        "publication_date": "12-15 Sept. 2023",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 4,
+        "citing_patent_count": 0,
+        "download_count": 248,
+        "insert_date": "20231012",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Production systems",
+              "Flowcharts",
+              "Mechatronics",
+              "Software",
+              "Hardware",
+              "Manufacturing",
+              "Behavioral sciences"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "Distributed control system",
+              "Software design",
+              "Software architecture",
+              "Design pattern",
+              "Skill"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Design Patterns",
+              "Modularity",
+              "Control Software",
+              "Error Handling",
+              "Exception Handling",
+              "Try-catch",
+              "Effect Of Error",
+              "Development Efforts",
+              "Control Applications",
+              "Error Detection",
+              "Machine Operators",
+              "Machine Performance",
+              "Project Partners",
+              "Software Components",
+              "Architectural Components",
+              "Real-world Use",
+              "Real-world Usage",
+              "Real-world Utility",
+              "Functional Blocks",
+              "Hardware Components",
+              "Boolean Variable",
+              "Boolean Value",
+              "Common Part",
+              "Decentralized Control",
+              "Distributed Control System",
+              "Hierarchical Design",
+              "Communication Interface",
+              "Architectural Patterns",
+              "Light Barrier",
+              "Programmable Logic Controllers",
+              "Real-world Use Cases",
+              "Machine Applications",
+              "Object-oriented",
+              "Object-oriented Programming"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3503-3992-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "USB ISBN",
+              "value": "979-8-3503-3990-1",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3503-3991-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA54631.2023.10275434",
+        "title": "Complexity of Structured Text in IEC 61499 Function Blocks: A Survey.",
+        "publisher": "IEEE",
+        "isbn": "979-8-3503-3992-5",
+        "issn": "1946-0740",
+        "rank": 3,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088522642",
+              "id": 37088522642,
+              "full_name": "Bianca Wiesmayr",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088283810",
+              "id": 37088283810,
+              "full_name": "Antonio Manuel Gutiérrez",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "The rising complexity of modern production systems raises the need for evaluating the code quality also in control software engineering. Complexity metrics can help identifying code that is difficult to maintain and may benefit from a refactoring. Although complexity metrics have already been adapted to the domain-specific languages (DSLs) used for cyber-physical production systems (CPPSs), literature on whether developers benefit from using these metrics is limited. Also, the complexity perception of code by the domain experts remains to be investigated. The perceived difficulty of comprehending a program can vary among developers and also between different implementation variants of the same functionality. We therefore asked industrial experts, who have experience in the respective DSLs, to rate the complexity of semantically equivalent implementations to find out which metric best represents their complexity perception and whether there are differences between implementation variants. The examples used in the study were inspired, in parts, by an open source library for IEC 61131-3. We found that the Cognitive Complexity metric is a useful representation of the software complexity in the domain, as it best matched the domain experts’ perception of complexity. These metrics should therefore be supported by the analysis tools.",
+        "article_number": "10275434",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10275434",
+        "html_url": "https://ieeexplore.ieee.org/document/10275434/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10275434/",
+        "publication_title": "2023 IEEE 28th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Sinaia, Romania",
+        "conference_dates": "12-15 Sept. 2023",
+        "publication_number": 10275065,
+        "is_number": 10275329,
+        "publication_year": 2023,
+        "publication_date": "12-15 Sept. 2023",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 2,
+        "citing_patent_count": 0,
+        "download_count": 211,
+        "insert_date": "20231012",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Measurement",
+              "Surveys",
+              "Production systems",
+              "Codes",
+              "Software",
+              "Complexity theory",
+              "DSL"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "Distributed Control System",
+              "CPS",
+              "CPPS",
+              "Metric",
+              "Measure"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Functional Blocks",
+              "Domain Experts",
+              "Software Engineering",
+              "Software Technology",
+              "Cognitive Complexity",
+              "Complex Knowledge",
+              "Industry Experts",
+              "Software Quality",
+              "Code Quality",
+              "Refactoring",
+              "Domain-specific Languages",
+              "Perception Of Complexity",
+              "Complexity Metrics",
+              "Statistical Significance",
+              "Years Of Experience",
+              "Twitter",
+              "Retweets",
+              "Differential Rates",
+              "Evaluation Of Differences",
+              "Paired Test",
+              "Results Question",
+              "Outcome In Question",
+              "Programming Experience",
+              "End Of The Questionnaire",
+              "Part Of Code",
+              "Quantitative Questions",
+              "Boolean Expression",
+              "Complex Code",
+              "Filter Question"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3503-3992-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "USB ISBN",
+              "value": "979-8-3503-3990-1",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3503-3991-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA54631.2023.10275499",
+        "title": "Bad Smells in IEC 61499-based Control Software: Sniffing out Shotgun Surgery",
+        "publisher": "IEEE",
+        "isbn": "979-8-3503-3992-5",
+        "issn": "1946-0740",
+        "rank": 4,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37090038798",
+              "id": 37090038798,
+              "full_name": "Dunja Životin",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Bad smells are code patterns which have a negative influence on software, often impacting its quality and maintainability. Because of these negative effects, it is important to detect and avoid them. In the domain of software engineering, the topic of bad smells has been widely researched. On the other hand, in the area of industrial automation and PLC programming languages, bad smells have not received the same amount of attention. Shotgun Surgery is a code smell which we can find when a functionality is used in a certain number of places in code. It starts smelling when every change to the functionality requires many smaller changes to the places where it’s used. If we take a closer look at Shotgun Surgery in the domain of IEC 61499, we see that the general trend persists and that there is no adequate research done on it. In this paper, we want to identify Shotgun Surgery scenarios and showcase multiple existing and new approaches for its detection in IEC 61499.",
+        "article_number": "10275499",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10275499",
+        "html_url": "https://ieeexplore.ieee.org/document/10275499/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10275499/",
+        "publication_title": "2023 IEEE 28th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Sinaia, Romania",
+        "conference_dates": "12-15 Sept. 2023",
+        "publication_number": 10275065,
+        "is_number": 10275329,
+        "publication_year": 2023,
+        "publication_date": "12-15 Sept. 2023",
+        "start_page": "1",
+        "end_page": "4",
+        "citing_paper_count": 2,
+        "citing_patent_count": 0,
+        "download_count": 137,
+        "insert_date": "20231012",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Computer languages",
+              "Codes",
+              "Surgery",
+              "Market research",
+              "Software",
+              "IEC Standards",
+              "Manufacturing automation"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "Bad Smells",
+              "Shotgun Surgery"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Bad Smell",
+              "Shotgun Surgery",
+              "Autonomic System",
+              "Autonomous Robots",
+              "Programming Language",
+              "Smelling",
+              "Coding Patterns",
+              "Detection Approach",
+              "Automatic Detection",
+              "Object-oriented",
+              "Object-oriented Programming",
+              "Copy And Paste",
+              "Software Quality",
+              "Code Quality",
+              "Instances Of Type",
+              "Short Type",
+              "Language Of The Text",
+              "Textese",
+              "Part Of Code",
+              "Clone Detection",
+              "Code Clones",
+              "Magic Number",
+              "Output Connections"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3503-3992-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "USB ISBN",
+              "value": "979-8-3503-3990-1",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3503-3991-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA54631.2023.10275595",
+        "title": "Using Tool Support to Visualize and Interact with IEC 61499 Control Software",
+        "publisher": "IEEE",
+        "isbn": "979-8-3503-3992-5",
+        "issn": "1946-0740",
+        "rank": 5,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089643659",
+              "id": 37089643659,
+              "full_name": "Philipp Bauer",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089172853",
+              "id": 37089172853,
+              "full_name": "Elene Kutsia",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "The field of industrial automation has witnessed a significant increase in software development and maintenance efforts in recent years. This can be attributed to the demand for shorter product life cycles and customized products, leading to increasingly complex applications. As a result, control software engineers are facing new challenges. In this paper, we present our tool for visualizing industrial automation software. It provides engineers with a unique perspective on their large-scale applications. The tool offers several benefits, including convenient tracing of control and information flow across multiple levels of hierarchy, applying metrics to the visualization, and various interaction methods. The tool is tightly integrated into an existing IDE, providing a unique workflow for software analysis and maintenance. We discuss the experiences of engineers of our industry partner, who have been using the tool, and next steps.",
+        "article_number": "10275595",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10275595",
+        "html_url": "https://ieeexplore.ieee.org/document/10275595/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10275595/",
+        "publication_title": "2023 IEEE 28th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Sinaia, Romania",
+        "conference_dates": "12-15 Sept. 2023",
+        "publication_number": 10275065,
+        "is_number": 10275329,
+        "publication_year": 2023,
+        "publication_date": "12-15 Sept. 2023",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 1,
+        "citing_patent_count": 0,
+        "download_count": 194,
+        "insert_date": "20231012",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Measurement",
+              "Industries",
+              "Visualization",
+              "Maintenance engineering",
+              "Software",
+              "IEC Standards",
+              "Manufacturing automation"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "control software",
+              "software visualization",
+              "tool demo"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Control Software",
+              "Autonomic System",
+              "Autonomous Robots",
+              "Large-scale Applications",
+              "Industry Partners",
+              "Software Maintenance",
+              "Modularity",
+              "Visualization Tool",
+              "Node Size",
+              "Nodes In The Graph",
+              "Domain Experts",
+              "Color Map",
+              "Leaf Node",
+              "Part Of Package",
+              "Software Part",
+              "Visibility Graph",
+              "Module Size",
+              "Functional Blocks",
+              "Node Color",
+              "Layout Algorithm",
+              "Force-directed Layout",
+              "Force-directed Algorithm",
+              "Visual Concepts",
+              "Adjacency Relationship",
+              "Incoming Connections",
+              "Bad Example"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3503-3992-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "USB ISBN",
+              "value": "979-8-3503-3990-1",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3503-3991-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA54631.2023.10275611",
+        "title": "Clone Detection in IEC 61499 using Metainformation",
+        "publisher": "IEEE",
+        "isbn": "979-8-3503-3992-5",
+        "issn": "1946-0740",
+        "rank": 6,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089172853",
+              "id": 37089172853,
+              "full_name": "Elene Kutsia",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Analyzing and maintaining the quality of control software is pivotal in the plant manufacturing industry. During software development, certain negative patterns frequently occur. These negative patterns are called code smells and are characterized by code that is hard to understand, maintain or expand. One such smell is duplicated code, also known as clones. Clones often result from clone-and-own reuse, which is common in practice. Detecting clones is crucial to avoid bug propagation and keep maintenance efforts low. This work deals with detecting clones in control software written in the domain-specific modeling language IEC 61499.",
+        "article_number": "10275611",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10275611",
+        "html_url": "https://ieeexplore.ieee.org/document/10275611/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10275611/",
+        "publication_title": "2023 IEEE 28th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Sinaia, Romania",
+        "conference_dates": "12-15 Sept. 2023",
+        "publication_number": 10275065,
+        "is_number": 10275329,
+        "publication_year": 2023,
+        "publication_date": "12-15 Sept. 2023",
+        "start_page": "1",
+        "end_page": "4",
+        "citing_paper_count": 2,
+        "citing_patent_count": 0,
+        "download_count": 113,
+        "insert_date": "20231012",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Manufacturing industries",
+              "Codes",
+              "Computer bugs",
+              "Cloning",
+              "Maintenance engineering",
+              "Software",
+              "IEC Standards"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "control software",
+              "clone detection",
+              "duplicated code",
+              "code smell"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Clone Detection",
+              "Code Clones",
+              "Prototype",
+              "Autonomic System",
+              "Autonomous Robots",
+              "State Machine",
+              "Finite-state",
+              "Finite State Machine",
+              "Design Changes",
+              "Name Change",
+              "Hash Function",
+              "Hash Table",
+              "Hash Value",
+              "Hash Codes",
+              "Object-oriented",
+              "Object-oriented Programming",
+              "Industry Partners",
+              "Functional Blocks",
+              "Copy And Paste",
+              "Part Of Code",
+              "Clone Types",
+              "Code Fragments",
+              "Simulink"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3503-3992-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "USB ISBN",
+              "value": "979-8-3503-3990-1",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3503-3991-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA54631.2023.10275726",
+        "title": "Using Graph Clustering Algorithms to Modularize IEC 61499 Control Software",
+        "publisher": "IEEE",
+        "isbn": "979-8-3503-3992-5",
+        "issn": "1946-0740",
+        "rank": 7,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089643659",
+              "id": 37089643659,
+              "full_name": "Philipp Bauer",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Software size and complexity in all kinds of domains increase rapidly in recent times, making software maintenance and reusability increasingly difficult. Analysis of existing software and subsequent re-modularization can help with these challenges. Although software re-modularization can be time- and resource-intensive, it can support engineers in improving the quality of their systems in the future. Code can contain certain patterns, such as code smells, that define some kind of problematic implementation that is usually inefficient and hinders future development. We explore the use of a semantic clustering algorithm, which aims to minimize the code smell \"Feature Envy\". We apply this algorithm recursively to create a multi-level hierarchy. With this approach, we explore the re-modularization of existing IEC 61499 control systems. First tests we conducted on example implementations of a capping station and a real-life-sized industrial control system show a significant reduction of Feature Envy and thus the coupling between modules using this approach.",
+        "article_number": "10275726",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10275726",
+        "html_url": "https://ieeexplore.ieee.org/document/10275726/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10275726/",
+        "publication_title": "2023 IEEE 28th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Sinaia, Romania",
+        "conference_dates": "12-15 Sept. 2023",
+        "publication_number": 10275065,
+        "is_number": 10275329,
+        "publication_year": 2023,
+        "publication_date": "12-15 Sept. 2023",
+        "start_page": "1",
+        "end_page": "4",
+        "citing_paper_count": 2,
+        "citing_patent_count": 0,
+        "download_count": 139,
+        "insert_date": "20231012",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Couplings",
+              "Software maintenance",
+              "Codes",
+              "Industrial control",
+              "Software algorithms",
+              "Semantics",
+              "Clustering algorithms"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 614499",
+              "control software",
+              "clustering algorithms",
+              "code smells",
+              "modularization",
+              "coupling",
+              "cohesion"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Clustering Algorithm",
+              "Control Software",
+              "Graph Clustering Algorithm",
+              "Control System",
+              "Industrial Systems",
+              "Industrial Control Systems",
+              "Semantic Clustering",
+              "Dendrogram",
+              "Shortest Path",
+              "Part Of Work",
+              "Clustering Results",
+              "Modulus Values",
+              "Leaf Node",
+              "Community Detection",
+              "Industry Partners",
+              "Module Size",
+              "Refactoring",
+              "Part Of Future Work",
+              "Clone Detection",
+              "Code Clones",
+              "Hierarchical Graph"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3503-3992-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "USB ISBN",
+              "value": "979-8-3503-3990-1",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3503-3991-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA61755.2024.10710711",
+        "title": "Variability-Driven Knowledge Discovery in IEC 61499 Systems",
+        "publisher": "IEEE",
+        "isbn": "979-8-3503-6124-7",
+        "issn": "1946-0740",
+        "rank": 8,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37090038855",
+              "id": 37090038855,
+              "full_name": "Anna-Lena Hager",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089576301",
+              "id": 37089576301,
+              "full_name": "Shubham Sharma",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Cyber-physical production systems (CPPSs) are advanced manufacturing systems that integrate the latest information technology techniques to enable flexible and adaptive production processes. The IEC 61499 standard defines a domain-specific modeling language for developing control software for distributed CPPSs. In CPPS, as well as in other domains, variability must be managed. However, effective management first requires the identification and extraction of this variability. Thus, this paper aims to explore and implement machine learning-based Knowledge Discovery techniques within the IEC 61499 standard. By employing a first case study, we demonstrate how to extract variability in IEC 61499-based applications. Our approach leverages techniques such as Term Frequency Inverse Document Frequency (TF-IDF) vectorization and cosine similarity to identify and cluster variations in software components. In the future, we plan to apply this approach to a greater scope of the IEC 61499 standard and develop evaluation methods to validate and improve our methodology. From the first results, integrating machine learning-based Knowledge Discovery techniques into the IEC 61499 standard shows potential for effectively extracting variability from control software.",
+        "article_number": "10710711",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10710711",
+        "html_url": "https://ieeexplore.ieee.org/document/10710711/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10710711/",
+        "publication_title": "2024 IEEE 29th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Padova, Italy",
+        "conference_dates": "10-13 Sept. 2024",
+        "publication_number": 10710336,
+        "is_number": 10710347,
+        "publication_year": 2024,
+        "publication_date": "10-13 Sept. 2024",
+        "start_page": "1",
+        "end_page": "4",
+        "citing_paper_count": 0,
+        "citing_patent_count": 0,
+        "download_count": 101,
+        "insert_date": "20241016",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Dimensionality reduction",
+              "Knowledge discovery",
+              "Software",
+              "Maintenance",
+              "IEC Standards",
+              "Interviews",
+              "Information technology",
+              "Standards",
+              "Manufacturing automation",
+              "Manufacturing systems"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "Distributed control system",
+              "Unsupervised Machine Learning",
+              "Variability Mining"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Knowledge Discovery",
+              "Control Software",
+              "Software Components",
+              "Architectural Components",
+              "Term Frequency",
+              "Cyber-physical Systems",
+              "Centroid",
+              "Similarity Matrix",
+              "Similarity Matrices",
+              "Blue Dots",
+              "Graph Structure",
+              "Hash Function",
+              "Hash Table",
+              "Hash Value",
+              "Hash Codes",
+              "Levenshtein Distance",
+              "Silhouette Score",
+              "Cosine Similarity Measure"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3503-6124-7",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3503-6123-0",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA61755.2024.10710951",
+        "title": "Deodorant for Shotgun Surgery Bad Smell in IEC 61499-Based Control Software",
+        "publisher": "IEEE",
+        "isbn": "979-8-3503-6124-7",
+        "issn": "1946-0740",
+        "rank": 9,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37090038798",
+              "id": 37090038798,
+              "full_name": "Dunja Životin",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Bad smells negatively influence different aspects of software, such as maintainability and quality. From development to maintenance, smells contribute to error-proneness and control software is no exception. Code smells are starting to gain some popularity in the domain of industrial automation and programming languages for Programmable Logic Controllers. However, they are still not as well researched as in general Software Engineering and lack appropriate support. Shotgun Surgery is a type of bad smell which can occur when changing source code. If every time a functionality is updated, many of the places where it is used need to be updated as well - we can sniff out Shotgun Surgery. This poses different challenges: being aware of all the places where this particular functionality is used and correctly updating those places. We aim to bridge the gap between bad smells and control software partially. We want to do this by developing approaches for automatic detection, visualization, and refactoring of Shotgun Surgery in IEC 61499 applications in Eclipse 4diac IDE.",
+        "article_number": "10710951",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10710951",
+        "html_url": "https://ieeexplore.ieee.org/document/10710951/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10710951/",
+        "publication_title": "2024 IEEE 29th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Padova, Italy",
+        "conference_dates": "10-13 Sept. 2024",
+        "publication_number": 10710336,
+        "is_number": 10710347,
+        "publication_year": 2024,
+        "publication_date": "10-13 Sept. 2024",
+        "start_page": "01",
+        "end_page": "08",
+        "citing_paper_count": 0,
+        "citing_patent_count": 0,
+        "download_count": 101,
+        "insert_date": "20241016",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Visualization",
+              "Computer languages",
+              "Source coding",
+              "Programmable logic devices",
+              "Surgery",
+              "Software",
+              "Maintenance",
+              "IEC Standards",
+              "Manufacturing automation",
+              "Software engineering"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "Bad Smells",
+              "Shotgun Surgery"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Control Software",
+              "Bad Smell",
+              "Shotgun Surgery",
+              "Autonomic System",
+              "Autonomous Robots",
+              "Automatic Detection",
+              "Software Engineering",
+              "Software Technology",
+              "Refactoring",
+              "Programmable Logic Controllers",
+              "Previous Paper",
+              "Workspace",
+              "Hash Function",
+              "Hash Table",
+              "Hash Value",
+              "Hash Codes",
+              "User Feedback",
+              "Software Quality",
+              "Code Quality",
+              "Open-source Projects",
+              "Transition Conditions",
+              "Call Detail Records",
+              "Struct",
+              "Exact Copy",
+              "Hierarchical Design",
+              "Clone Detection",
+              "Code Clones",
+              "Magic Number"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3503-6124-7",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3503-6123-0",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA61755.2024.10711077",
+        "title": "Variability Extraction Methodologies for Developing Reusable Control Software Artifacts in IEC 61499",
+        "publisher": "IEEE",
+        "isbn": "979-8-3503-6124-7",
+        "issn": "1946-0740",
+        "rank": 10,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089576301",
+              "id": 37089576301,
+              "full_name": "Shubham Sharma",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37090038798",
+              "id": 37090038798,
+              "full_name": "Dunja Životin",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37086593823",
+              "id": 37086593823,
+              "full_name": "Hafiyyan Sayyid Fadhlillah",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 6,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Control software in the Cyber-Physical Production System domain continuously evolves to cater to customer needs. Addressing customer needs involves developing new functional requirements or modifying existing functionalities, leading to the creation of product variants. Clone-and-own is a common reuse strategy in which the closest variant in project history is cloned and then modified to derive a new variant. Platform-oriented reuse is an alternative strategy that builds a configurable platform to derive variants. Adopting both reuse strategies for existing systems requires common and variant-specific artifacts to be extracted and maintained. This paper proposes two extraction methodologies that extract common and variant-specific artifacts from existing systems for systematic reuse. We evaluate the two extraction methodologies by applying them to multiple industrial and academic control software case study systems developed using IEC 61499. We conduct quantitative analysis of the extracted artifacts, considering factors such as the total effort required to derive variants, the number and size of artifacts that need maintenance, and their evolution using the two extraction methodologies. Our proposal suggests different variants of control software that lead to the creation of artifacts that are not only more optimal but also easier to maintain using a specific extraction methodology.",
+        "article_number": "10711077",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10711077",
+        "html_url": "https://ieeexplore.ieee.org/document/10711077/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/10711077/",
+        "publication_title": "2024 IEEE 29th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Padova, Italy",
+        "conference_dates": "10-13 Sept. 2024",
+        "publication_number": 10710336,
+        "is_number": 10710347,
+        "publication_year": 2024,
+        "publication_date": "10-13 Sept. 2024",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 6,
+        "citing_patent_count": 0,
+        "download_count": 128,
+        "insert_date": "20241016",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Production systems",
+              "Systematics",
+              "Statistical analysis",
+              "Software",
+              "Maintenance",
+              "Proposals",
+              "History",
+              "IEC Standards",
+              "Manufacturing automation"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "Variability Extraction",
+              "Systematic Reuse",
+              "SPL",
+              "Maintenance",
+              "CPPS",
+              "Control Software",
+              "IEC 61499"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Control Software",
+              "Extraction Methodology",
+              "Variety Of Products",
+              "Number Of Artifacts",
+              "Number Of Artefacts",
+              "Total Effort",
+              "Industrial Case Study",
+              "Time And Space",
+              "Spacetime",
+              "Time-variant",
+              "Time Variation",
+              "Actuator",
+              "Multiple Variables",
+              "Coded Based",
+              "Technological Domains",
+              "Engineering Domain",
+              "Product Family",
+              "Mechatronic",
+              "Project Execution",
+              "Bar Diagram",
+              "Running Example",
+              "Bug Fixes"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3503-6124-7",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3503-6123-0",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/PacificVis64226.2025.00049",
+        "title": "Visualization Tools for Machine Learning Pipelines: A Review",
+        "publisher": "IEEE",
+        "isbn": "979-8-3315-0582-0",
+        "issn": "2165-8765",
+        "rank": 11,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "University of Innsbruck, Innsbruck, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089425287",
+              "id": 37089425287,
+              "full_name": "Valentina Golendukhina",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "University of Innsbruck, Innsbruck, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "German Aerospace Center (DLR), Institute for Software Technology University of Cologne, Cologne, Germany",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37589392600",
+              "id": 37589392600,
+              "full_name": "Michael Felderer",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "German Aerospace Center (DLR), Institute for Software Technology University of Cologne, Cologne, Germany"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "The increasing complexity and adoption of machine learning (ML) pipelines has led to a rising demand for effective visualization tools. This paper presents a comprehensive review of existing tools for visualizing data flow in machine learning (ML) pipelines. We highlight the tools’ purposes, integration methods, and visualization techniques. We collected and analyzed 22 open-source tools and concepts, analyzing their features and classifying them based on their primary purpose. Our analysis revealed five main purposes of visualization tools: exploration, explanation, visual development, comparison, monitoring. We provide an analysis of their integration methods, from standalone visual interfaces to code-level libraries, as well as a review of various visualization techniques, including Directed Acyclic Graphs (DAGs), pipeline matrices, and annotated visualizations. Our findings highlight the importance of visualization in enhancing the interpretability and efficiency of ML workflows. Moreover, the paper provides key limitations and challenges in current visualization methods to promote future research directions enhancing the usability and functionality of ML pipeline visualization tools.",
+        "article_number": "11021023",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11021023",
+        "html_url": "https://ieeexplore.ieee.org/document/11021023/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/11021023/",
+        "publication_title": "2025 IEEE 18th Pacific Visualization Conference (PacificVis)",
+        "conference_location": "Taipei City, Taiwan",
+        "conference_dates": "22-25 April 2025",
+        "publication_number": 11020985,
+        "is_number": 11020987,
+        "publication_year": 2025,
+        "publication_date": "22-25 April 2025",
+        "start_page": "399",
+        "end_page": "407",
+        "citing_paper_count": 0,
+        "citing_patent_count": 0,
+        "download_count": 169,
+        "insert_date": "20250616",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Visualization",
+              "Directed acyclic graph",
+              "Reviews",
+              "Pipelines",
+              "Data visualization",
+              "Machine learning",
+              "Visual systems",
+              "Complexity theory",
+              "Usability",
+              "Monitoring"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "Human-centered computing—Visualization—Visualization systems and tools",
+              "Computing methodologies—Machine Learning"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Machine Learning",
+              "Visualization Tool",
+              "Machine Learning Pipeline",
+              "Flow Data",
+              "Integration Method",
+              "Visual Methods",
+              "Visualization Techniques",
+              "Directed Acyclic Graph",
+              "Visual Interface",
+              "Adoption Of Machine Learning",
+              "Inclusion Criteria",
+              "Model Evaluation",
+              "Machine Learning Models",
+              "Performance Metrics",
+              "Data Preparation",
+              "TensorFlow",
+              "Descriptive Information",
+              "Anomaly Detection",
+              "Pipeline Stages",
+              "Machine Learning Framework",
+              "Model Performance Metrics",
+              "Integration Requirements",
+              "Prerequisite For Integration",
+              "Feature Engineering",
+              "High-level Overview",
+              "Entire Pipeline",
+              "Machine Learning Tasks",
+              "Justification For Decisions",
+              "Google Scholar"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3315-0582-0",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3315-0581-3",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA65518.2025.11205630",
+        "title": "Component-based Control Software design using IEC 61499 Adapter Interfaces",
+        "publisher": "IEEE",
+        "isbn": "979-8-3315-5384-5",
+        "issn": "1946-0740",
+        "rank": 12,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089576301",
+              "id": 37089576301,
+              "full_name": "Shubham Sharma",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/418246604756913",
+              "id": 418246604756913,
+              "full_name": "Alexander Stummer",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Control software components in the Cyber-Physical Systems domain use Function Blocks (FBs) to implement system logic, which manages interactions among hardware components (e.g., sensors and actuators) and other control software modules. FBs provide discrete input and output interfaces that support unidirectional data and event connections, which facilitate the integration of multiple subsystems to meet overall system requirements. However, this design based on discrete interfaces results in a high number of connection instances and lacks encapsulation. The complexity is further compounded by implicit one-to-many (fan-out) connections among subsystems, which can hinder both system understandability and maintainability. To address these challenges, we propose leveraging the adapter interface concept from IEC 61499. This approach replaces multiple discrete connections with a single bidirectional adapter connection that explicitly defines interaction requirements between components. Consequently, this reduces visual complexity and enhances system maintainability and testability.",
+        "article_number": "11205630",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11205630",
+        "html_url": "https://ieeexplore.ieee.org/document/11205630/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/11205630/",
+        "publication_title": "2025 IEEE 30th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Porto, Portugal",
+        "conference_dates": "9-12 Sept. 2025",
+        "publication_number": 11205475,
+        "is_number": 11205526,
+        "publication_year": 2025,
+        "publication_date": "9-12 Sept. 2025",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 2,
+        "citing_patent_count": 0,
+        "download_count": 75,
+        "insert_date": "20251021",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Visualization",
+              "Software design",
+              "Software",
+              "Sensor systems",
+              "Complexity theory",
+              "Sensors",
+              "Maintenance",
+              "Logic",
+              "IEC Standards",
+              "Manufacturing automation"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "Design Patterns",
+              "Maintenance",
+              "Reusability",
+              "CPPS",
+              "Generic Components",
+              "IEC 61499",
+              "Adapter Interfaces"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Control Software",
+              "Software Components",
+              "Architectural Components",
+              "Multiple Connections",
+              "Visual Complexity",
+              "Single Connection",
+              "General Function",
+              "Modularity",
+              "Industrial Systems",
+              "Software Engineering",
+              "Software Technology",
+              "Multiple Projects",
+              "Design Patterns",
+              "Software Architecture",
+              "Input Generation",
+              "Change In The Total Number",
+              "Maintenance Efforts",
+              "Types Of Transducers"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3315-5384-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3315-5383-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA65518.2025.11205747",
+        "title": "A Formal Model Transformation from Data Flow Models to IEC 61499 Models",
+        "publisher": "IEEE",
+        "isbn": "979-8-3315-5384-5",
+        "issn": "1946-0740",
+        "rank": 13,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/437043657427900",
+              "id": 437043657427900,
+              "full_name": "Malte Grave",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/807258494810008",
+              "id": 807258494810008,
+              "full_name": "Markus Meingast",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "Embedded Hardware-/Software-Systems, Carl von Ossietzky University of Oldenburg, Oldenburg, Germany",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085741118",
+              "id": 37085741118,
+              "full_name": "Verena Klös",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Embedded Hardware-/Software-Systems, Carl von Ossietzky University of Oldenburg, Oldenburg, Germany"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "OFFIS e.V., Oldenburg, Germany",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37072725000",
+              "id": 37072725000,
+              "full_name": "Jörg Walter",
+              "author_order": 6,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "OFFIS e.V., Oldenburg, Germany"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Signal processing plays a vital role in various areas of engineering, particularly in industrial automation. Signal processing applications are based on a data flow paradigm, which uses directed graphs to describe the flow of data between operations. Although industrial control applications are based on standards such as IEC 61499, their syntax, and semantics differ from the data flow paradigm, creating a challenge in integrating signal processing applications into industrial automation systems. Modeling signal processing applications using IEC 61499 is not yet a common practice. This paper addresses this gap by proposing an approach to transform data flow models into IEC 61499 models. This approach enables the design and transformation of signal processing applications using data flow models, without requiring manual modeling or knowledge of the IEC 61499 standard. The model transformation is formally defined and subsequently implemented as a separate tool. A running example illustrates the transformation process, demonstrating that the model is both syntactically correct and executable.",
+        "article_number": "11205747",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11205747",
+        "html_url": "https://ieeexplore.ieee.org/document/11205747/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/11205747/",
+        "publication_title": "2025 IEEE 30th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Porto, Portugal",
+        "conference_dates": "9-12 Sept. 2025",
+        "publication_number": 11205475,
+        "is_number": 11205526,
+        "publication_year": 2025,
+        "publication_date": "9-12 Sept. 2025",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 0,
+        "citing_patent_count": 0,
+        "download_count": 92,
+        "insert_date": "20251021",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Runtime",
+              "Semantics",
+              "Signal processing algorithms",
+              "Transforms",
+              "Signal processing",
+              "Filtering algorithms",
+              "Syntactics",
+              "Data models",
+              "IEC Standards",
+              "Standards"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "data flow",
+              "model transformation",
+              "signal processing",
+              "GNU Radio",
+              "Eclipse 4diac"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Flow Data",
+              "Transformer Model",
+              "Signal Processing",
+              "Autonomic System",
+              "Autonomous Robots",
+              "Transformation Process",
+              "Directed Graph",
+              "Directed Edge",
+              "Running Example",
+              "Cut-off Value",
+              "Inference Rules",
+              "Transformation Rules",
+              "Logical Rules",
+              "Functional Blocks",
+              "Model Execution",
+              "Set Of Connections",
+              "Transformation Tool",
+              "Programmable Logic Controllers",
+              "Static Type"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3315-5384-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3315-5383-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/OJIES.2026.3705534",
+        "title": "Maintainable Control Software Design Using Design Patterns in IEC 61499",
+        "publisher": "IEEE",
+        "issn": "2644-1284",
+        "rank": 14,
+        "volume": "7",
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089576301",
+              "id": 37089576301,
+              "full_name": "Shubham Sharma",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "Software Competence Center Hagenberg GmbH (SCCH), Hagenberg, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "CCBY - IEEE is not the copyright holder of this material. Please follow the instructions via https://creativecommons.org/licenses/by/4.0/ to obtain full-text articles and stipulations in the API documentation.",
+        "content_type": "Journals",
+        "abstract": "Control software design in cyber-physical systems plays a vital role in ensuring maintainability and adaptability in response to evolving process requirements. Variability-aware designs facilitate the efficient integration of new functionalities and depend on the selected design elements and on the way these elements interact. Designers can enhance flexibility by applying design patterns and adopting alternative design elements when an existing design requires substantial modification effort. In IEC 61499, using discrete interfaces as a design element in function block (FB) implementations often incurs high effort due to numerous discrete connection instances and limited encapsulation. Complexity is further increased by implicit one-to-many connections among subsystems, which negatively affect system understandability and maintainability. This article analyzes two baseline implementations that follow pure service-oriented architecture (SOA) interaction patterns: choreography and orchestration, implemented in IEC 61499 using FBs with discrete interfaces. We then restructure these baseline implementations using design patterns and adapter interfaces, resulting in two new implementations with adapter interfaces and a hybrid interaction structure. We evaluate modification effort across three variability cases to quantify the changes required in the original and redesigned implementations. The results demonstrate a measurable reduction in modification effort and improvements in control software maintainability. Based on these findings, we derive guidelines to support practitioners in selecting suitable designs and interface strategies for a specific variability context in control software design.",
+        "article_number": "11570863",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11570863",
+        "html_url": "https://ieeexplore.ieee.org/document/11570863/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/11570863/",
+        "publication_title": "IEEE Open Journal of the Industrial Electronics Society",
+        "publication_number": 8782706,
+        "is_number": 11319325,
+        "publication_year": 2026,
+        "publication_date": "2026",
+        "start_page": "1138",
+        "end_page": "1154",
+        "citing_paper_count": 0,
+        "citing_patent_count": 0,
+        "download_count": 161,
+        "insert_date": "20260618",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Design methodology",
+              "IEC",
+              "Software",
+              "Measurement",
+              "Algorithms",
+              "Abstracts",
+              "Sockets",
+              "Filtering",
+              "Filters",
+              "Plugs"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "Control software design",
+              "design patterns",
+              "IEC 61499",
+              "restructuring",
+              "variability maintenance"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Design Software",
+              "Packaging Design",
+              "Control Software",
+              "Design Patterns",
+              "Redesign",
+              "Interaction Patterns",
+              "Design Elements",
+              "Cyber-physical Systems",
+              "Functional Blocks",
+              "Reduction Efforts",
+              "Service-oriented Architecture",
+              "Processing Steps",
+              "Behavioral Patterns",
+              "Design Strategies",
+              "Design Scheme",
+              "Variance Components",
+              "Filtering Step",
+              "Original Sequence",
+              "Coordinating Center",
+              "Industrial Systems",
+              "Design Decisions",
+              "Software Components",
+              "Architectural Components",
+              "Maintenance Efforts",
+              "Single Connection",
+              "Value Of Income",
+              "Design In Fig",
+              "Multiple Connections",
+              "Programmable Logic Controllers"
+            ]
+          }
+        },
+        "license": "CCBY"
+      },
+      {
+        "doi": "10.1109/ETFA46521.2020.9212090",
+        "title": "A Software Measure for IEC 61499 Basic Function Blocks",
+        "publisher": "IEEE",
+        "isbn": "978-1-7281-8957-4",
+        "issn": "1946-0740",
+        "rank": 15,
+        "volume": "1",
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "When proposing new design patterns or design guidelines for IEC 61499 Applications, their performance and quality has to be compared to alternative solutions. Software measures are a way of achieving that. Although first attempts towards software measures for IEC 61499 were made, the standard still lacks a solid set of measures to evaluate applications. Taking a first step in that direction, we propose a set of measures for an IEC 61499 Basic Function Block.",
+        "article_number": "9212090",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9212090",
+        "html_url": "https://ieeexplore.ieee.org/document/9212090/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9212090/",
+        "publication_title": "2020 25th IEEE International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Vienna, Austria",
+        "conference_dates": "8-11 Sept. 2020",
+        "publication_number": 9210104,
+        "is_number": 9211869,
+        "publication_year": 2020,
+        "publication_date": "8-11 Sept. 2020",
+        "start_page": "997",
+        "end_page": "1000",
+        "citing_paper_count": 19,
+        "citing_patent_count": 0,
+        "download_count": 414,
+        "insert_date": "20201005",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Software metrics",
+              "Design methodology",
+              "Software quality",
+              "Programming",
+              "Solids",
+              "Control systems",
+              "Software measurement"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "distributed control system",
+              "software measure",
+              "software metric"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Design Guidelines",
+              "Valid Measure",
+              "Validity Of Measures",
+              "Programming Language",
+              "System Size",
+              "Control Applications",
+              "Software Engineering",
+              "Software Technology",
+              "Radar Chart",
+              "Radar Graph"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-7281-8957-4",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-7281-8956-7",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ICPS48405.2020.9274744",
+        "title": "Structuring Distributed Control Applications for Adaptability",
+        "publisher": "IEEE",
+        "isbn": "978-1-7281-6390-1",
+        "rank": 16,
+        "volume": "1",
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088522642",
+              "id": 37088522642,
+              "full_name": "Bianca Wiesmayr",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "In modern industrial applications, the complexity of control software is increasing while its execution may be distributed to numerous small devices. The standard IEC 61499 fosters designing distributed control applications by defining a platform-independent application model that can be mapped to numerous hardware components. Applications though need to be designed for distribution, as comparing three implementation designs of a running example indicated. We propose the usage of a distributed architectural pattern for applications with parallel paths. Metrics confirm a reduced complexity compared to purely hierarchical designs.",
+        "article_number": "9274744",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9274744",
+        "html_url": "https://ieeexplore.ieee.org/document/9274744/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9274744/",
+        "publication_title": "2020 IEEE Conference on Industrial Cyberphysical Systems (ICPS)",
+        "conference_location": "Tampere, Finland",
+        "conference_dates": "10-12 June 2020",
+        "publication_number": 9274544,
+        "is_number": 9274545,
+        "publication_year": 2020,
+        "publication_date": "10-12 June 2020",
+        "start_page": "236",
+        "end_page": "241",
+        "citing_paper_count": 25,
+        "citing_patent_count": 0,
+        "download_count": 271,
+        "insert_date": "20201204",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "IEC Standards",
+              "Valves",
+              "Complexity theory",
+              "Software",
+              "Computer architecture",
+              "Hardware",
+              "Task analysis"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "distributed control system",
+              "reuse",
+              "adaptability",
+              "design rules"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Control Applications",
+              "Distributed Control",
+              "Parallel Paths",
+              "Hierarchical Design",
+              "Architectural Patterns",
+              "Running Example",
+              "Hierarchical Structure",
+              "Hierarchical Organization",
+              "Center For Control",
+              "Flow Control",
+              "Levels Of Hierarchy",
+              "Control Devices",
+              "Higher Layers",
+              "Software Components",
+              "Architectural Components",
+              "Conveyor Belt",
+              "Design Patterns",
+              "Hierarchical Control",
+              "Decentralized Control",
+              "Distributed Control System",
+              "State Diagram",
+              "State Machine Diagrams",
+              "State Transition Diagram",
+              "Statecharts",
+              "Complexity Metrics",
+              "Input Events",
+              "Point-to-point Links",
+              "Point-to-point Connections"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-7281-6390-1",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-7281-6389-5",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA45728.2021.9613379",
+        "title": "Do you smell it too? Towards Bad Smells in IEC 61499 Applications",
+        "publisher": "IEEE",
+        "isbn": "978-1-7281-2990-7",
+        "rank": 17,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089172070",
+              "id": 37089172070,
+              "full_name": "Michael Oberlehner",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089172853",
+              "id": 37089172853,
+              "full_name": "Elene Kutsia",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "Budapest University of Technology and Economics, Budapest, Hungary",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37087094903",
+              "id": 37087094903,
+              "full_name": "Sándor Bácsi",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Budapest University of Technology and Economics, Budapest, Hungary"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Bad Smells are certain suboptimal structures or patterns in software. They can cause maintenance issues and hinder understandability. Therefore, it is essential to avoid Bad Smells in software. While the topic is well researched in other fields, it is still an open issue in industrial automation. In this work, we are taking a step towards closing that gap and propose a catalog of IEC 61499 Bad Smells.",
+        "article_number": "9613379",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9613379",
+        "html_url": "https://ieeexplore.ieee.org/document/9613379/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9613379/",
+        "publication_title": "2021 26th IEEE International Conference on Emerging Technologies and Factory Automation (ETFA )",
+        "conference_location": "Vasteras, Sweden",
+        "conference_dates": "7-10 Sept. 2021",
+        "publication_number": 9613137,
+        "is_number": 9613141,
+        "publication_year": 2021,
+        "publication_date": "7-10 Sept. 2021",
+        "start_page": "1",
+        "end_page": "4",
+        "citing_paper_count": 22,
+        "citing_patent_count": 0,
+        "download_count": 367,
+        "insert_date": "20211130",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Codes",
+              "Conferences",
+              "Maintenance engineering",
+              "Control systems",
+              "Software",
+              "IEC Standards",
+              "Manufacturing automation"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "distributed control system",
+              "CPS",
+              "CPPS",
+              "design smell",
+              "code smell",
+              "bad smell",
+              "anti-pattern",
+              "OCL"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Autonomic System",
+              "Autonomous Systems",
+              "Autonomous Robots",
+              "Bad Smell",
+              "Scope Of This Paper",
+              "Programming Language",
+              "Large Class",
+              "Data Elements",
+              "Termination Condition",
+              "Terminal State",
+              "Object-oriented",
+              "Object Orientation",
+              "Object-oriented Programming",
+              "Software Components",
+              "Architectural Components",
+              "Functional Blocks",
+              "Software Quality",
+              "Code Quality",
+              "Refactoring",
+              "Clone Detection",
+              "Code Clones",
+              "Interface Elements",
+              "User Interface Elements",
+              "Divergent Changes",
+              "Simulink"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-7281-2990-7",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-7281-2989-1",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA45728.2021.9613398",
+        "title": "Catalog of Refactoring Operations for IEC 61499",
+        "publisher": "IEEE",
+        "isbn": "978-1-7281-2990-7",
+        "rank": 18,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089172070",
+              "id": 37089172070,
+              "full_name": "Michael Oberlehner",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088522642",
+              "id": 37088522642,
+              "full_name": "Bianca Wiesmayr",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089166878",
+              "id": 37089166878,
+              "full_name": "CDL VaSiCS",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Refactoring is a key technology for improving the quality of a software system. A higher quality will lead to a clearer structure, which facilitates sharing work across multiple teams. This is important especially in the domain of cyber-physical production systems, where different engineering disciplines meet at their cutting point. IEC 61499 tries to abstract the increasing complexity of such systems. This work gives an overview of existing refactoring techniques from software engineering and provides a first insight on how to apply refactoring to IEC 61499 systems.",
+        "article_number": "9613398",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9613398",
+        "html_url": "https://ieeexplore.ieee.org/document/9613398/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9613398/",
+        "publication_title": "2021 26th IEEE International Conference on Emerging Technologies and Factory Automation (ETFA )",
+        "conference_location": "Vasteras, Sweden",
+        "conference_dates": "7-10 Sept. 2021",
+        "publication_number": 9613137,
+        "is_number": 9613141,
+        "publication_year": 2021,
+        "publication_date": "7-10 Sept. 2021",
+        "start_page": "01",
+        "end_page": "04",
+        "citing_paper_count": 11,
+        "citing_patent_count": 0,
+        "download_count": 267,
+        "insert_date": "20211130",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Production systems",
+              "Conferences",
+              "Software systems",
+              "Complexity theory",
+              "IEC Standards",
+              "Manufacturing automation",
+              "Software engineering"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "Cyber-Physical Production System",
+              "Refactoring",
+              "Model-Driven Software Engineering"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Refactoring Operations",
+              "Software Engineering",
+              "Software Technology",
+              "Cyber-physical Systems",
+              "Cyber Physical Systems",
+              "Source Code",
+              "Data Compression",
+              "Programming Language",
+              "Language Model",
+              "Functional Blocks",
+              "Control Chart",
+              "Short Type",
+              "Language Of The Text",
+              "Textese",
+              "Graphics Program",
+              "Visual Programming Language",
+              "Integrated Development Environment",
+              "Bad Smell",
+              "Version Control System",
+              "Simulink"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-7281-2990-7",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-7281-2989-1",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA45728.2021.9613569",
+        "title": "IEC 61499 Distributed Design Patterns",
+        "publisher": "IEEE",
+        "isbn": "978-1-7281-2990-7",
+        "rank": 19,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088522642",
+              "id": 37088522642,
+              "full_name": "Bianca Wiesmayr",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088524902",
+              "id": 37088524902,
+              "full_name": "Virendra Ashiwal",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+                  "CDL VaSiCS"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "IEC 61499 emerged as a language for modeling distributed control systems. An Application is a platform-independent model that is comprised of modular components. High reusability of these components and high reconfigurability of the underlying system configuration can only be achieved with advanced design patterns. We show two example implementations of such designs and extended a pattern to foster reuse. All designs are compared based on a set of evaluation criteria. We show that our proposed design provides improved understandability and adaptability, while maintaining a slim library with highly reusable Function Block types.",
+        "article_number": "9613569",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9613569",
+        "html_url": "https://ieeexplore.ieee.org/document/9613569/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9613569/",
+        "publication_title": "2021 26th IEEE International Conference on Emerging Technologies and Factory Automation (ETFA )",
+        "conference_location": "Vasteras, Sweden",
+        "conference_dates": "7-10 Sept. 2021",
+        "publication_number": 9613137,
+        "is_number": 9613141,
+        "publication_year": 2021,
+        "publication_date": "7-10 Sept. 2021",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 34,
+        "citing_patent_count": 0,
+        "download_count": 609,
+        "insert_date": "20211130",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Conferences",
+              "Decentralized control",
+              "Tools",
+              "Libraries",
+              "IEC Standards",
+              "Manufacturing automation"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "Distributed control system",
+              "Software design",
+              "Software architecture",
+              "Distributed design",
+              "Design pattern",
+              "skill",
+              "choreography"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Design Patterns",
+              "Functional Blocks",
+              "Decentralized Control",
+              "Distributed Control System",
+              "Cylindrical",
+              "Cylinder",
+              "Basic Skills",
+              "Control Applications",
+              "Control Software",
+              "Manufacturing Systems",
+              "Software Components",
+              "Architectural Components",
+              "Hardware Components",
+              "Part Of Application",
+              "Mechatronic",
+              "Hierarchical Design",
+              "Kind Of Communication",
+              "Interface Elements",
+              "User Interface Elements",
+              "Running Example",
+              "Supply Unit",
+              "Application Behavior",
+              "Application Behaviour",
+              "Transport Unit"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-7281-2990-7",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-7281-2989-1",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ICPS51978.2022.9816893",
+        "title": "Automation Software Architecture in CPPS - Definition, Challenges and Research Potentials",
+        "publisher": "IEEE",
+        "isbn": "978-1-6654-9771-8",
+        "rank": 20,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "Institute of Automation and Information Systems TUM School of Engineering and Design Core Member of MDSI, Member of MIRMI Technical University of Munich, Garching, Germany",
+              "authorUrl": "https://ieeexplore.ieee.org/author/38277090300",
+              "id": 38277090300,
+              "full_name": "Birgit Vogel–Heuser",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Institute of Automation and Information Systems TUM School of Engineering and Design Core Member of MDSI, Member of MIRMI Technical University of Munich, Garching, Germany"
+                ]
+              }
+            },
+            {
+              "affiliation": "Institute of Automation and Information Systems TUM School of Engineering and Design Technical University of Munich, Garching, Germany",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37086405233",
+              "id": 37086405233,
+              "full_name": "Eva–Maria Neumann",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Institute of Automation and Information Systems TUM School of Engineering and Design Technical University of Munich, Garching, Germany"
+                ]
+              }
+            },
+            {
+              "affiliation": "Institute of Automation and Information Systems TUM School of Engineering and Design Technical University of Munich, Garching, Germany",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085630717",
+              "id": 37085630717,
+              "full_name": "Juliane Fischer",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Institute of Automation and Information Systems TUM School of Engineering and Design Technical University of Munich, Garching, Germany"
+                ]
+              }
+            },
+            {
+              "affiliation": "Department of Automatic Control and System Engineering, ETSI Bilbao Basque Country University, Bilbao, Spain",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298718700",
+              "id": 37298718700,
+              "full_name": "Marga Marcos",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Department of Automatic Control and System Engineering, ETSI Bilbao Basque Country University, Bilbao, Spain"
+                ]
+              }
+            },
+            {
+              "affiliation": "Electronics and Automation Engineering Department, University of Jaén, Jaén, Spain",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298719000",
+              "id": 37298719000,
+              "full_name": "Elisabet Estévez Estévez",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Electronics and Automation Engineering Department, University of Jaén, Jaén, Spain"
+                ]
+              }
+            },
+            {
+              "affiliation": "Department of Mechanical Engineering, Universidad de los Andes, Bogotá, Colombia",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37078044900",
+              "id": 37078044900,
+              "full_name": "Giacomo Barbieri",
+              "author_order": 6,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Department of Mechanical Engineering, Universidad de los Andes, Bogotá, Colombia"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 7,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 8,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "The importance of a mature, maintainable design of automation software in Cyber-Physical Production Systems (CPPS) is continuously increasing since a growing proportion of the system functionality is implemented via software. As a result, system complexity is shifting more and more towards the software side. Quality characteristics such as flexibility, maintainability, and extensibility, whose importance is increasing in the context of Industry 4.0, are thus becoming harder to achieve. These challenges can only be solved through sound architectural design. While there is a common understanding of good software architecture and appropriate methods to achieve it in computer science, a suitable architecture definition for automation software that takes all relevant factors into account is still missing in the field of CPPS. Therefore, based on a workshop with international scientists with different perspectives on CPPS, this paper presents influencing factors on automation software architecture. On this basis, a joint definition for software architecture in CPPS, as well as challenges and future research potentials, are derived.",
+        "article_number": "9816893",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9816893",
+        "html_url": "https://ieeexplore.ieee.org/document/9816893/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9816893/",
+        "publication_title": "2022 IEEE 5th International Conference on Industrial Cyber-Physical Systems (ICPS)",
+        "conference_location": "Coventry, United Kingdom",
+        "conference_dates": "24-26 May 2022",
+        "publication_number": 9816848,
+        "is_number": 9816852,
+        "publication_year": 2022,
+        "publication_date": "24-26 May 2022",
+        "start_page": "01",
+        "end_page": "08",
+        "citing_paper_count": 12,
+        "citing_patent_count": 0,
+        "download_count": 487,
+        "insert_date": "20220718",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Computer science",
+              "Production systems",
+              "Software architecture",
+              "Conferences",
+              "Computer architecture",
+              "Cyber-physical systems",
+              "Software"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "Cyber-Physical Production Systems",
+              "Automation Software Architecture",
+              "Programmable Logic Controllers"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Software Architecture",
+              "Cyber-physical Production Systems",
+              "Cyber Physical Production System",
+              "Computer Science",
+              "Design Software",
+              "Packaging Design",
+              "Architectural Design",
+              "Cyber-physical Systems",
+              "Cyber Physical Systems",
+              "Potential Future Research",
+              "Suitable Architecture",
+              "Rational Design",
+              "Design Principles",
+              "Autonomic System",
+              "Autonomous Systems",
+              "Autonomous Robots",
+              "State Of The Art",
+              "State-of-the-art",
+              "Internet Of Things",
+              "Internet-of-Things",
+              "Software Development",
+              "Interoperability",
+              "Distributed Control",
+              "Industrial Practice",
+              "Industry Practices",
+              "Functional Requirements",
+              "Software Engineering",
+              "Software Technology",
+              "Design Decisions",
+              "Design Patterns",
+              "Programmable Logic Controllers",
+              "High-level Programming",
+              "Architectural Principles",
+              "Non-functional Requirements",
+              "Industry Practitioners",
+              "Industrial Practitioners",
+              "Machine Manufacturing",
+              "Hardware Architecture",
+              "Markup Language",
+              "Software Module",
+              "Automatic System"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-6654-9771-8",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-6654-9770-1",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA52439.2022.9921527",
+        "title": "Identifying repeating patterns in IEC 61499 systems using Feature-Based embeddings",
+        "publisher": "IEEE",
+        "isbn": "978-1-6654-9997-2",
+        "rank": 21,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089575343",
+              "id": 37089575343,
+              "full_name": "Markus Unterdechler",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088283810",
+              "id": 37088283810,
+              "full_name": "Antonio M. Gutiérrez",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Cyber-Physical Production Systems (CPPSs) are highly variable systems of systems comprised of software and hardware interacting with each other and the environment. The increasing integration of technologies and devices has brought an unprecedented level of automation and customization. At the same time, it has also increased the efforts to maintain highly complex and heterogeneous systems. Although engineering practices support the reuse of common components to ease the development and maintenance of the systems in different projects, the identification of common components is still manually performed, which is a time-consuming, error-prone task. In this paper, a novel approach identifying repeating patterns in CPPSs based on artificial intelligence techniques is presented. This approach allows finding exact and similar components to support the CPPS design. Furthermore, it enables the maintenance of common components by reusing predefined types thereby reducing development effort. We implemented and evaluated our approach in an industry case study on developing CPPS control software with IEC 61499.",
+        "article_number": "9921527",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9921527",
+        "html_url": "https://ieeexplore.ieee.org/document/9921527/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9921527/",
+        "publication_title": "2022 IEEE 27th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Stuttgart, Germany",
+        "conference_dates": "6-9 Sept. 2022",
+        "publication_number": 9921412,
+        "is_number": 9921279,
+        "publication_year": 2022,
+        "publication_date": "6-9 Sept. 2022",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 6,
+        "citing_patent_count": 0,
+        "download_count": 293,
+        "insert_date": "20221025",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Industries",
+              "Production systems",
+              "Maintenance engineering",
+              "Software",
+              "Hardware",
+              "IEC Standards",
+              "Task analysis"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "cyber-physical systems",
+              "artificial intelligence",
+              "IEC 61499"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Complex Systems",
+              "Control Software",
+              "Artificial Intelligence Techniques",
+              "Cyber-physical Systems",
+              "Cyber Physical Systems",
+              "Industrial Case Study",
+              "Industry Case Study",
+              "False Positive",
+              "False-positive",
+              "Neural Network",
+              "High-dimensional",
+              "High-dimensional Space",
+              "False Positive Rate",
+              "False-positive Rate",
+              "Clustering Method",
+              "Clustering Methods",
+              "Latent Space",
+              "Embedding Space",
+              "Semantic Similarity",
+              "Semantic Relatedness",
+              "State Machine",
+              "Finite-state",
+              "Finite State",
+              "Finite State Machine",
+              "Finite-state Machine",
+              "Similar Objects",
+              "Software Components",
+              "Architectural Components",
+              "Graph Neural Networks",
+              "Uniform Manifold Approximation",
+              "Functional Blocks",
+              "Vertex Degree",
+              "Vertices Of Degree",
+              "Scale Projects",
+              "Feature-based Approaches",
+              "Graph-structured Data",
+              "Refactoring",
+              "Similar Embeddings",
+              "Clone Detection",
+              "Code Clones",
+              "Programming Language",
+              "Similar Values",
+              "Machine Learning Techniques",
+              "Machine-learning Techniques"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-6654-9997-2",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-6654-9996-5",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/ETFA52439.2022.9921610",
+        "title": "Architectural Concepts for IEC 61499-based Machine Controls: Beyond Normal Operation Handling",
+        "publisher": "IEEE",
+        "isbn": "978-1-6654-9997-2",
+        "rank": 22,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088522642",
+              "id": 37088522642,
+              "full_name": "Bianca Wiesmayr",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088524902",
+              "id": 37088524902,
+              "full_name": "Virendra Ashiwal",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089576301",
+              "id": 37089576301,
+              "full_name": "Shubham Sharma",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS",
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS",
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "OFFIS – Institute for Information Technology, Oldenburg, Germany",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37072725000",
+              "id": 37072725000,
+              "full_name": "Jörg Walter",
+              "author_order": 6,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "OFFIS – Institute for Information Technology, Oldenburg, Germany"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Modern production systems are constantly getting more complex and moving towards smaller lot sizes and more customizable products. This poses new challenges on the control software, which is growing in size and complexity. To deal with this increasingly large and complex control software, design guidelines are needed. We are working on such design guidelines for IEC 61499, a modeling language for distributed control systems. In our previous work, we proposed a distributed and highly reusable application design based on skills. In this work, we will present concepts for extending this design beyond normal operation handling.",
+        "article_number": "9921610",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9921610",
+        "html_url": "https://ieeexplore.ieee.org/document/9921610/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9921610/",
+        "publication_title": "2022 IEEE 27th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Stuttgart, Germany",
+        "conference_dates": "6-9 Sept. 2022",
+        "publication_number": 9921412,
+        "is_number": 9921279,
+        "publication_year": 2022,
+        "publication_date": "6-9 Sept. 2022",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 10,
+        "citing_patent_count": 0,
+        "download_count": 216,
+        "insert_date": "20221025",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Production systems",
+              "Software design",
+              "Machine control",
+              "Design methodology",
+              "Decentralized control",
+              "Reliability engineering",
+              "Software"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "Distributed control system",
+              "Software design",
+              "Software architecture",
+              "Distributed design",
+              "Design pattern",
+              "Skill",
+              "Choreography",
+              "Error detection",
+              "Error handling"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Normal Operation",
+              "Machine Control",
+              "Production Systems",
+              "Control Software",
+              "Decentralized Control",
+              "Distributed Control System",
+              "High Reusability",
+              "Compensatory Mechanism",
+              "Manufacturing Process",
+              "Flow Control",
+              "Data Exchange",
+              "Development Efforts",
+              "Error Detection",
+              "Software Engineering",
+              "Software Technology",
+              "Manufacturing Systems",
+              "Machine Operators",
+              "Machine Performance",
+              "Software Components",
+              "Architectural Components",
+              "Concept Of Integration",
+              "Conceptual Blending",
+              "Functional Blocks",
+              "Design Patterns",
+              "Software Quality",
+              "Code Quality",
+              "Programmable Logic Controllers",
+              "Error Handling",
+              "Error-handling",
+              "Exception Handling",
+              "Try-catch",
+              "Part Of Code",
+              "Control Chart",
+              "Error Scenarios",
+              "Mechatronic"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-6654-9997-2",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-6654-9996-5",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      },
+      {
+        "doi": "10.1109/VISSOFT55257.2022.00029",
+        "title": "Applying Visualization Concepts to Large-Scale Software Systems in Industrial Automation",
+        "publisher": "IEEE",
+        "isbn": "978-1-6654-8093-2",
+        "issn": "2379-7576",
+        "rank": 23,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089643659",
+              "id": 37089643659,
+              "full_name": "Philipp Bauer",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37394482300",
+              "id": 37394482300,
+              "full_name": "Rick Rabiser",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "In recent years, the field of industrial automation is experiencing a dramatic increase of software development and maintenance effort. Driven by shorter product life-cycles and customizable products, production systems are becoming more and more complex, presenting new challenges for control software engineers. In this paper, we report on a visualization concept we applied to industrial automation software. It allows automation software developers to take a look at their software system from a new perspective. Various ways of interacting with the visualization offer further benefits, such as the convenient tracing of control and information flow across multiple hierarchies. We conducted a workshop with five industrial domain experts as a first evaluation of the usefulness of the visualization. Based on their feedback, we discuss open questions and next steps.",
+        "article_number": "9978535",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9978535",
+        "html_url": "https://ieeexplore.ieee.org/document/9978535/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9978535/",
+        "publication_title": "2022 Working Conference on Software Visualization (VISSOFT)",
+        "conference_location": "Limassol, Cyprus",
+        "conference_dates": "3-4 Oct. 2022",
+        "publication_number": 9978165,
+        "is_number": 9978308,
+        "publication_year": 2022,
+        "publication_date": "3-4 Oct. 2022",
+        "start_page": "182",
+        "end_page": "186",
+        "citing_paper_count": 6,
+        "citing_patent_count": 0,
+        "download_count": 404,
+        "insert_date": "20221219",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Measurement",
+              "Manifolds",
+              "Visualization",
+              "Production systems",
+              "Automation",
+              "Codes",
+              "Conferences"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "CPS",
+              "CPPS",
+              "software visualization",
+              "circle packing",
+              "hierarchical edge bundling"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Autonomic System",
+              "Autonomous Systems",
+              "Autonomous Robots",
+              "System Software",
+              "Packaging System",
+              "Visual Concepts",
+              "Large-scale Software",
+              "Large-scale Software Systems",
+              "Large Scale Software",
+              "Large Scale Software System",
+              "New Perspective",
+              "Information Flow",
+              "Software Development",
+              "Flow Control",
+              "Domain Experts",
+              "Control Software",
+              "Short Product Life Cycles",
+              "Straight Line",
+              "Jumping",
+              "Root Node",
+              "Parent Node",
+              "Kind Of Relationship",
+              "Parent Child Relationship",
+              "Parent-child Relationship",
+              "Root Of The Tree",
+              "Visualization Techniques",
+              "Child Nodes",
+              "Children Nodes",
+              "Functional Blocks",
+              "Programmable Logic Controllers",
+              "Adjacency Relationship",
+              "Industry Experts",
+              "Industrial Experts",
+              "Treemap",
+              "Tree Map",
+              "Functional Tree",
+              "Performance Of Trees",
+              "2D Visualization"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "978-1-6654-8093-2",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "978-1-6654-8092-5",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      }
+    ]
+  }
+]

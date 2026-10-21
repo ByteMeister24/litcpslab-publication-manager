@@ -1,0 +1,146 @@
+[
+  {
+    "total_records": 1,
+    "total_searched": 7457857,
+    "articles": [
+      {
+        "doi": "10.1109/ETFA68377.2026.11724872",
+        "title": "Rule-based Redesign of Abstract GraphML Representations into IEC 61499-Oriented Designs",
+        "publisher": "IEEE",
+        "isbn": "979-8-3315-7889-3",
+        "issn": "1946-0740",
+        "rank": 1,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37089576301",
+              "id": 37089576301,
+              "full_name": "Shubham Sharma",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/549781472742711",
+              "id": 549781472742711,
+              "full_name": "Oleksandr Kudriavchenko",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37370797200",
+              "id": 37370797200,
+              "full_name": "Felix Schmid",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University Linz, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "This paper presents an approach for deriving IEC 61499-oriented designs from abstract GraphML representations. GraphML is a graph-based language that can represent systems, their components and interactions as a graph. Such representations are useful for communicating top-level system designs and onboarding new team members. However, they mainly capture structural information and lack the IEC 61499-specific design decisions required for control software development. These decisions include the number and type of interfaces, hierarchy levels, and interface connections across nested structures. In systems with many components and deep hierarchies, manually selecting an interface strategy and analyzing its effect on the overall system structure is cumbersome and error-prone. To address this issue, we propose a rule-based redesign approach that redesigns abstract GraphML representations into IEC 61499-oriented GraphML representations. The resulting design preview supports the review and analysis of key IEC 61499 design decisions before implementation. The approach is grounded in practical field experience and discussions with control software engineers, and it supports maintainable and cost-effective control software development.",
+        "article_number": "11724872",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11724872",
+        "html_url": "https://ieeexplore.ieee.org/document/11724872/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/11724872/",
+        "publication_title": "2026 IEEE 31st International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Vasteras, Sweden",
+        "conference_dates": "8-11 Sept. 2026",
+        "publication_number": 11724655,
+        "is_number": 11724659,
+        "publication_year": 2026,
+        "publication_date": "8-11 Sept. 2026",
+        "start_page": "1",
+        "end_page": "4",
+        "citing_paper_count": 0,
+        "citing_patent_count": 0,
+        "download_count": 0,
+        "insert_date": "20261016",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "IEC",
+              "Modeling",
+              "Design methodology",
+              "Software",
+              "Abstracts",
+              "Printing",
+              "Indium phosphide",
+              "Joining processes",
+              "Technology"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "GraphML",
+              "IEC 61499",
+              "Rule-based redesign",
+              "Interface strategies",
+              "Pre-design analysis",
+              "CPPS"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Control Software",
+              "Design Decisions",
+              "Abstract Representations",
+              "Rule-based Approach",
+              "Flow Data",
+              "Pair Of Nodes",
+              "Source Node",
+              "Cyber-physical Systems",
+              "Early Design",
+              "Intermediate Representation",
+              "Destination Node",
+              "Type Of Interface",
+              "Graph-based Models",
+              "Higher Hierarchical Levels"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3315-7889-3",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3315-7888-6",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      }
+    ]
+  }
+]

@@ -1,0 +1,205 @@
+[
+  {
+    "total_records": 1,
+    "total_searched": 7457857,
+    "articles": [
+      {
+        "doi": "10.1109/ACCESS.2020.3042739",
+        "title": "Boosting Big Data Streaming Applications in Clouds With BurstFlow",
+        "publisher": "IEEE",
+        "issn": "2169-3536",
+        "rank": 1,
+        "volume": "8",
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37086514933",
+              "id": 37086514933,
+              "full_name": "Paulo Ricardo Rodrigues De Souza",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil"
+                ]
+              }
+            },
+            {
+              "affiliation": "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085360372",
+              "id": 37085360372,
+              "full_name": "Kassiano J. Matteussi",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil"
+                ]
+              }
+            },
+            {
+              "affiliation": "Department of Computer Science, University of Toronto, Toronto, ON, Canada",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37087114300",
+              "id": 37087114300,
+              "full_name": "Alexandre Da Silva Veith",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Department of Computer Science, University of Toronto, Toronto, ON, Canada"
+                ]
+              }
+            },
+            {
+              "affiliation": "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37086098571",
+              "id": 37086098571,
+              "full_name": "Breno F. Zanchetta",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil"
+                ]
+              }
+            },
+            {
+              "affiliation": "COPELABS, Universidade Lusófona de Humanidades e Tecnologias, Lisbon, Portugal",
+              "authorUrl": "https://ieeexplore.ieee.org/author/38232999600",
+              "id": 38232999600,
+              "full_name": "Valderi R. Q. Leithardt",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "COPELABS, Universidade Lusófona de Humanidades e Tecnologias, Lisbon, Portugal",
+                  "Departamento de Informática, Universidade da Beira Interior, Covilhã, Portugal",
+                  "VALORIZA Research Center, Instituto Politécnico de Portalegre, Portalegre, Portugal"
+                ]
+              }
+            },
+            {
+              "affiliation": "Faculty of Science, Expert Systems and Applications Laboratory, University of Salamanca, Salamanca, Spain",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37088576731",
+              "id": 37088576731,
+              "full_name": "Álvaro L. Murciego",
+              "author_order": 6,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Faculty of Science, Expert Systems and Applications Laboratory, University of Salamanca, Salamanca, Spain"
+                ]
+              }
+            },
+            {
+              "affiliation": "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37392990600",
+              "id": 37392990600,
+              "full_name": "Edison Pignaton De Freitas",
+              "author_order": 7,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil"
+                ]
+              }
+            },
+            {
+              "affiliation": "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085590730",
+              "id": 37085590730,
+              "full_name": "Julio C. S. Dos Anjos",
+              "author_order": 8,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil"
+                ]
+              }
+            },
+            {
+              "affiliation": "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37267319800",
+              "id": 37267319800,
+              "full_name": "Claudio F. R. Geyer",
+              "author_order": 9,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Institute of Informatics, Federal University of Rio Grande do Sul, UFRGS/PPGC, Porto Alegre, Brazil"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "CCBY - IEEE is not the copyright holder of this material. Please follow the instructions via https://creativecommons.org/licenses/by/4.0/ to obtain full-text articles and stipulations in the API documentation.",
+        "content_type": "Journals",
+        "abstract": "The rapid growth of stream applications in financial markets, health care, education, social media, and sensor networks represents a remarkable milestone for data processing and analytic in recent years, leading to new challenges to handle Big Data in real-time. Traditionally, a single cloud infrastructure often holds the deployment of Stream Processing applications because it has extensive and adaptative virtual computing resources. Hence, data sources send data from distant and different locations of the cloud infrastructure, increasing the application latency. The cloud infrastructure may be geographically distributed and it requires to run a set of frameworks to handle communication. These frameworks often comprise a Message Queue System and a Stream Processing Framework. The frameworks explore Multi-Cloud deploying each service in a different cloud and communication via high latency network links. This creates challenges to meet real-time application requirements because the data streams have different and unpredictable latencies forcing cloud providers’ communication systems to adjust to the environment changes continually. Previous works explore static micro-batch demonstrating its potential to overcome communication issues. This paper introduces BurstFlow, a tool for enhancing communication across data sources located at the edges of the Internet and Big Data Stream Processing applications located in cloud infrastructures. BurstFlow introduces a strategy for adjusting the micro-batch sizes dynamically according to the time required for communication and computation. BurstFlow also presents an adaptive data partition policy for distributing incoming streams across available machines by considering memory and CPU capacities. The experiments use a real-world multi-cloud deployment showing that BurstFlow can reduce the execution time up to 77% when compared to the state-of-the-art solutions, improving CPU efficiency by up to 49%.",
+        "article_number": "9281110",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9281110",
+        "html_url": "https://ieeexplore.ieee.org/document/9281110/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/9281110/",
+        "publication_title": "IEEE Access",
+        "publication_number": 6287639,
+        "is_number": 8948470,
+        "publication_year": 2020,
+        "publication_date": "2020",
+        "start_page": "219124",
+        "end_page": "219136",
+        "citing_paper_count": 22,
+        "citing_patent_count": 0,
+        "download_count": 1785,
+        "insert_date": "20201204",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Cloud computing",
+              "Social networking (online)",
+              "Education",
+              "Medical services",
+              "Big Data",
+              "Tools",
+              "Real-time systems"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "Big data",
+              "stream processing applications",
+              "multi cloud",
+              "micro-batches",
+              "data partition"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Big Data",
+              "Data Streams",
+              "Big Data Stream",
+              "Data Sources",
+              "Data Processing",
+              "Computational Resources",
+              "Data Partitioning",
+              "Stream Processing",
+              "High Latency",
+              "Cloud Infrastructure",
+              "Cloud Providers",
+              "Single Cloud",
+              "Batch Size",
+              "Data Center",
+              "Internet Of Things",
+              "Data Transfer",
+              "Waiting Time",
+              "Low Latency",
+              "Time In Seconds",
+              "Low Throughput",
+              "Hadoop Distributed File System",
+              "Network Latency",
+              "Apache Spark",
+              "Data Block",
+              "Model Predictive Control",
+              "Use Of Memory",
+              "Wide Area Network",
+              "Local Area Network",
+              "Computational Memory",
+              "Microsoft Azure"
+            ]
+          }
+        },
+        "license": "CCBY"
+      }
+    ]
+  }
+]

@@ -1,0 +1,53 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Python environments and bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+
+# Test, lint, type-check, and coverage artifacts
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+.coverage
+.coverage.*
+htmlcov/
+
+# Packaging artifacts
+build/
+dist/
+*.egg-info/
+
+# Local runtime databases and logs
+database/*.db
+database/*.db-*
+database/*.sqlite
+database/*.sqlite-*
+database/*.sqlite3
+database/*.sqlite3-*
+*.log
+logs/
+
+# Editors, workspaces
+.agents/
+.codex/
+.idea/
+.vscode/
+*.code-workspace
+*~
+*.swp
+*.swo
+
+# Operating-system metadata
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini

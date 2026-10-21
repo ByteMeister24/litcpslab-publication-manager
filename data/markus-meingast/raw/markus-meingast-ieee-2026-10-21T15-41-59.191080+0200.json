@@ -1,0 +1,179 @@
+[
+  {
+    "total_records": 1,
+    "total_searched": 7457857,
+    "articles": [
+      {
+        "doi": "10.1109/ETFA65518.2025.11205747",
+        "title": "A Formal Model Transformation from Data Flow Models to IEC 61499 Models",
+        "publisher": "IEEE",
+        "isbn": "979-8-3315-5384-5",
+        "issn": "1946-0740",
+        "rank": 1,
+        "authors": {
+          "authors": [
+            {
+              "affiliation": "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/437043657427900",
+              "id": 437043657427900,
+              "full_name": "Malte Grave",
+              "author_order": 1,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "LIT CPS Lab, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/807258494810008",
+              "id": 807258494810008,
+              "full_name": "Markus Meingast",
+              "author_order": 2,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "Embedded Hardware-/Software-Systems, Carl von Ossietzky University of Oldenburg, Oldenburg, Germany",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085741118",
+              "id": 37085741118,
+              "full_name": "Verena Klös",
+              "author_order": 3,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "Embedded Hardware-/Software-Systems, Carl von Ossietzky University of Oldenburg, Oldenburg, Germany"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37298726700",
+              "id": 37298726700,
+              "full_name": "Alois Zoitl",
+              "author_order": 4,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37085489713",
+              "id": 37085489713,
+              "full_name": "Lisa Sonnleithner",
+              "author_order": 5,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "CDL VaSiCS, Johannes Kepler University, Linz, Austria",
+                  "LIT CPS Lab, Johannes Kepler University, Linz, Austria"
+                ]
+              }
+            },
+            {
+              "affiliation": "OFFIS e.V., Oldenburg, Germany",
+              "authorUrl": "https://ieeexplore.ieee.org/author/37072725000",
+              "id": 37072725000,
+              "full_name": "Jörg Walter",
+              "author_order": 6,
+              "authorAffiliations": {
+                "authorAffiliation": [
+                  "OFFIS e.V., Oldenburg, Germany"
+                ]
+              }
+            }
+          ]
+        },
+        "access_type": "LOCKED",
+        "content_type": "Conferences",
+        "abstract": "Signal processing plays a vital role in various areas of engineering, particularly in industrial automation. Signal processing applications are based on a data flow paradigm, which uses directed graphs to describe the flow of data between operations. Although industrial control applications are based on standards such as IEC 61499, their syntax, and semantics differ from the data flow paradigm, creating a challenge in integrating signal processing applications into industrial automation systems. Modeling signal processing applications using IEC 61499 is not yet a common practice. This paper addresses this gap by proposing an approach to transform data flow models into IEC 61499 models. This approach enables the design and transformation of signal processing applications using data flow models, without requiring manual modeling or knowledge of the IEC 61499 standard. The model transformation is formally defined and subsequently implemented as a separate tool. A running example illustrates the transformation process, demonstrating that the model is both syntactically correct and executable.",
+        "article_number": "11205747",
+        "pdf_url": "https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11205747",
+        "html_url": "https://ieeexplore.ieee.org/document/11205747/",
+        "abstract_url": "https://ieeexplore.ieee.org/document/11205747/",
+        "publication_title": "2025 IEEE 30th International Conference on Emerging Technologies and Factory Automation (ETFA)",
+        "conference_location": "Porto, Portugal",
+        "conference_dates": "9-12 Sept. 2025",
+        "publication_number": 11205475,
+        "is_number": 11205526,
+        "publication_year": 2025,
+        "publication_date": "9-12 Sept. 2025",
+        "start_page": "1",
+        "end_page": "8",
+        "citing_paper_count": 0,
+        "citing_patent_count": 0,
+        "download_count": 92,
+        "insert_date": "20251021",
+        "index_terms": {
+          "ieee_terms": {
+            "terms": [
+              "Runtime",
+              "Semantics",
+              "Signal processing algorithms",
+              "Transforms",
+              "Signal processing",
+              "Filtering algorithms",
+              "Syntactics",
+              "Data models",
+              "IEC Standards",
+              "Standards"
+            ]
+          },
+          "author_terms": {
+            "terms": [
+              "IEC 61499",
+              "data flow",
+              "model transformation",
+              "signal processing",
+              "GNU Radio",
+              "Eclipse 4diac"
+            ]
+          },
+          "dynamic_index_terms": {
+            "terms": [
+              "Flow Data",
+              "Transformer Model",
+              "Signal Processing",
+              "Autonomic System",
+              "Autonomous Robots",
+              "Transformation Process",
+              "Directed Graph",
+              "Directed Edge",
+              "Running Example",
+              "Cut-off Value",
+              "Inference Rules",
+              "Transformation Rules",
+              "Logical Rules",
+              "Functional Blocks",
+              "Model Execution",
+              "Set Of Connections",
+              "Transformation Tool",
+              "Programmable Logic Controllers",
+              "Static Type"
+            ]
+          }
+        },
+        "isbn_formats": {
+          "isbns": [
+            {
+              "format": "Print on Demand(PoD) ISBN",
+              "value": "979-8-3315-5384-5",
+              "isbnType": "New-2005"
+            },
+            {
+              "format": "Electronic ISBN",
+              "value": "979-8-3315-5383-8",
+              "isbnType": "New-2005"
+            }
+          ]
+        },
+        "license": "IEEE"
+      }
+    ]
+  }
+]
