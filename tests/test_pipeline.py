@@ -213,6 +213,9 @@ class CLITests(unittest.TestCase):
 
 class DownloadManagerTests(unittest.TestCase):
     def setUp(self):
+        sources = patch("download_manager.SUPPORTED_SOURCES", ("ieee",))
+        sources.start()
+        self.addCleanup(sources.stop)
         report = patch("download_publications.update_report", return_value=None)
         report.start()
         self.addCleanup(report.stop)
@@ -349,7 +352,7 @@ class DownloadManagerTests(unittest.TestCase):
     def test_all_authors_does_not_override_source_validation(self):
         download = Mock()
         with patch.dict("download_manager.DOWNLOADERS", {"ieee": download}), self.assertRaises(ValueError):
-            run_download(DownloadRequest("all", ("sciencedirect",)))
+            run_download(DownloadRequest("all", ("unknown",)))
         download.assert_not_called()
 
     def test_unknown_author_or_source_fails_before_any_request(self):

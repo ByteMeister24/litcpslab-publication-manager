@@ -1,13 +1,15 @@
 """Coordinate author/source downloads and Markdown builds without file writes."""
 import ieee_xplore
+import sciencedirect
 from markdown_builder import build_markdown
 from author_builder import get_selected_authors
 from models import DownloadError, DownloadRecord, DownloadRequest, MarkdownBuildResult, Selection
 
 
-SUPPORTED_SOURCES = ("ieee",)
+SUPPORTED_SOURCES = ("ieee", "sciencedirect")
 DOWNLOADERS = {
     "ieee": ieee_xplore.download,
+    "sciencedirect": sciencedirect.download,
 }
 
 def _resolve_sources(source_selection: Selection) -> tuple[str, ...]:
