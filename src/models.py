@@ -4,18 +4,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, Optional, Union
 
+from author_builder import Author
+
 
 Selection = Union[tuple[str, ...], Literal["all"]]
-
-
-@dataclass(frozen=True)
-class Author:
-    name: str
-    affiliations: tuple[str, ...]
-
-    @property
-    def slug(self) -> str:
-        return self.name.lower().replace(" ", "-")
 
 
 @dataclass(frozen=True)
@@ -41,30 +33,24 @@ class Publication:
 
 
 @dataclass(frozen=True)
-class SourceDownload:
+class DownloadRecord:
+    author: str
+    source: str
+    publication_count: int
     publications: list[Publication]
     raw_file_path: Path
 
 
 @dataclass(frozen=True)
-class MarkdownBuildResult:
-    markdown_path: Optional[Path] = None
-    error: Optional[str] = None
+class DownloadError:
+    author: str
+    source: str
+    error: str
 
 
 @dataclass(frozen=True)
-class DownloadResult:
+class MarkdownBuildResult:
     author: str
     source: str
-    publication_count: Optional[int] = None
-    raw_file_path: Optional[Path] = None
     markdown_path: Optional[Path] = None
     error: Optional[str] = None
-
-
-class DownloadError(Exception):
-    """A safe source error, optionally identifying a saved raw download."""
-
-    def __init__(self, message: str, raw_file_path: Optional[Path] = None):
-        super().__init__(message)
-        self.raw_file_path = raw_file_path

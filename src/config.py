@@ -5,16 +5,18 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIRECTORY = PROJECT_ROOT / "data"
-AUTHORS_FILE = DATA_DIRECTORY / "authors.md"
+DATABASE_DIRECTORY = PROJECT_ROOT / "db"
+AUTHORS_FILE = DATABASE_DIRECTORY / "authors.yaml"
 ENV_FILE = PROJECT_ROOT / ".env"
+REPORT_HTML_FILE = PROJECT_ROOT / "output" / "report.html"
+REPORT_JSON_FILE = PROJECT_ROOT / "output" / "report.json"
 
-AUTHOR_SECTIONS = ("Authors", "Common Affiliations", "Additional Affiliations")
-SUPPORTED_SOURCES = ("ieee",)
-MARKDOWN_PRESET = "commonmark"
 DOWNLOAD_TIMEZONE = "Europe/Vienna"
 DOWNLOAD_TIMESTAMP_FORMAT = "%Y-%m-%dT%H-%M-%S.%f%z"
 RAW_FILENAME_FORMAT = "{author}-{source}{sequence}-{timestamp}.json"
-MARKDOWN_FILENAME_FORMAT = "{author}-{source}.md"
+MARKDOWN_DATE_FORMAT = "%Y-%m-%d"
+MARKDOWN_FILENAME_FORMAT = "{author}-{source}-{date}.md"
+REPORT_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S %Z"
 
 # Markdown label and common Publication attribute, in schema order.
 PUBLICATION_FIELDS = (

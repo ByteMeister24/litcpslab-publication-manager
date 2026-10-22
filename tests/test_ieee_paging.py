@@ -9,7 +9,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlsplit
 
 from support import page
-from models import Author, DownloadError
+from author_builder import Author
 from ieee_xplore import PAGE_SIZE, build_query, download_pages, fetch_page
 
 
@@ -26,7 +26,7 @@ class IEEEDownloadTests(unittest.TestCase):
         for author in [Author("", ("University",)), Author("Ada", ()),
                        Author('Ada "Researcher"', ("University",)),
                        Author("Ada", ("University*",)), Author("Ada", ("",))]:
-            with self.subTest(author=author), self.assertRaises(DownloadError):
+            with self.subTest(author=author), self.assertRaises(ValueError):
                 build_query(author)
 
     @patch("ieee_xplore.urlopen")
@@ -80,7 +80,7 @@ class IEEEDownloadTests(unittest.TestCase):
 
     @patch("ieee_xplore.fetch_page")
     def test_missing_key_makes_no_request(self, fetch):
-        with self.assertRaises(DownloadError):
+        with self.assertRaises(ValueError):
             download_pages(self.author, " ")
         fetch.assert_not_called()
 
@@ -96,7 +96,7 @@ class IEEEDownloadTests(unittest.TestCase):
         ]
         for invalid in invalid_pages:
             with self.subTest(response=invalid), patch("ieee_xplore.fetch_page", return_value=invalid):
-                with self.assertRaises(DownloadError):
+                with self.assertRaises(ValueError):
                     download_pages(self.author, "test-key")
 
     def test_incomplete_changed_or_repeated_later_pages_fail(self):
@@ -104,7 +104,7 @@ class IEEEDownloadTests(unittest.TestCase):
                           [page(2, [1]), page(3, [2])],
                           [page(2, [1]), page(2, [1])]]:
             with self.subTest(responses=responses), patch("ieee_xplore.fetch_page", side_effect=responses):
-                with self.assertRaises(DownloadError):
+                with self.assertRaises(ValueError):
                     download_pages(self.author, "test-key")
 
     def test_transport_errors_do_not_disclose_key_or_request_url(self):
@@ -113,7 +113,7 @@ class IEEEDownloadTests(unittest.TestCase):
                   TimeoutError(secret_url), IncompleteRead(b"partial")]
         for error in errors:
             with self.subTest(error=error), patch("ieee_xplore.urlopen", side_effect=error):
-                with self.assertRaises(DownloadError) as caught:
+                with self.assertRaises(RuntimeError) as caught:
                     fetch_page("secret-key", "query", 1)
                 self.assertNotIn("secret-key", str(caught.exception))
                 self.assertNotIn("https://", str(caught.exception))
@@ -123,5 +123,5 @@ class IEEEDownloadTests(unittest.TestCase):
         for content in [b"<html>Bad gateway</html>", b"\xff"]:
             with self.subTest(content=content):
                 open_url.return_value.__enter__.return_value = io.BytesIO(content)
-                with self.assertRaises(DownloadError):
+                with self.assertRaises(ValueError):
                     fetch_page("test-key", "query", 1)

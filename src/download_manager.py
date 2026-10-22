@@ -1,59 +1,62 @@
 """Coordinate author/source downloads and Markdown builds without file writes."""
-
-import config
 import ieee_xplore
 from markdown_builder import build_markdown
-from author_builder import load_authors
-from models import DownloadError, DownloadRequest, DownloadResult, Selection
+from author_builder import get_selected_authors
+from models import DownloadError, DownloadRecord, DownloadRequest, MarkdownBuildResult, Selection
 
+
+SUPPORTED_SOURCES = ("ieee",)
+DOWNLOADERS = {
+    "ieee": ieee_xplore.download,
+}
 
 def _resolve_sources(source_selection: Selection) -> tuple[str, ...]:
     if source_selection == "all":
-        return config.SUPPORTED_SOURCES
+        return SUPPORTED_SOURCES
     
     if (not isinstance(source_selection, tuple) or not source_selection
             or any(not isinstance(item, str) or not item for item in source_selection)):
         raise ValueError("Expected source names or all.")
     
-    unknown = set(source_selection) - set(config.SUPPORTED_SOURCES)
+    unknown = set(source_selection) - set(SUPPORTED_SOURCES)
+    
     if unknown:
         raise ValueError(f"Unknown source selection(s): {', '.join(sorted(unknown))}.")
+    
     return tuple(dict.fromkeys(source_selection))
 
 
-def run_download(request: DownloadRequest) -> list[DownloadResult]:
+def run_download(request: DownloadRequest) -> tuple[list[DownloadRecord | DownloadError], list[MarkdownBuildResult]]:
+    """Collect source records/errors and Markdown results for attempted builds.
+
+    Failed downloads have no corresponding Markdown result. Each list retains
+    processing order; records are identified by their author and source.
+    """
     
     if not isinstance(request, DownloadRequest):
         raise ValueError("Expected DownloadRequest.")
 
-    authors = load_authors(request.authors)
+    selected_authors = get_selected_authors(request.authors)
+    selected_sources = _resolve_sources(request.sources)
     
-    sources = _resolve_sources(request.sources)
-    downloaders = {"ieee": ieee_xplore.download}
-    
-    if any(source not in downloaders for source in sources):
-        raise ValueError("A configured source has no downloader.")
+    if any(source not in DOWNLOADERS for source in selected_sources):
+        raise ValueError("The selected source is not supported.")
 
-    results = []
-    for author in authors:
-        for source in sources:
-            try:
-                response = downloaders[source](author)
-            except DownloadError as error:
-                results.append(DownloadResult(author.name, source,
-                                              raw_file_path=error.raw_file_path, error=str(error)))
-                continue
-            except (OSError, UnicodeError, ValueError, TypeError) as error:
-                results.append(DownloadResult(author.name, source, error=f"Download failed: {error}"))
+    download_results: list[DownloadRecord | DownloadError] = []
+    markdown_results: list[MarkdownBuildResult] = []
+    
+    for author in selected_authors:
+        for source in selected_sources:
+            response = DOWNLOADERS[source](author)
+            download_results.append(response)
+            
+            if isinstance(response, DownloadError):
                 continue
 
-            build = build_markdown(author, source, response.publications)
-            results.append(DownloadResult(
-                author=author.name,
-                source=source,
-                publication_count=len(response.publications),
-                raw_file_path=response.raw_file_path,
-                markdown_path=build.markdown_path,
-                error=build.error,
-            ))
-    return results
+            if response.publication_count == 0:
+                continue
+
+            build_report = build_markdown(author, source, response.publications)
+            markdown_results.append(build_report)
+    
+    return download_results, markdown_results

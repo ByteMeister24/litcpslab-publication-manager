@@ -14,6 +14,8 @@ A combination of author name and author affilitions are used as serach queries t
 - [tests](/tests/) — automated tests
 - [docs](/docs/) — supporting documentation
 - [data](/data/) — raw csv and processed markdown files
+- [database](/db/) — YAML file containing the author list
+- [schema](/schema/) — schema for the processed markdown file
 
 Do not infer architectural ownership solely from the current source-tree structure. Use the specifications as the authoritative source when relevant.
 
@@ -25,10 +27,13 @@ Do not infer architectural ownership solely from the current source-tree structu
 
 You are allowed to read files under the following directories:
 
+- [Agent Instructions](AGENTS.md)
 - [src/](/src/)
 - [tests](/tests/)
 - [docs](/docs/)
 - [data](/data/)
+- [database](/db/) — YAML file containing the author list
+- [schema](/schema/) — schema for the processed markdown file
 
 ### Approval required
 
@@ -45,6 +50,9 @@ Do not edit, update, or delet the following files:
 
 - [gitignore](/.gitignore)
 - [environment variables](/.env)
+- [Agent Instructions](AGENTS.md)
+- [database](/db/) — YAML file containing the author list
+- [schema](/schema/) — schema for the processed markdown file
 
 ---
 

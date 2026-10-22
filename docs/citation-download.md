@@ -1,178 +1,205 @@
-# Publication download and Markdown generation
+# Publication download guide
 
-The pipeline implements the
-[publication-pipelines specification](specs/publication-pipelines-specification.md).
-IEEE is the only implemented source. It retrieves publication metadata and links,
-saves native JSON, and generates the existing publication Markdown schema.
+The pipeline downloads IEEE Xplore publication metadata, saves the native JSON
+responses, and generates Markdown exports. The available source keyword is
+`ieee`. See the [pipeline specification](specs/publication-pipelines-specification.md)
+for component responsibilities and data contracts.
 
 ## Setup
 
-Use the project's virtual environment and install its requirements:
+From the project root, install the dependencies into the project environment:
 
 ```bash
 .venv/bin/python -m pip install -r requirements.txt
 ```
 
-The pipeline uses `python-dotenv` for direct file credentials and `markdown-it-py`
-for Markdown syntax. The system timezone database must include `Europe/Vienna`.
+Author loading uses PyYAML; credential loading uses python-dotenv. The system
+timezone database must include `Europe/Vienna`.
 
-Maintain researcher definitions in `data/authors.md`, keeping all three sections:
+### Authors
 
-```markdown
-## Authors
+The author database is [db/authors.yaml](../db/authors.yaml). Each name maps to
+its complete affiliation list:
 
-- Researcher One Full Name
-- Researcher Two Full Name
+```yaml
+Ada Researcher:
+  - University A
+  - Institute B
 
-## Common Affiliations
-
-- University A
-- Institute B
-
-## Additional Affiliations
-
-### Researcher Two Full Name
-
-- Former University C
+René Researcher:
+  - University A
+  - Former University C
 ```
 
-Author names must be unique and author-specific headings must match the master
-list. Every author needs at least one common or additional affiliation. Name
-directories must be distinct; directory separators in names are rejected.
-The file uses H2 sections and H3 author headings, with no H1 title. The reusable
-Markdown Reader builds a tree of sections and subsections. The Author Builder
-reads that tree, validates the author sections and flat bullet lists, and returns
-selected `Author` instances with effective affiliations. Inline formatting is
-read as displayed text. Nested
-lists, prose outside list items, code blocks, embedded HTML, and images are
-rejected rather than silently interpreted as researcher definitions.
+Include shared affiliations under each applicable author. Every author needs a
+nonempty list of nonempty affiliation strings. Names and affiliations must
+contain nonblank text without control characters. Duplicate YAML keys and
+invalid entries fail validation before downloading.
 
-The IEEE module reads `IEEE_API_KEY` directly from the project `.env` file when
-called. Exported environment values are ignored. Variable interpolation is
-disabled, so `${OTHER_VARIABLE}` is treated literally. Missing or blank keys
-produce a reported failure before requests. Imports and `--help` do not read
-credentials. The pipeline does not modify `.env`.
+Names are matched case-insensitively. For example, `ada researcher` selects
+`Ada Researcher`, retaining the YAML spelling in queries and reports. Named
+selection fails if database names are ambiguous under case-insensitive matching.
 
-## Commands
+### IEEE credentials
 
-From the project root:
+Configure the project-root `.env` file:
+
+```dotenv
+IEEE_API_KEY=your-api-key
+```
+
+The IEEE module reads this file when called. It ignores process environment
+variables and disables variable interpolation. A missing, unassigned, or blank
+key produces a download error before any HTTP request. Imports and CLI help do
+not load credentials.
+
+## Run the pipeline
+
+The following examples use the names from the sample YAML above:
 
 ```bash
-.venv/bin/python src/main.py all
-.venv/bin/python src/main.py --author "Researcher One Full Name"
-.venv/bin/python src/main.py --source ieee
-.venv/bin/python src/main.py --author "Researcher One Full Name, Researcher Two Full Name" --source ieee
-.venv/bin/python src/main.py --author all --source ieee
-.venv/bin/python src/main.py --author "Researcher One Full Name" --source all
+.venv/bin/python src/download_publications.py all
+.venv/bin/python src/download_publications.py --author "Ada Researcher"
+.venv/bin/python src/download_publications.py --source ieee
+.venv/bin/python src/download_publications.py --author "ada researcher, René Researcher" --source ieee
 ```
 
-Both flags accept comma-separated values or `all`. Quote author lists containing
-spaces. An omitted flag selects all for that dimension. Bare `all` selects every
-author and available source; combining bare `all` with either flag is invalid.
-Running without arguments is also invalid. The previous positional-author syntax
-has been replaced.
+- Provide bare `all` or at least one selection flag.
+- Each flag accepts comma-separated values or `all`. An omitted flag means all
+  for that dimension.
+- Bare `all` selects every author and source and cannot be combined with flags.
+- Flag values are required. Positional author/source names are invalid.
+- Surrounding whitespace is trimmed. Duplicates are processed once in selection
+  order, including author names that differ only in case.
+- Source keywords are lowercased. Currently only `ieee` is supported.
+- Empty items and `all` mixed with named selections are invalid. Unknown authors
+  or sources fail validation before any request.
 
-Whitespace is trimmed and repeated selections are processed once in first-seen
-order. Author names match exactly; source keywords are lowercased. Empty list
-items, `all` mixed with names, unknown authors, and unknown sources are rejected.
-All selections are validated before any API calls. Source selection examples
-with additional publishers remain invalid until those integrations are added.
-
-The debug launch profile prompts separately for author and source lists, using
-`all` as each default. Credentials are read by the source module itself.
-
-## Responsibilities
-
-- `main.py`: normalizes every valid CLI selection, including bare `all`, into a
-  `DownloadRequest`, calls the manager, prints results, and handles exit codes.
-- `download_manager.py`: resolves sources, asks the Author Builder for selected authors,
-  calls each source once per author, delegates exports to the builder, and
-  collects one `DownloadResult` per pair. It performs no file writes.
-- `markdown_reader.py`: exposes `read_markdown(path) -> MarkdownDocument`. The
-  document has `sections` and content before the first heading. Sections expose
-  `title`, `level`, `content`, and nested `subsections`; content blocks use
-  `markdown-it-py` syntax nodes. Heading levels determine the hierarchy, and
-  duplicate headings remain distinct. This reader is independent of author rules.
-- `author_builder.py`: uses the reader's H2/H3 tree, validates definitions and
-  selections, builds the author/affiliation dictionary, and returns `list[Author]`
-  with common plus author-specific affiliations. `load_authors` accepts selected
-  names or `"all"`.
-- `ieee_xplore.py`: implements `download(author: Author) -> SourceDownload`,
-  including credentials, queries, paging, validation, native raw saving, and
-  normalization, in that order.
-- `markdown_builder.py`: renders the publication schema, saves the export, and
-  returns `MarkdownBuildResult` with a Markdown path or a stage-specific error.
-- `storage.py`: shared filename rules and safe writes, called by source modules
-  and the Markdown Builder.
-- `models.py`: shared request, author, publication, source-result, builder-result,
-  and report types.
-- `config.py`: project-wide paths and settings, including publication field order.
-  Source API settings stay in their source modules. The schema document remains
-  the output contract; it is not parsed as a runtime template.
-
-Each `SourceDownload` contains common `Publication` records and the saved
-`raw_file_path`. Complete native pages are saved before normalization. If
-normalization fails, `DownloadError` carries that path so the report can identify
-the retained download. Source modules sanitize errors before the manager sees
-them. The manager and helpers do not print reports.
-
-A future source implements the same per-author function and is added to the
-supported-source configuration and manager's explicit dispatch. ScienceDirect
-and Springer Nature remain extension points; neither integration is implemented.
-
-## Outputs and failures
+A search combines the selected author's full YAML name with any configured
+affiliation:
 
 ```text
-data/researcher-one-full-name/
-  raw/
-    researcher-one-full-name-ieee-2026-10-21T14-30-00.000000+0200.json
-  researcher-one-full-name-ieee.md
+Author Name AND (Affiliation A OR Affiliation B OR ...)
 ```
 
-Raw JSON contains an array of complete native page objects, including for one
-page. Each successful download creates a new file. Names include completion date,
-time, microseconds, and UTC offset in `Europe/Vienna`; collisions insert a sequence
-number before the timestamp. Legacy and dated raw files are retained.
+There is no year filter. Publications with missing or unmatched affiliations may
+be absent from the results.
 
-The current Markdown file contains all returned publications in the existing
-schema and replaces its previous version only after a complete new document is
-ready. Authors and affiliations come from publication metadata; configured search
-affiliations are never substituted. Author keywords precede IEEE terms. Missing
-fields keep empty labels. A successful zero-result search saves raw metadata and
-an empty Markdown file.
+In VS Code, the `Download publications (IEEE)` launch profile prompts for author
+and source selections, each defaulting to `all`.
 
-A failed or incomplete retrieval does not change existing outputs. Raw saving
-must succeed before Markdown is updated. If rendering or Markdown saving fails,
-the new raw file remains, previous Markdown is preserved, and the report identifies
-the failed stage and raw path. Complete raw responses are also retained if
-normalization fails after raw saving; the error carries the retained raw path.
-Other author/source pairs continue.
+## Saved files
 
-Temporary writes prevent partially written final files. Publishing raw history
-requires hard-link support in the output filesystem; Markdown uses atomic
-replacement. Requests have a source-defined timeout (currently 30 seconds for
-IEEE) and are not automatically retried.
+For an export created on 22 October 2026, an author's output looks like:
 
-The CLI prints one result per pair, with publication count and saved paths on
-success, then a summary. Exit status is 0 for complete success, 1 for pipeline
-failures, and 2 for invalid CLI syntax. PDFs are not downloaded. The legacy CSV
-converter remains a separate utility with its existing behavior.
+```text
+data/ada-researcher/
+  raw/
+    ada-researcher-ieee-2026-10-22T14-30-00.000000+0200.json
+  ada-researcher-ieee-2026-10-22.md
+```
 
-## Verification
+The author slug is the YAML name lowercased with spaces replaced by hyphens.
+All filename dates use `Europe/Vienna`.
+
+Every complete raw download creates a new JSON file containing an array of
+native response pages. Existing raw files are retained; timestamp collisions
+add a sequence number before the timestamp.
+
+Markdown names end in `YYYY-MM-DD`. Another export on the same date atomically
+replaces that day's file after the new document is ready. Earlier dated exports
+and existing undated files remain.
+
+Markdown follows the [publication schema](../schema/publication-schema.md).
+Publication metadata supplies all returned authors and affiliations. Author
+keywords precede IEEE terms, absent values retain empty field labels, and output
+uses UTF-8.
+
+## Results and failures
+
+The CLI prints a download result for each author/source pair, Markdown results
+for attempted builds, and a summary for each stage.
+
+| Outcome | Raw data | Markdown |
+| --- | --- | --- |
+| Publications found | New native JSON saved | Dated export built |
+| Zero publications | New native JSON saved; download succeeds | Build skipped; existing exports retained |
+| Retrieval or raw-save failure | No new complete download published | Build skipped |
+| Normalization failure | Completed raw file retained; path included in the error message | Build skipped |
+| Markdown generation or saving failure | Completed raw file retained | Previous exports preserved |
+
+Source failures do not stop the remaining author/source pairs. A Markdown
+failure leaves the corresponding download successful. Skipped builds include
+failed downloads and successful zero-result searches.
+
+| Exit code | Meaning |
+| --- | --- |
+| `0` | Downloads and all attempted Markdown builds succeeded |
+| `1` | Author/source validation, downloading, normalization, or Markdown building failed |
+| `2` | Invalid CLI syntax or selections such as empty items |
+
+IEEE requests use a 30-second timeout and are not retried automatically.
+Publication PDF URLs are included when returned; PDF files are not downloaded.
+
+## JSON and HTML count report
+
+After the existing Markdown reports are printed, the CLI collects successful
+download counts and calls `report_generator.update_download_counts()` once.
+[output/report.json](../output/report.json) stores these counts by author and
+source, plus an ISO `updated_at` timestamp using `Europe/Vienna`:
+
+```json
+{
+  "updated_at": "2026-10-22T20:00:00+02:00",
+  "Alois Zoitl": {"ieee": 0}
+}
+```
+
+All 47 members start with integer zero IEEE counts. Equal counts stay unchanged,
+increases replace saved counts, and decreases retain the saved count and print
+a console warning. Failed and unprocessed downloads leave their saved counts
+intact. The timestamp refreshes once per completed pipeline execution, including
+runs with no successful downloads.
+
+Next, `report_generator.update_report()` reads JSON and synchronizes
+[output/report.html](../output/report.html). Its Current Members and Past Members
+tables retain the supplied membership and order; new source columns are added
+to both tables as needed. The HTML displays saved counts and the JSON timestamp,
+without decrease warnings. Both paths are configured in `config.py`.
+
+Open the HTML file directly in a browser. To refresh an already-open page, click
+**Update** and choose `output/report.json`. The button reads the selected file
+and refreshes the displayed tables; it does not save changes to disk. Keep
+`report.js` beside the HTML. No web server is required.
+
+The updater uses the download records' `publication_count` directly, without
+reading publication contents, raw files, or Markdown results. Missing or invalid
+files and save errors are reported without replacing the affected file. If JSON
+saves but HTML synchronization fails, the saved JSON is retained. Warnings and
+report-update errors go to stderr without changing existing pipeline exit codes.
+
+## Offline verification
 
 ```bash
 .venv/bin/python -B -m unittest discover -s tests -v
 ```
 
-Tests use synthetic author documents, credentials, and IEEE-shaped responses in
-temporary directories. HTTP calls are mocked; production data and credentials
-are not used. Normalization covers nested authors, affiliations, author keywords,
-IEEE terms, and the remaining fields in the
-[publication schema](../data/publication-schema.md).
+The suite uses synthetic author data, credentials, temporary output directories,
+and mocked HTTP. It covers selection, YAML validation, credentials, pagination,
+normalization, rendering, storage, and failure handling. The VS Code
+`Debug offline tests` launch profile runs the suite under the debugger.
 
-IEEE's [returned-field reference](https://developer.ieee.org/docs/read/Metadata_API_responses)
-documents populated fields. The normalizer accepts `authors.authors` (and the
-`authors.author` variant), and the `index_terms` keyword groups. Counts accept
-`total_records` or the documented `totalfound`. Exact live payload compatibility
-still needs a smoke test with a configured researcher; no live IEEE requests are
-part of the automated suite.
+## CSV conversion
+
+The separate [CSV converter](../src/csv_to_semantic_markdown.py) converts a manual
+IEEE CSV export into Markdown:
+
+```bash
+.venv/bin/python src/csv_to_semantic_markdown.py input.csv output.md
+.venv/bin/python src/csv_to_semantic_markdown.py input.csv output.md --encoding cp1252
+```
+
+Its default input encoding is `utf-8-sig`; output is UTF-8. Input columns and
+records are validated before writing, and publication order follows the CSV.
+The caller supplies the output path; the API pipeline's dated filename policy
+does not apply to this command.

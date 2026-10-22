@@ -7,21 +7,14 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-AUTHOR_TEXT = """## Authors
+AUTHOR_YAML = """Ada Researcher:
+  - University A
+  - Institute B
 
-- Ada Researcher
-- René Researcher
-
-## Common Affiliations
-
-- University A
-- Institute B
-
-## Additional Affiliations
-
-### René Researcher
-
-- Former University
+René Researcher:
+  - University A
+  - Institute B
+  - Former University
 """
 
 

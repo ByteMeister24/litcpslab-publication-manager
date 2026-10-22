@@ -1,98 +1,116 @@
-"""Markdown syntax and author-definition validation, with no production data."""
+"""Unit tests for author validation and selection using parsed mappings."""
 
-from pathlib import Path
-import tempfile
+from typing import cast
 import unittest
+from unittest.mock import patch
 
-from support import AUTHOR_TEXT
-from author_builder import load_authors
-from models import Author
+from support import PROJECT_ROOT
+import config
+from author_builder import Author, Selection, get_selected_authors
 
 
 class AuthorBuilderTests(unittest.TestCase):
     def setUp(self):
-        directory = tempfile.TemporaryDirectory()
-        self.addCleanup(directory.cleanup)
-        self.path = Path(directory.name) / "authors.md"
+        self.path = PROJECT_ROOT / "synthetic-authors.yaml"
+        patcher = patch.object(config, "AUTHORS_FILE", self.path)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.definitions = {
+            "Ada Researcher": ["University A", "Institute B"],
+            "René Researcher": ["University A", "Institute B", "Former University"],
+        }
+        self.ada = Author("Ada Researcher", ("University A", "Institute B"))
+        self.rene = Author("René Researcher", ("University A", "Institute B", "Former University"))
 
-    def read_config(self, text=AUTHOR_TEXT):
-        self.path.write_text(text, encoding="utf-8")
-        return load_authors("all", self.path)
+    def test_all_returns_author_instances_in_database_order(self):
+        with patch("author_builder.convert_yaml_to_dict", return_value=self.definitions) as loader:
+            authors = get_selected_authors("all")
+        loader.assert_called_once_with(self.path)
+        self.assertIsInstance(authors, list)
+        self.assertTrue(all(isinstance(author, Author) for author in authors))
+        self.assertEqual(authors, [self.ada, self.rene])
 
-    def test_common_and_additional_affiliations_preserve_master_order(self):
-        definitions = self.read_config()
-        self.assertEqual(definitions, [
-            Author("Ada Researcher", ("University A", "Institute B")),
-            Author("René Researcher", ("University A", "Institute B", "Former University")),
-        ])
+    def test_single_selected_name_returns_only_its_author(self):
+        with patch("author_builder.convert_yaml_to_dict", return_value=self.definitions):
+            self.assertEqual(get_selected_authors(("René Researcher",)), [self.rene])
 
-    def test_author_specific_affiliations_without_common_ones(self):
-        text = ("## Authors\n- Ada Researcher\n## Common Affiliations\n"
-                "## Additional Affiliations\n### Ada Researcher\n- University A\n")
-        self.assertEqual(self.read_config(text), [Author("Ada Researcher", ("University A",))])
+    def test_multiple_selections_preserve_requested_order_and_remove_duplicates(self):
+        with patch("author_builder.convert_yaml_to_dict", return_value=self.definitions) as loader:
+            authors = get_selected_authors(("René Researcher", "Ada Researcher", "René Researcher"))
+        loader.assert_called_once_with(self.path)
+        self.assertEqual(authors, [self.rene, self.ada])
 
-    def test_section_order_does_not_change_effective_affiliations(self):
-        authors, rest = AUTHOR_TEXT.split("## Common Affiliations", 1)
-        common, additional = rest.split("## Additional Affiliations", 1)
-        reordered = "## Additional Affiliations" + additional + authors + "## Common Affiliations" + common
-        self.assertEqual(self.read_config(reordered), self.read_config())
+    def test_affiliations_are_used_directly_without_merging_or_deduplication(self):
+        definitions = {"Ada Researcher": ["University A", "University A"], "René Researcher": ["Institute B"]}
+        with patch("author_builder.convert_yaml_to_dict", return_value=definitions):
+            authors = get_selected_authors("all")
+        self.assertEqual(authors, [Author("Ada Researcher", ("University A", "University A")),
+                                   Author("René Researcher", ("Institute B",))])
 
-    def test_commonmark_heading_forms_and_inline_text(self):
-        text = AUTHOR_TEXT.replace("## Authors", "Authors\n-------")
-        text = text.replace("- University A", "- **University A**")
-        text = text.replace("- Institute B", "* [Institute B](https://example.invalid)")
-        self.assertEqual(self.read_config(text)[0].affiliations, ("University A", "Institute B"))
+    def test_author_name_matching_ignores_case_and_keeps_database_capitalization(self):
+        for selection, expected in [(("ada researcher",), [self.ada]),
+                                    (("ADA RESEARCHER",), [self.ada]),
+                                    (("rEnÉ rEsEaRcHeR",), [self.rene])]:
+            with self.subTest(selection=selection), \
+                 patch("author_builder.convert_yaml_to_dict", return_value=self.definitions):
+                self.assertEqual(get_selected_authors(selection), expected)
 
-    def test_utf8_bom_and_mixed_bullet_markers(self):
-        definitions = self.read_config("\ufeff" + AUTHOR_TEXT.replace("- Institute B", "+ Institute B"))
-        self.assertIn("René Researcher", [author.name for author in definitions])
+    def test_case_variants_are_deduplicated_in_first_selected_order(self):
+        with patch("author_builder.convert_yaml_to_dict", return_value=self.definitions):
+            authors = get_selected_authors(("rené researcher", "ADA RESEARCHER", "RENÉ RESEARCHER", "ada researcher"))
+        self.assertEqual(authors, [self.rene, self.ada])
 
-    def test_selected_names_preserve_order_and_are_constructed_once(self):
-        self.read_config()
-        authors = load_authors(("René Researcher", "Ada Researcher", "René Researcher"), self.path)
-        self.assertEqual(authors, [
-            Author("René Researcher", ("University A", "Institute B", "Former University")),
-            Author("Ada Researcher", ("University A", "Institute B")),
-        ])
+    def test_name_capitalization_comes_from_database_including_hyphens_and_internal_capitals(self):
+        definitions = {"Jean-Luc McDonald": ["University A"]}
+        with patch("author_builder.convert_yaml_to_dict", return_value=definitions):
+            authors = get_selected_authors(("jean-luc mcdonald",))
+        self.assertEqual(authors, [Author("Jean-Luc McDonald", ("University A",))])
 
-    def test_unknown_or_invalid_selection_fails_without_partial_results(self):
-        self.read_config()
-        for selection in [("Ada Researcher", "Unknown"), (), "Ada Researcher", ("all",), ("",)]:
-            with self.subTest(selection=selection), self.assertRaises(ValueError):
-                load_authors(selection, self.path)
+    def test_case_insensitive_selection_rejects_ambiguous_database_names(self):
+        definitions = {"Ada Researcher": ["University A"], "ADA RESEARCHER": ["Institute B"]}
+        with patch("author_builder.convert_yaml_to_dict", return_value=definitions):
+            with self.assertRaisesRegex(ValueError, "ambiguous"):
+                get_selected_authors(("ada researcher",))
 
-    def test_invalid_configuration_fails_explicitly(self):
-        invalid_texts = [
-            "",
-            "# Lab Researchers\n" + AUTHOR_TEXT,
-            "Introductory prose\n\n" + AUTHOR_TEXT,
-            AUTHOR_TEXT.replace("### René Researcher", "#### René Researcher"),
-            AUTHOR_TEXT + "\n#### Nested affiliation heading\n- University C\n",
-            AUTHOR_TEXT.replace("## Authors", "## Authors\n### Unexpected subsection"),
-            AUTHOR_TEXT.replace("## Common Affiliations", "## Common Affiliations\n### Unexpected subsection"),
-            AUTHOR_TEXT.replace("- René Researcher\n", ""),
-            AUTHOR_TEXT.replace("### René Researcher", "### Unknown Researcher"),
-            AUTHOR_TEXT.replace("- René Researcher", "- Ada Researcher"),
-            AUTHOR_TEXT.replace("- René Researcher", "- ADA RESEARCHER"),
-            AUTHOR_TEXT.replace("- Ada Researcher", "- ../../elsewhere"),
-            AUTHOR_TEXT.replace("- Ada Researcher", "- all"),
-            AUTHOR_TEXT.replace("- Ada Researcher", "- Ada\tResearcher"),
-            AUTHOR_TEXT.replace("- Ada Researcher", "Ada Researcher"),
-            AUTHOR_TEXT.replace("## Authors", "## Authors\n## Authors"),
-            AUTHOR_TEXT.replace("### René Researcher", "### René Researcher\n### René Researcher"),
-            AUTHOR_TEXT.replace("## Common Affiliations", "## Other"),
-            AUTHOR_TEXT.replace("### René Researcher\n", ""),
-            AUTHOR_TEXT.replace("- University A\n", "").replace("- Institute B\n", ""),
-            AUTHOR_TEXT.replace("- Ada Researcher", "- Ada Researcher\n  - Nested name"),
-            AUTHOR_TEXT.replace("- Ada Researcher", "- Ada Researcher\n\n  Extra paragraph"),
-            AUTHOR_TEXT.replace("- Ada Researcher", "- "),
-            AUTHOR_TEXT.replace("- Ada Researcher", "> - Ada Researcher"),
-            AUTHOR_TEXT.replace("- Ada Researcher", "```\n- Ada Researcher\n```"),
-            AUTHOR_TEXT.replace("- Ada Researcher", "1. Ada Researcher"),
-            AUTHOR_TEXT.replace("- Ada Researcher", '- <span>Ada Researcher</span>'),
-            AUTHOR_TEXT.replace("- Ada Researcher", "- ![Ada](image.png)"),
-            "## Authors\n## Common Affiliations\n## Additional Affiliations\n",
-        ]
-        for text in invalid_texts:
-            with self.subTest(text=text), self.assertRaises(ValueError):
-                self.read_config(text)
+    def test_unknown_names_are_reported_in_sorted_order(self):
+        with patch("author_builder.convert_yaml_to_dict", return_value=self.definitions):
+            with self.assertRaises(ValueError) as caught:
+                get_selected_authors(("Unknown Z", "Ada Researcher", "Unknown A"))
+        self.assertEqual(str(caught.exception), "Unknown author selection(s): Unknown A, Unknown Z.")
+
+    def test_invalid_selections_are_rejected(self):
+        invalid_selections = [(), "Ada Researcher", "invalid", None, ["Ada Researcher"],
+                              ("",), ("Ada Researcher", ""), (42,), ("all",)]
+        with patch("author_builder.convert_yaml_to_dict", return_value=self.definitions):
+            for selection in invalid_selections:
+                with self.subTest(selection=selection), self.assertRaises(ValueError):
+                    get_selected_authors(cast(Selection, selection))
+
+    def test_blank_names_and_control_characters_are_rejected(self):
+        for name in ["", "   ", "Ada\tResearcher", "Ada\nResearcher", "Ada\x00Researcher"]:
+            with self.subTest(name=name), patch("author_builder.convert_yaml_to_dict", return_value={name: ["University A"]}):
+                with self.assertRaises(ValueError):
+                    get_selected_authors("all")
+
+    def test_affiliations_must_be_a_nonempty_list_of_nonempty_strings(self):
+        invalid_values = [None, "University A", {}, (), [], [""], [" "], ["University A", None],
+                          [True], [42], [{}], [["University A"]], ["University A\tDepartment"],
+                          ["University A\nDepartment"], ["University A\x00Department"]]
+        for affiliations in invalid_values:
+            with self.subTest(affiliations=affiliations), \
+                 patch("author_builder.convert_yaml_to_dict", return_value={"Ada Researcher": affiliations}):
+                with self.assertRaises(ValueError):
+                    get_selected_authors("all")
+
+    def test_invalid_unselected_author_is_rejected_before_returning_selected_authors(self):
+        definitions = {**self.definitions, "Other Researcher": []}
+        with patch("author_builder.convert_yaml_to_dict", return_value=definitions):
+            with self.assertRaises(ValueError):
+                get_selected_authors(("Ada Researcher",))
+
+    def test_loader_errors_are_propagated(self):
+        for error in [FileNotFoundError("Missing file"), ValueError("Invalid YAML")]:
+            with self.subTest(error=error), patch("author_builder.convert_yaml_to_dict", side_effect=error):
+                with self.assertRaises(type(error)) as caught:
+                    get_selected_authors("all")
+                self.assertIs(caught.exception, error)

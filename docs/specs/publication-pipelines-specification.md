@@ -1,392 +1,281 @@
-# Publication Pipelines Specification
+# Publication pipeline specification
 
-## Status and purpose
+## Scope
 
-This document records the requirements agreed during the publication-management
-discussion and the subsequently approved architecture reorganization.
-The implemented pipeline downloads native metadata and generates Markdown in
-one run. This supersedes the previous independent API-download and conversion
-workflow. Details that remain undecided are listed at the end.
+The pipeline retrieves publication metadata from IEEE Xplore, preserves native
+JSON responses, and generates Markdown using the
+[publication schema](../../schema/publication-schema.md). IEEE is the only
+implemented source. Additional publishers, PDF downloading, and reconversion of
+historical raw downloads are outside the current pipeline.
 
-The project automates collecting publication metadata for individual lab
-researchers and converting it into semantic Markdown for a knowledge base.
-Titles, authors, affiliations, keywords, abstracts, publication details, and PDF
-links support downstream questions about researchers and their work.
+For commands and setup, see the [download guide](../citation-download.md).
 
-The first version supports **IEEE Xplore**, identified by the source keyword
-`ieee`. Additional sources, including ScienceDirect and Springer Nature, are
-future work. The knowledge-base chatbot is a downstream consumer of the generated
-Markdown; its implementation is outside this specification.
+## Components and ownership
 
-## Pipeline architecture
+All implementation paths below are relative to `src/`.
 
-1. **CLI entry point (`main.py`)** parses selections, normalizes them into a
-   `DownloadRequest`, calls the Download Manager, and prints returned results and
-   the summary. It does not read author files or credentials, issue HTTP requests,
-   render Markdown, or save publication files.
-2. **Download Manager (`download_manager.py`)** exposes
-   `run_download(request: DownloadRequest) -> list[DownloadResult]`. It resolves
-   sources, requests selected authors from the Author Builder, and validates all
-   selections before requests. For each author/source pair it calls the source
-   once, delegates exports to the Markdown Builder, and collects one result.
-   It continues after individual failures, performs no file writes, and does not
-   print.
-3. **Author Builder (`author_builder.py`)** exposes
-   `load_authors(selection, path=None) -> list[Author]`, accepting a tuple of full
-   names or `"all"`. It uses the Markdown Reader to get H2 sections and their H3
-   subsections, validates author definitions, builds the author/affiliation
-   dictionary, and constructs selected authors with common plus author-specific
-   affiliations. The default path is the configured author file.
-4. **Source modules** expose `download(author: Author) -> SourceDownload`. They
-   access their credentials, build API queries, retrieve and validate every page,
-   save complete native responses through the shared storage helper, and only
-   then normalize publications. IEEE is the only implemented source.
-5. **Markdown Builder (`markdown_builder.py`)** exposes
-   `build_markdown(author, source, publications) -> MarkdownBuildResult`. It
-   renders common publication records using the documented schema and saves
-   through the shared storage helper. Its result contains the saved Markdown path
-   or a stage-specific generation/saving error.
+| Component | Responsibility |
+| --- | --- |
+| `download_publications.py` | Parse CLI arguments into `DownloadRequest`, call the manager, print reports, update HTML counts, and return an exit code |
+| `download_manager.py` | Resolve sources, request selected authors, process author/source pairs sequentially, and collect download and Markdown outcomes |
+| `author_builder.py` | Define `Author`, validate the complete author database, and return selected `Author` instances |
+| `utils/yaml_loader.py` | Parse the complete YAML mapping safely and reject duplicate keys |
+| `ieee_xplore.py` | Load IEEE credentials, build queries, retrieve and validate pages, save raw data, normalize publications, and construct download outcomes |
+| `markdown_builder.py` | Render publications, save Markdown, and return build feedback |
+| `report_generator.py` | Update publication counts in the static current/past member HTML tables and return decrease warnings |
+| `utils/storage.py` | Apply filename rules and publish completed files safely |
+| `models.py` | Define the shared request, publication, download-outcome, and Markdown-result dataclasses |
+| `config.py` | Define project paths, timezone, filename formats, and publication field order |
 
-The reusable **Markdown Reader (`markdown_reader.py`)** exposes
-`read_markdown(path) -> MarkdownDocument`. It uses `markdown-it-py` and its syntax
-tree to group content under headings. The document has `sections` and content
-before the first heading. Each section exposes `title`, `level`, `content`, and
-`subsections`; content blocks are navigable `SyntaxTreeNode` objects. A section
-ends at the next heading of the same or higher level. Duplicate headings remain
-distinct in source order. The reader has no author-specific validation.
+The manager owns the module-level `SUPPORTED_SOURCES` tuple and `DOWNLOADERS`
+dictionary. Source-specific API URLs, page sizes, timeouts, and credential-key
+names belong to their source modules.
 
-Shared contracts live in `models.py`. `SourceDownload` contains `publications`
-and `raw_file_path`. `Publication` mirrors the Markdown schema: authors,
-affiliations, and keywords are tuples of strings; remaining fields are strings.
-`DownloadResult` contains author, source, publication count, `raw_file_path`,
-`markdown_path`, and an optional error. The manager returns one result for every
-attempted pair. Source failures use a credential-safe `DownloadError`; if
-normalization fails after raw saving, the error carries `raw_file_path` so the
-manager and CLI can report the retained file.
+The CLI handles reporting. The manager, sources, and helpers do not print.
+Sources and the Markdown Builder invoke storage directly; the manager performs
+no file writes.
 
-`config.py` centralizes project-wide settings: project/data/author/environment
-file paths, author-section names, available-source keywords, Markdown parser
-preset, timezone, filename formats, and publication field order. API URLs, page
-sizes, timeouts, and credential-key names remain in each source module.
+## Data contracts
 
-`storage.py` centralizes filename rules and safe writes. Source modules invoke it
-for raw downloads; the Markdown Builder invokes it for exports. The Markdown
-schema is a documented contract implemented by `config.PUBLICATION_FIELDS`,
-not a runtime template loaded from the schema document.
+`Selection` is a tuple of strings or the literal string `"all"`.
 
-The CSV converter remains an independent manual-export utility with its existing
-behavior. CSV is not an intermediate API format. This change adds no standalone
-saved-API-response conversion command. Publication PDFs are not downloaded.
+| Dataclass | Fields |
+| --- | --- |
+| `Author` | `name: str`, `affiliations: tuple[str, ...]`; defined in `author_builder.py` |
+| `DownloadRequest` | `authors: Selection`, `sources: Selection` |
+| `Publication` | `title`, `authors`, `affiliations`, `keywords`, `abstract`, `publication_title`, `year`, `issn`, `isbn`, `doi`, `pdf_url`, `publisher` |
+| `DownloadRecord` | `author: str`, `source: str`, `publication_count: int`, `publications: list[Publication]`, `raw_file_path: Path` |
+| `DownloadError` | `author: str`, `source: str`, `error: str` |
+| `MarkdownBuildResult` | `author: str`, `source: str`, optional `markdown_path: Path`, optional `error: str` |
 
-## Master author file
+`Publication.authors`, `affiliations`, and `keywords` are tuples of strings
+defaulting to empty tuples. Its other fields are strings defaulting to empty
+strings. A `DownloadRecord` with count zero and an empty publication list is a
+success. `DownloadError` is a returned dataclass, not an exception.
 
-The Author Builder uses the fixed project-relative location **`data/authors.md`**.
-Author names and affiliations are maintained in this single Markdown file.
-Affiliations are not supplied as command arguments.
+The public coordination interface is:
 
-The file uses H2 sections and H3 author headings, with no H1 title. It contains
-three sections:
-
-- `Authors`: the master list of full author names to process.
-- `Common Affiliations`: affiliations used for every author in the master list.
-- `Additional Affiliations`: optional author-specific additions, grouped under
-  headings containing the corresponding full author names.
-
-Example structure:
-
-```markdown
-## Authors
-
-- Researcher One Full Name
-- Researcher Two Full Name
-
-## Common Affiliations
-
-- Affiliation A
-- Affiliation B
-
-## Additional Affiliations
-
-### Researcher Two Full Name
-
-- Affiliation C
-- Affiliation D
+```python
+def run_download(request: DownloadRequest) -> tuple[
+    list[DownloadRecord | DownloadError],
+    list[MarkdownBuildResult],
+]:
+    ...
 ```
 
-The `Authors` section determines the researchers to query. An author named in
-`Additional Affiliations` must match a full name in that master list.
+The first list contains the source-returned outcome for every author/source
+pair. The second contains one result for every attempted Markdown build,
+including failed builds. Errors and zero-publication records skip building and
+produce no Markdown result. Both lists preserve processing order; associate
+records by `(author, source)` rather than list position.
 
-Each author has one configured full name. Name variants and aliases are outside
-the agreed requirements. Full names are assumed to be unique; the user maintains
-that uniqueness. Automatic duplicate-name disambiguation and `_1`/`_2` suffixes
-are explicitly out of scope for this version.
+## Author database and selection
 
-## Author and affiliation search contract
+`config.AUTHORS_FILE` points to `db/authors.yaml`. Each full author name maps
+directly to its complete list of affiliations:
 
-The intended scope is each researcher's full publication history available from
-the selected source, including work associated with previous institutions. No
-year restriction or restriction to work performed at the current lab has been
-requested.
+```yaml
+Ada Researcher:
+  - University A
+  - Institute B
+```
 
-For a particular author, the effective affiliation list consists of:
+`convert_yaml_to_dict(filepath)` uses a PyYAML `SafeLoader` subclass, reads
+UTF-8 with optional BOM, and returns a nonempty mapping. It rejects non-string
+keys, duplicate keys, and invalid YAML.
+
+`get_selected_authors(selection) -> list[Author]` loads and validates the whole
+mapping before selection. Names must contain nonblank text without control
+characters. Each affiliation value must be a nonempty list of nonblank strings
+without control characters. Affiliations are converted to tuples in their
+original order, retaining duplicates. No affiliation merging occurs.
+
+For `"all"`, authors follow database order. Named selections use `casefold()`
+for matching and deduplication, preserve first-selected order, and return the
+original YAML spelling and affiliations. Unknown names fail validation. Named
+selection also rejects a database containing multiple names that normalize to
+the same lookup key.
+
+`Author.slug` lowercases the name and replaces spaces with hyphens.
+
+## CLI contract
+
+The entry point is `src/download_publications.py`.
+
+- Bare `all` selects every author and available source and is exclusive with
+  `--author` and `--source`.
+- Each flag accepts comma-separated selections or `all`; an omitted flag means
+  all for that dimension.
+- No arguments, valueless flags, and positional author/source names are usage
+  errors.
+- Selections are trimmed and deduplicated. Source keywords are lowercased.
+- Empty items and `all` mixed with named selections are usage errors.
+- Unknown authors and sources fail validation before requests.
+
+The CLI always passes a `DownloadRequest`. Bare `all` becomes
+`DownloadRequest(authors="all", sources="all")`; the manager does not accept a
+standalone `"all"` string.
+
+## Download coordination
+
+The manager validates author and source selections and resolves registered
+downloaders before making requests. It then calls each source once per selected
+author, in author order followed by source order.
+
+Each source implements:
+
+```python
+def download(author: Author) -> DownloadRecord | DownloadError:
+    ...
+```
+
+Sources catch exceptions within `download()` and return sanitized error records.
+The manager appends each outcome unchanged. It skips Markdown for
+`DownloadError` and for count-zero records; otherwise it passes the author,
+source, and normalized publications to `build_markdown()`.
+
+The builder returns `MarkdownBuildResult` with a saved path or an error
+identifying Markdown generation or saving. A build failure does not change the
+download outcome. The manager continues processing other pairs after returned
+source or builder failures.
+
+## IEEE retrieval and normalization
+
+The IEEE module uses Python's standard-library HTTP client with these settings:
+
+| Setting | Value |
+| --- | --- |
+| Endpoint | `https://ieeexploreapi.ieee.org/api/v1/search/articles` |
+| Format | JSON |
+| Page size | 200 |
+| Start record | 1 initially; then retrieved count + 1 |
+| Sort | `article_number`, ascending |
+| Timeout | 30 seconds per request |
+| Automatic retries | None |
+
+Credentials are loaded inside `download()` using
+`dotenv_values(config.ENV_FILE, interpolate=False)`. Only the project-root
+`.env` file supplies `IEEE_API_KEY`; process environment variables are not a
+fallback. The trimmed key is validated before query execution. Imports do not
+load credentials.
+
+Queries use the canonical author name and all configured affiliations, with no
+year restriction:
 
 ```text
-common affiliations + that author's additional affiliations
+"Authors":"Ada Researcher" AND ("Author Affiliations":"University A" OR "Author Affiliations":"Institute B")
 ```
 
-Additional affiliations extend the common list; they do not replace it or apply
-to other authors.
+Search values must be nonblank literal text without double quotes, backslashes,
+wildcards, or control characters. Publications with missing or unmatched
+affiliations can be missed.
 
-The conceptual query is:
+Every response must be a JSON object with a valid `total_records` or
+`totalfound` count and a valid articles list. Zero-count responses may omit the
+articles field. Retrieval rejects API error responses, changing totals,
+incomplete or oversized pages, excess records, and missing or repeated article
+numbers. Short pages advance by their actual length.
+
+After every page is retrieved and validated, the source saves the complete native
+pages before normalizing any publication. All native fields remain in the raw
+JSON. Normalization converts each article to `Publication` in response order:
+
+- Preserve all returned authors and affiliations. Sort authors by
+  `author_order` when every author has that value; otherwise keep returned order.
+- Accept nested authors under `authors.authors` or `authors.author`.
+- Combine `index_terms.author_terms` before `index_terms.ieee_terms`.
+- Treat absent metadata as empty fields and reject malformed values.
+- Use returned publication affiliations, without substituting search affiliations.
+
+Errors identify the failed download, raw-saving, or normalization stage.
+Credential values are redacted before errors leave the source. If normalization
+fails after saving, the error message includes the retained raw-file path.
+
+## Storage and rendering
+
+Paths are rooted at `config.PROJECT_ROOT`, independently of the working
+directory. API outputs use these patterns:
 
 ```text
-Full Author Name AND (Affiliation A OR Affiliation B OR ...)
+data/<author-slug>/raw/<author-slug>-<source><sequence>-<timestamp>.json
+data/<author-slug>/<author-slug>-<source>-<YYYY-MM-DD>.md
 ```
 
-For the example author file:
+Dates use `Europe/Vienna`. Raw timestamps include date, time, microseconds, and
+UTC offset. The sequence is empty for the first filename and becomes `-2`,
+`-3`, and so on when a timestamp collides. Raw files are never overwritten.
 
-```text
-Researcher One Full Name AND (Affiliation A OR Affiliation B)
+Markdown exports replace only an existing file for the same author, source,
+and date. Earlier dates and undated exports are retained. Storage writes to a
+temporary file in the destination directory, then publishes the completed raw
+file with a hard link or replaces Markdown atomically with `os.replace()`.
+Temporary files are removed after success or failure.
 
-Researcher Two Full Name AND
-    (Affiliation A OR Affiliation B OR Affiliation C OR Affiliation D)
-```
+Rendering follows `config.PUBLICATION_FIELDS` and the documented
+[publication schema](../../schema/publication-schema.md), in this order:
 
-The implementation must translate this intent into IEEE's documented search
-parameters and field-scoped query syntax. The examples above are conceptual
-expressions, not executable API request strings.
+`Authors`, `Author Affiliations`, `Keywords`, `Abstract`, `Publication`,
+`Year`, `ISSN`, `ISBN`, `DOI`, `Link`, `Publisher`.
 
-Some publications may be missed because their affiliations are absent or do not
-match the configured list. This is an accepted limitation; complete coverage of
-every work by a researcher is not guaranteed.
+Each publication has one H2 title on a single line, with blank lines separating
+the heading and field labels. Tuple values are joined with `; `; absent values retain empty
+labels. Publication order is preserved and output uses UTF-8. `Publication`
+denotes the containing publication; `Link` uses `pdf_url`. The schema document
+is a reference contract; rendering does not parse it at runtime.
 
-## Author and source selection
+A failed or partial retrieval publishes no new raw dataset and leaves existing
+exports intact. Raw saving must succeed before building Markdown. Normalization
+or Markdown failures retain completed raw files and preserve existing exports.
+Successful zero-result searches save raw metadata and skip Markdown.
 
-The CLI accepts bare `all` or one or both selection flags:
+## Reporting and extensions
 
-```text
-python3 src/main.py all
-python3 src/main.py --author "Author X, Author Y" --source "ieee"
-python3 src/main.py --author "Author X"
-python3 src/main.py --source "ieee"
-```
+The CLI reports downloads and Markdown builds separately, with publication
+counts and saved paths on success or stage-specific errors on failure. The
+Markdown summary includes skipped builds. Exit codes are `0` for successful
+downloads and attempted builds, `1` for validation or pipeline failures, and
+`2` for CLI usage errors.
 
-`--author` accepts comma-separated full names or `all`. `--source` accepts
-comma-separated source keywords or `all`. Each dimension expands independently:
-`--author all --source ieee` selects all authors from IEEE;
-`--author "Author X" --source all` selects that author from every available source.
-An omitted flag means all for that dimension. Bare `all` selects every author
-and source and cannot be combined with either flag, even if that flag says `all`.
-No arguments is a usage error. The old positional-author syntax is removed.
+After printing the Markdown summary, the CLI collects successful
+`DownloadRecord.publication_count` values into an author → source → integer
+mapping, including count-zero records. It calls
+`update_download_counts(counts_by_author: dict[str, dict[str, int]]) -> list[str]`,
+prints returned warnings, and calls `update_report() -> None`. The updater
+receives no publication list, raw-file path, or Markdown result. Existing console
+reports and exit codes are preserved; warnings and update errors go to stderr.
 
-Selections are trimmed and deduplicated in first-occurrence order. Source
-keywords are lowercased; author names match the master list exactly. Empty list
-items and `all` mixed with named selections are usage errors. Unknown authors or
-sources fail validation before any download. `all` expands authors in master
-order and sources in configured order; explicit lists retain their order.
+`config.REPORT_JSON_FILE` points to `output/report.json`, the count store. Its
+top-level `updated_at` is an ISO datetime with a Europe/Vienna offset; remaining
+keys are canonical author names mapped to source keywords and nonnegative
+integer publication counts. Initially all 47 members have `ieee: 0`. Equal counts
+remain; increases replace the value. Decreases retain the previous count and
+return a console warning without persisting warning metadata. Failed or
+unprocessed author/source pairs retain their counts. Every completed pipeline
+execution refreshes the timestamp once, even if there are no successful records.
+Unknown authors are errors; new sources may be added for existing authors.
 
-The CLI always passes `DownloadRequest(authors, sources)`, with each field
-containing a tuple of strings or the literal `all`. The CLI normalizes bare `all`
-into `DownloadRequest(authors="all", sources="all")`; the manager accepts only
-that dataclass and delegates author selection to the Author Builder. The available-source set
-contains only `ieee`. New integrations follow the same source interface and are
-added to the available-source configuration and manager dispatch.
+`config.REPORT_HTML_FILE` points to `output/report.html`. Its fixed Current
+Members and Past Members tables are seeded from the supplied Markdown member
+list. Each row's `data-author` identifies its database name; `data-source`
+identifies source headers and cells. Source columns are added to both tables as
+needed. JSON authors must match the HTML member tables.
 
-## Storage and filenames
+`update_report()` reads JSON, parses the well-formed HTML with standard-library
+`ElementTree`, and writes saved counts into the corresponding cells. HTML values
+do not influence saved counts. It removes legacy cell warnings, preserves member
+groups and row order, and displays the JSON timestamp using
+`REPORT_DATETIME_FORMAT` and `DOWNLOAD_TIMEZONE`.
 
-Each researcher has an automatically created directory under `data/`. Its name
-is derived from the full author name, lowercased with spaces replaced by hyphens.
-For example:
+Both files save through the existing atomic-write helper. Missing or malformed
+files and failed saves leave the affected file intact. JSON failure skips HTML
+synchronization; HTML failure retains the newly saved JSON.
 
-```text
-Researcher Full Name -> researcher-full-name
-```
+A small Update button opens a JSON file chooser. The adjacent `report.js` reads
+the selected file, validates it before changing the displayed counts, and
+refreshes both tables and their timestamp. It changes the open page only, works
+without a web server, and displays errors without changing existing counts.
 
-Each author's directory contains:
-
-- A `raw/` subdirectory for persisted downloaded metadata.
-- One generated Markdown file for each source.
-
-Markdown filenames contain the full author slug followed by the source keyword:
-
-```text
-<author-slug>-<source>.md
-```
-
-Example layout, showing JSON as the native response format:
-
-```text
-data/
-  authors.md
-  publication-schema.md
-  researcher-one-full-name/
-    raw/
-      researcher-one-full-name-ieee-2026-10-21T14-30-00.000000+0200.json
-    researcher-one-full-name-ieee.md
-  researcher-two-full-name/
-    raw/
-      researcher-two-full-name-ieee-2026-10-21T14-31-00.000000+0200.json
-    researcher-two-full-name-ieee.md
-```
-
-IEEE's default API response format is JSON. Native downloaded metadata is
-retained alongside generated Markdown without an intermediate CSV transformation. Each
-download file is a JSON array of complete native response objects, in retrieval
-order, including for a single-page result. Source fields are preserved rather
-than flattened or renamed. The manager passes publications from the same source call
-to the builder; it does not select or merge historical downloads.
-
-## Download history and failure behavior
-
-Each successful download creates a new file for the author and source. The user
-revised the previous replacement policy on 2026-10-21: older downloaded files
-must be retained, and new filenames must have the date at the end.
-
-The implementation includes time, microseconds, and UTC offset with that date to
-distinguish downloads on the same day. Timestamps use `Europe/Vienna`. Even a
-timestamp collision produces a separate file by inserting a sequence number
-before the timestamp. Existing download files are never overwritten.
-
-A new file is published only after complete retrieval and serialization succeed.
-A failed or partial download leaves previous persisted metadata intact and does
-not publish a partial dataset. A successful zero-result search saves a new file
-containing the native empty response and explicitly reports zero publications;
-previous downloads remain intact.
-
-The current Markdown file is replaced atomically after the complete new document
-is ready. If Markdown generation or saving fails, the new raw response is
-retained, previous Markdown remains intact, and the failed stage is reported.
-Sources save complete raw responses before normalization. If normalization fails,
-`DownloadError` retains the saved path and the builder is not called. Raw saving
-must succeed before Markdown is built. Successful
-zero-result searches save native metadata and an empty Markdown file.
-
-When processing several author/source pairs:
-
-1. A failure for one pair does not stop processing the remaining pairs.
-2. Successful pairs are persisted as new dated files.
-3. A final report identifies the failed author/source pairs and their errors.
-
-The report includes saved paths and makes partial failures visible. A Markdown
-failure identifies the retained raw path. Exit codes are 0 for complete success,
-1 for selection/configuration/runtime failures, and 2 for CLI syntax errors.
-Requests use the source timeout and are not automatically retried.
-
-## IEEE API authentication
-
-The IEEE source reads **`IEEE_API_KEY` directly from the project `.env` file**
-when `download(author)` is called. It uses `dotenv_values(..., interpolate=False)`
-and never falls back to process environment variables. Missing files and missing,
-unassigned, or blank keys fail the pair before HTTP requests.
-
-Module imports and CLI help do not read credentials. The entry point and
-middleware never receive the key. Credential-bearing URLs and source errors are
-sanitized within the IEEE module. The author file contains only researcher
-definitions. The pipeline does not modify `.env`.
-
-## Publication Markdown contract
-
-The existing [publication schema](../../data/publication-schema.md) defines the
-output structure. The heading represents the individual work's title; the
-`Publication` field represents its containing journal, conference, book, or
-other publication.
-
-Each publication is one H2 section, with fields in this order:
-
-```markdown
-## <document title>
-
-Authors: <authors>
-
-Author Affiliations: <affiliations>
-
-Keywords: <keywords>
-
-Abstract: <abstract>
-
-Publication: <publication title>
-
-Year: <publication year>
-
-ISSN: <ISSN>
-
-ISBN: <ISBN>
-
-DOI: <DOI>
-
-Link: <PDF URL>
-
-Publisher: <publisher>
-```
-
-Formatting and content rules:
-
-- Repeat the section for each publication in the author/source dataset.
-- Include all authors listed in the publication metadata, not just the
-  researcher whose search produced it.
-- Populate publication affiliations from the returned metadata. The configured
-  search affiliations are not a substitute for missing publication affiliations.
-- Combine author keywords and IEEE terms into the `Keywords` field, with author
-  keywords first. The existing converter joins populated groups with `; `.
-- Keep every field label even when its value is unavailable; emit an empty value.
-- Put the PDF URL in `Link` when supplied by the source.
-- Use blank lines between the heading and fields and between successive fields.
-- Keep the document title on one heading line.
-- Produce UTF-8 Markdown.
-
-The IEEE documentation identifies logical metadata fields for the mapping:
-
-| Markdown element    | IEEE metadata                                 |
-| ------------------- | --------------------------------------------- |
-| H2 document title   | `title`                                       |
-| Authors             | Author full names, in the listed author order |
-| Author Affiliations | Publication author affiliations               |
-| Keywords            | Author terms and IEEE terms                   |
-| Abstract            | `abstract`                                    |
-| Publication         | `publication_title`                           |
-| Year                | `publication_year`                            |
-| ISSN                | `issn`                                        |
-| ISBN                | `isbn`                                        |
-| DOI                 | `doi`                                         |
-| Link                | `pdf_url`                                     |
-| Publisher           | `publisher`                                   |
-
-This table describes the semantic mapping; it does not assert exact nested JSON
-paths. IEEE returns only populated fields, so omitted metadata must be handled
-as missing values during conversion.
-
-The existing CSV converter preserves input record order. No new requirement to
-sort generated Markdown has been agreed. The newest-first rule from the
-referenced conversation concerns downstream chatbot answers.
-
-## Existing code and implementation boundaries
-
-The current [CSV converter](../../src/csv_to_semantic_markdown.py) reads IEEE CSV
-exports and renders the agreed Markdown field order. It does not implement API
-retrieval, the master author file, native API-response parsing, or the new
-author/source selection rules.
-
-## Remaining decisions
-
-- Requirements for future sources such as ScienceDirect and Springer Nature.
-- Any future standalone command for reconverting historical native downloads.
-
-API request construction and parsing must be checked against IEEE documentation
-and the actual response structure during implementation. The author/source
-contract must remain the same when later publisher integrations are added.
-
-## IEEE documentation references
-
-- [API query basics](https://developer.ieee.org/docs/read/Searching_the_IEEE_Xplore_Metadata_API):
-  request structure, authentication, and the default JSON response format.
-- [Search parameters](https://developer.ieee.org/docs/read/Metadata_API_details):
-  author, affiliation, and complex-query parameters.
-- [Boolean search operators](https://developer.ieee.org/docs/read/metadata_api_details/Leveraging_Boolean_Logic):
-  documented `AND`, `OR`, and `NOT` operators.
-- [Sorting and paging parameters](https://developer.ieee.org/docs/read/metadata_api_details/Sorting_and_Paging_Parameters):
-  `start_record` and `max_records`, with a documented maximum of 200 records per
-  response.
-- [Returned metadata fields](https://developer.ieee.org/docs/read/Metadata_API_responses):
-  available publication fields and omission of unpopulated fields.
-- [Quick start guide](https://developer.ieee.org/Quick_Start_Guide): API-key
-  registration and issuance.
+A new publisher supplies the same `download(author)` interface, owns its API
+settings and credentials, and is registered in `download_manager.SUPPORTED_SOURCES`
+and `DOWNLOADERS`. The existing CSV converter remains a separate utility with
+caller-supplied input and output paths; it is not part of the API pipeline.
