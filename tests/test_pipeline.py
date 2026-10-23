@@ -19,7 +19,7 @@ from support import AUTHOR_YAML, PROJECT_ROOT, full_article, page
 import config
 from download_publications import main, parse_request
 from author_builder import Author
-from models import DownloadError, DownloadRequest, MarkdownBuildResult, Publication, Selection, DownloadRecord
+from models import DownloadConfirmation, DownloadError, DownloadRequest, Selection
 from download_manager import run_download
 
 
@@ -74,11 +74,8 @@ class CLITests(unittest.TestCase):
 
     @patch("download_publications.run_download")
     def test_cli_only_passes_request_and_reports_returned_results(self, run):
-        run.return_value = (
-            [DownloadRecord("Ada Researcher", "ieee", 2, [Publication(), Publication()], Path("raw.json")),
-             DownloadError("René Researcher", "ieee", "Download failed: HTTP 503")],
-            [MarkdownBuildResult("Ada Researcher", "ieee", Path("output.md"))],
-        )
+        run.return_value = [DownloadConfirmation("Ada Researcher", "ieee", 2, Path("raw.json")),
+                            DownloadError("René Researcher", "ieee", "Download failed: HTTP 503")]
         stdout, stderr = io.StringIO(), io.StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
             status = main(["--author", "Ada Researcher, René Researcher", "--source", "ieee"])
@@ -86,62 +83,36 @@ class CLITests(unittest.TestCase):
         run.assert_called_once_with(DownloadRequest(("Ada Researcher", "René Researcher"), ("ieee",)))
         self.assertIn("2 publication(s)", stdout.getvalue())
         self.assertIn("Download report: 1 succeeded; 1 failed.", stdout.getvalue())
-        self.assertIn("Markdown report: 1 succeeded; 0 failed; 1 skipped.", stdout.getvalue())
-        self.assertIn("Markdown completed: Ada Researcher [ieee]: output.md", stdout.getvalue())
+        self.assertIn("raw: raw.json", stdout.getvalue())
+        self.assertNotIn("Markdown", stdout.getvalue())
         self.assertIn("Download failed: René Researcher [ieee]", stderr.getvalue())
 
     @patch("download_publications.run_download")
     def test_bare_all_reaches_middleware_as_a_download_request(self, run):
-        run.return_value = ([], [])
+        run.return_value = []
         with redirect_stdout(io.StringIO()):
             self.assertEqual(main(["all"]), 0)
         run.assert_called_once_with(DownloadRequest(authors="all", sources="all"))
 
     @patch("download_publications.run_download")
-    def test_markdown_failure_does_not_mark_download_as_failed(self, run):
-        run.return_value = (
-            [DownloadRecord("Ada Researcher", "ieee", 1, [Publication()], Path("retained.json"))],
-            [MarkdownBuildResult("Ada Researcher", "ieee", error="Markdown saving failed: disk error")],
-        )
+    def test_failed_download_reports_source_error(self, run):
+        run.return_value = [DownloadError("Ada Researcher", "ieee", "Raw saving failed: disk error")]
         stdout, stderr = io.StringIO(), io.StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
             status = main(["all"])
         self.assertEqual(status, 1)
-        self.assertIn("Download completed: Ada Researcher [ieee]", stdout.getvalue())
-        self.assertIn("raw: retained.json", stdout.getvalue())
-        self.assertIn("Download report: 1 succeeded; 0 failed.", stdout.getvalue())
-        self.assertIn("Markdown report: 0 succeeded; 1 failed; 0 skipped.", stdout.getvalue())
-        self.assertIn("Markdown failed: Ada Researcher [ieee]", stderr.getvalue())
-        self.assertIn("Markdown saving failed", stderr.getvalue())
-        self.assertNotIn("Download failed:", stderr.getvalue())
-
-    @patch("download_publications.run_download")
-    def test_failed_download_reports_retained_raw_and_skipped_markdown(self, run):
-        run.return_value = (
-            [DownloadError("Ada Researcher", "ieee", "Normalization failed: invalid metadata; raw saved: retained.json")],
-            [],
-        )
-        stdout, stderr = io.StringIO(), io.StringIO()
-        with redirect_stdout(stdout), redirect_stderr(stderr):
-            status = main(["all"])
-        self.assertEqual(status, 1)
-        self.assertIn("raw saved: retained.json", stderr.getvalue())
+        self.assertIn("Raw saving failed: disk error", stderr.getvalue())
         self.assertIn("Download report: 0 succeeded; 1 failed.", stdout.getvalue())
-        self.assertIn("Markdown report: 0 succeeded; 0 failed; 1 skipped.", stdout.getvalue())
-        self.assertNotIn("Markdown failed:", stderr.getvalue())
+        self.assertNotIn("Markdown", stdout.getvalue() + stderr.getvalue())
 
     @patch("download_publications.run_download")
     def test_success_and_request_failure_exit_codes(self, run):
-        run.return_value = (
-            [DownloadRecord("Ada Researcher", "ieee", 0, [], Path("raw"))],
-            [],
-        )
+        run.return_value = [DownloadConfirmation("Ada Researcher", "ieee", 0, Path("raw"))]
         stdout = io.StringIO()
         with redirect_stdout(stdout):
             self.assertEqual(main(["all"]), 0)
         self.assertIn("0 publication(s)", stdout.getvalue())
         self.assertIn("Download report: 1 succeeded; 0 failed.", stdout.getvalue())
-        self.assertIn("Markdown report: 0 succeeded; 0 failed; 1 skipped.", stdout.getvalue())
         run.side_effect = ValueError("Unknown author")
         stderr = io.StringIO()
         with redirect_stderr(stderr):
@@ -149,17 +120,14 @@ class CLITests(unittest.TestCase):
         self.assertIn("Unknown author", stderr.getvalue())
 
     @patch("download_publications.run_download")
-    def test_json_then_html_updates_use_successful_counts_after_markdown_reports(self, run):
-        run.return_value = (
-            [DownloadRecord("Ada Researcher", "ieee", 0, [], Path("ada.json")),
-             DownloadError("Other Researcher", "ieee", "Download failed"),
-             DownloadRecord("René Researcher", "ieee", 17, [], Path("rene.json"))],
-            [MarkdownBuildResult("René Researcher", "ieee", Path("rene.md"))],
-        )
+    def test_json_then_html_updates_use_successful_counts_after_download_reports(self, run):
+        run.return_value = [DownloadConfirmation("Ada Researcher", "ieee", 0, Path("ada.json")),
+                            DownloadError("Other Researcher", "ieee", "Download failed"),
+                            DownloadConfirmation("René Researcher", "ieee", 17, Path("rene.json"))]
         stdout, stderr = io.StringIO(), io.StringIO()
 
         def counts_after_summary(counts):
-            self.assertIn("Markdown report: 1 succeeded; 0 failed; 2 skipped.", stdout.getvalue())
+            self.assertIn("Download report: 2 succeeded; 1 failed.", stdout.getvalue())
             self.report.assert_not_called()
             return ["Count decreased"]
 
@@ -178,7 +146,7 @@ class CLITests(unittest.TestCase):
 
     @patch("download_publications.run_download")
     def test_failed_only_execution_still_updates_report_timestamp(self, run):
-        run.return_value = ([DownloadError("Ada Researcher", "ieee", "Unavailable")], [])
+        run.return_value = [DownloadError("Ada Researcher", "ieee", "Unavailable")]
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             self.assertEqual(main(["all"]), 1)
         self.counts.assert_called_once_with({})
@@ -186,7 +154,7 @@ class CLITests(unittest.TestCase):
 
     @patch("download_publications.run_download")
     def test_json_update_failure_skips_html_and_preserves_exit_code(self, run):
-        run.return_value = ([DownloadRecord("Ada Researcher", "ieee", 0, [], Path("raw.json"))], [])
+        run.return_value = [DownloadConfirmation("Ada Researcher", "ieee", 0, Path("raw.json"))]
         self.counts.side_effect = ValueError("invalid JSON")
         stderr = io.StringIO()
         with redirect_stdout(io.StringIO()), redirect_stderr(stderr):
@@ -201,8 +169,8 @@ class CLITests(unittest.TestCase):
             (ValueError("invalid HTML"), [DownloadError("Other Researcher", "ieee", "Download failed")], 1),
         ]:
             with self.subTest(error=error):
-                run.return_value = ([DownloadRecord("Ada Researcher", "ieee", 0, [], Path("raw.json"))]
-                                    + extra_downloads, [])
+                run.return_value = ([DownloadConfirmation("Ada Researcher", "ieee", 0, Path("raw.json"))]
+                                    + extra_downloads)
                 self.report.side_effect = error
                 stdout, stderr = io.StringIO(), io.StringIO()
                 with redirect_stdout(stdout), redirect_stderr(stderr):
@@ -250,32 +218,27 @@ class DownloadManagerTests(unittest.TestCase):
 
     def run_offline(self, request, responses):
         stdout, stderr = io.StringIO(), io.StringIO()
-        with patch("source_downloaders.ieee_xplore.fetch_page", side_effect=responses) as fetch, \
+        with patch("source_downloaders.ieee_xplore._fetch_page", side_effect=responses) as fetch, \
              redirect_stdout(stdout), redirect_stderr(stderr):
             results = run_download(request)
         self.assertEqual(stdout.getvalue(), "")
         self.assertEqual(stderr.getvalue(), "")
         return results, fetch
 
-    def test_complete_flow_saves_raw_and_markdown(self):
+    def test_complete_flow_saves_raw_without_building_markdown(self):
         native = {"total_records": 1, "articles": [full_article()]}
-        (downloads, markdowns), fetch = self.run_offline(DownloadRequest(("Ada Researcher",), ("ieee",)), [native])
+        with patch("markdown_builder.build_markdown") as builder:
+            downloads, fetch = self.run_offline(DownloadRequest(("Ada Researcher",), ("ieee",)), [native])
         self.assertEqual(len(downloads), 1)
-        self.assertEqual(len(markdowns), 1)
-        download, build = downloads[0], markdowns[0]
-        assert isinstance(download, DownloadRecord)
-        self.assertIsNone(build.error)
+        download = downloads[0]
+        assert isinstance(download, DownloadConfirmation)
         self.assertEqual(download.publication_count, 1)
-        self.assertEqual((build.author, build.source), (download.author, download.source))
-        assert build.markdown_path is not None
         self.assertEqual(json.loads(download.raw_file_path.read_text()), [native])
-        markdown = build.markdown_path.read_text(encoding="utf-8")
-        self.assertIn("## Über Research Across Systems", markdown)
-        self.assertIn("Authors: First Author; Second Author", markdown)
-        self.assertIn("Keywords: Author keyword; Second keyword; IEEE term", markdown)
+        self.assertFalse(self.markdown_path().exists())
+        builder.assert_not_called()
         fetch.assert_called_once()
 
-    @patch("source_downloaders.ieee_xplore.fetch_page", return_value=page(1, [1]))
+    @patch("source_downloaders.ieee_xplore._fetch_page", return_value=page(1, [1]))
     def test_cli_accepts_lowercase_and_mixed_case_authors_and_uses_database_names(self, fetch):
         stdout, stderr = io.StringIO(), io.StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
@@ -290,64 +253,42 @@ class DownloadManagerTests(unittest.TestCase):
         self.assertIn("Download completed: René Researcher [ieee]", stdout.getvalue())
         self.assertIn("Download report: 2 succeeded; 0 failed.", stdout.getvalue())
 
-    def test_manager_delegates_selected_authors_downloads_and_builds_without_writes(self):
+    def test_manager_delegates_selected_authors_and_returns_download_outcomes_without_writes(self):
         author = Author("Ada Researcher", ("University A",))
-        publications = [Publication(title="A work")]
-        response = DownloadRecord(author.name, "ieee", 1, publications, Path("source-owned.json"))
-        build = MarkdownBuildResult(author.name, "ieee", Path("builder-owned.md"))
+        response = DownloadConfirmation(author.name, "ieee", 1, Path("source-owned.json"))
         download = Mock(return_value=response)
         with patch("download_manager.get_selected_authors", return_value=[author]) as reader, \
              patch.dict("download_manager.DOWNLOADERS", {"ieee": download}), \
-             patch("download_manager.build_markdown", return_value=build) as builder, \
              patch("utils.storage.save_raw") as raw_save, patch("utils.storage.save_markdown") as markdown_save:
             results = run_download(DownloadRequest((author.name,), ("ieee",)))
         reader.assert_called_once_with((author.name,))
         download.assert_called_once_with(author)
-        builder.assert_called_once_with(author, "ieee", publications)
         raw_save.assert_not_called()
         markdown_save.assert_not_called()
-        self.assertEqual(results, ([response], [build]))
-        self.assertIs(results[0][0], response)
-
-    def test_manager_returns_builder_error_and_continues_with_next_pair(self):
-        authors = [Author("Ada Researcher", ("University A",)), Author("René Researcher", ("Institute B",))]
-        records = [DownloadRecord(authors[0].name, "ieee", 1, [Publication()], Path("first.json")),
-                   DownloadRecord(authors[1].name, "ieee", 1, [Publication()], Path("second.json"))]
-        builds = [MarkdownBuildResult(authors[0].name, "ieee", error="Markdown saving failed: disk error"),
-                  MarkdownBuildResult(authors[1].name, "ieee", Path("second.md"))]
-        download = Mock(side_effect=records)
-        with patch("download_manager.get_selected_authors", return_value=authors), \
-             patch.dict("download_manager.DOWNLOADERS", {"ieee": download}), \
-             patch("download_manager.build_markdown", side_effect=builds) as builder:
-            downloads, markdowns = run_download(DownloadRequest("all", "all"))
-        self.assertEqual(download.call_count, 2)
-        self.assertEqual(builder.call_count, 2)
-        self.assertEqual(downloads, records)
-        self.assertEqual(markdowns, builds)
+        self.assertEqual(results, [response])
+        self.assertIs(results[0], response)
 
     def test_manager_returns_source_error_unchanged_without_calling_builder(self):
         author = Author("Ada Researcher", ("University A",))
-        error = DownloadError(author.name, "ieee", "Normalization failed: invalid metadata; raw saved: retained.json")
+        error = DownloadError(author.name, "ieee", "Download failed: unavailable")
         with patch("download_manager.get_selected_authors", return_value=[author]), \
              patch.dict("download_manager.DOWNLOADERS", {"ieee": Mock(return_value=error)}), \
-             patch("download_manager.build_markdown") as builder:
+             patch("markdown_builder.build_markdown") as builder:
             results = run_download(DownloadRequest("all", "all"))
         builder.assert_not_called()
-        self.assertEqual(results, ([error], []))
-        self.assertIs(results[0][0], error)
+        self.assertEqual(results, [error])
+        self.assertIs(results[0], error)
 
     def test_returned_download_error_skips_markdown_and_continues(self):
         error = DownloadError("Ada Researcher", "ieee", "Download failed: disk error")
-        record = DownloadRecord("René Researcher", "ieee", 1, [Publication()], Path("second.json"))
+        record = DownloadConfirmation("René Researcher", "ieee", 1, Path("second.json"))
         download = Mock(side_effect=[error, record])
-        build = MarkdownBuildResult("René Researcher", "ieee", Path("second.md"))
         with patch.dict("download_manager.DOWNLOADERS", {"ieee": download}), \
-             patch("download_manager.build_markdown", return_value=build) as builder:
-            downloads, markdowns = run_download(DownloadRequest("all", "all"))
+             patch("markdown_builder.build_markdown") as builder:
+            downloads = run_download(DownloadRequest("all", "all"))
         self.assertEqual(downloads, [error, record])
-        self.assertEqual(markdowns, [build])
-        builder.assert_called_once_with(Author("René Researcher", ("University A", "Institute B", "Former University")),
-                                        "ieee", record.publications)
+        self.assertEqual(download.call_count, 2)
+        builder.assert_not_called()
 
     def test_all_authors_does_not_override_source_validation(self):
         download = Mock()
@@ -377,7 +318,7 @@ class DownloadManagerTests(unittest.TestCase):
     def test_invalid_yaml_is_reported_by_cli_without_requests_or_traceback(self):
         config.AUTHORS_FILE.write_text("Ada Researcher: [unfinished\n", encoding="utf-8")
         stderr = io.StringIO()
-        with patch("source_downloaders.ieee_xplore.fetch_page") as fetch, redirect_stderr(stderr):
+        with patch("source_downloaders.ieee_xplore._fetch_page") as fetch, redirect_stderr(stderr):
             status = main(["all"])
         self.assertEqual(status, 1)
         self.assertIn(str(config.AUTHORS_FILE), stderr.getvalue())
@@ -385,16 +326,15 @@ class DownloadManagerTests(unittest.TestCase):
         fetch.assert_not_called()
 
     def test_all_request_processes_master_order_and_source_calls_receive_authors(self):
-        download = Mock(side_effect=lambda author: DownloadRecord(author.name, "ieee", 0, [], Path("raw.json")))
+        download = Mock(side_effect=lambda author: DownloadConfirmation(author.name, "ieee", 0, Path("raw.json")))
         with patch.dict("download_manager.DOWNLOADERS", {"ieee": download}), \
-             patch("download_manager.build_markdown") as builder:
-            downloads, markdowns = run_download(DownloadRequest(authors="all", sources="all"))
+             patch("markdown_builder.build_markdown") as builder:
+            downloads = run_download(DownloadRequest(authors="all", sources="all"))
         self.assertEqual(download.call_args_list, [
             call(Author("Ada Researcher", ("University A", "Institute B"))),
             call(Author("René Researcher", ("University A", "Institute B", "Former University"))),
         ])
         self.assertEqual([result.author for result in downloads], ["Ada Researcher", "René Researcher"])
-        self.assertEqual(markdowns, [])
         builder.assert_not_called()
 
     def test_middleware_rejects_bare_all_before_loading_authors(self):
@@ -404,149 +344,110 @@ class DownloadManagerTests(unittest.TestCase):
         load.assert_not_called()
 
     def test_explicit_author_order_and_duplicates(self):
-        (downloads, markdowns), fetch = self.run_offline(
+        downloads, fetch = self.run_offline(
             DownloadRequest(("René Researcher", "Ada Researcher", "René Researcher"), "all"),
             [page(1, [1]), page(1, [2])],
         )
         self.assertEqual([result.author for result in downloads], ["René Researcher", "Ada Researcher"])
-        self.assertEqual([result.author for result in markdowns], ["René Researcher", "Ada Researcher"])
         self.assertEqual(fetch.call_count, 2)
 
-    def test_zero_results_skip_markdown_and_preserve_previous_outputs(self):
+    def test_zero_results_preserve_previous_outputs(self):
         self.run_offline(DownloadRequest(("Ada Researcher",), "all"), [page(1, [1])])
         old_raw = self.downloads()[0]
         original = old_raw.read_bytes()
+        self.markdown_path().write_text("Previous Markdown", encoding="utf-8")
         old_markdown = self.markdown_path().read_bytes()
-        with patch("download_manager.build_markdown") as builder:
-            (downloads, markdowns), _ = self.run_offline(DownloadRequest(("Ada Researcher",), "all"), [page(0, [])])
-        assert isinstance(downloads[0], DownloadRecord)
+        downloads, _ = self.run_offline(DownloadRequest(("Ada Researcher",), "all"), [page(0, [])])
+        assert isinstance(downloads[0], DownloadConfirmation)
         self.assertEqual(downloads[0].publication_count, 0)
-        self.assertEqual(downloads[0].publications, [])
         self.assertEqual(json.loads(downloads[0].raw_file_path.read_text()), [page(0, [])])
-        self.assertEqual(markdowns, [])
-        builder.assert_not_called()
         self.assertEqual(self.markdown_path().read_bytes(), old_markdown)
         self.assertEqual(old_raw.read_bytes(), original)
         self.assertEqual(len(self.downloads()), 2)
 
     def test_zero_results_save_raw_without_creating_markdown(self):
-        with patch("download_manager.build_markdown") as builder:
-            (downloads, markdowns), _ = self.run_offline(DownloadRequest(("Ada Researcher",), "all"), [page(0, [])])
-        assert isinstance(downloads[0], DownloadRecord)
+        downloads, _ = self.run_offline(DownloadRequest(("Ada Researcher",), "all"), [page(0, [])])
+        assert isinstance(downloads[0], DownloadConfirmation)
         self.assertEqual(downloads[0].publication_count, 0)
         self.assertEqual(json.loads(downloads[0].raw_file_path.read_text()), [page(0, [])])
-        self.assertEqual(markdowns, [])
         self.assertFalse(self.markdown_path().exists())
-        builder.assert_not_called()
 
     def test_later_page_failure_keeps_old_outputs_and_continues_other_authors(self):
         self.run_offline(DownloadRequest(("Ada Researcher",), "all"), [page(1, [99])])
         old_raw = self.downloads()
+        self.markdown_path().write_text("Previous Markdown", encoding="utf-8")
         old_markdown = self.markdown_path().read_bytes()
-        (downloads, markdowns), fetch = self.run_offline(DownloadRequest("all", "all"),
-                                                       [page(2, [1]), RuntimeError("HTTP 503"), page(1, [3])])
+        downloads, fetch = self.run_offline(DownloadRequest("all", "all"),
+                                            [page(2, [1]), RuntimeError("HTTP 503"), page(1, [3])])
         assert isinstance(downloads[0], DownloadError)
         self.assertIn("Download failed", downloads[0].error)
         self.assertNotIn("raw saved:", downloads[0].error)
-        self.assertIsInstance(downloads[1], DownloadRecord)
-        self.assertEqual([result.author for result in markdowns], ["René Researcher"])
+        self.assertIsInstance(downloads[1], DownloadConfirmation)
+        self.assertTrue(downloads[1].raw_file_path.exists())
         self.assertEqual(self.downloads(), old_raw)
         self.assertEqual(self.markdown_path().read_bytes(), old_markdown)
-        self.assertTrue(self.markdown_path("rené-researcher").exists())
+        self.assertFalse(self.markdown_path("rené-researcher").exists())
         self.assertEqual(fetch.call_count, 3)
 
-    def test_markdown_failure_retains_new_raw_and_previous_markdown(self):
-        for target in ["markdown_builder._render_publications", "markdown_builder.storage.save_markdown"]:
-            with self.subTest(target=target):
-                destination = self.markdown_path()
-                destination.parent.mkdir(exist_ok=True)
-                destination.write_text("Previous Markdown", encoding="utf-8")
-                with patch(target, side_effect=ValueError("Markdown failure")):
-                    (downloads, markdowns), _ = self.run_offline(DownloadRequest("all", "all"),
-                                                               [page(1, [1]), page(1, [2])])
-                assert isinstance(downloads[0], DownloadRecord)
-                assert markdowns[0].error is not None
-                self.assertIn("Markdown", markdowns[0].error)
-                self.assertTrue(downloads[0].raw_file_path.exists())
-                self.assertIsNone(markdowns[0].markdown_path)
-                self.assertEqual(len(markdowns), 2)
-                self.assertEqual(destination.read_text(), "Previous Markdown")
-
-    def test_markdown_failure_for_one_author_does_not_block_next(self):
-        from markdown_builder import _render_publications
-        calls = 0
-
-        def render(publications):
-            nonlocal calls
-            calls += 1
-            if calls == 1:
-                raise ValueError("first author failed")
-            return _render_publications(publications)
-
-        with patch("markdown_builder._render_publications", side_effect=render):
-            (downloads, markdowns), _ = self.run_offline(DownloadRequest("all", "all"), [page(1, [1]), page(1, [2])])
-        self.assertTrue(all(isinstance(result, DownloadRecord) for result in downloads))
-        self.assertIsNotNone(markdowns[0].error)
-        self.assertIsNone(markdowns[1].error)
-        assert markdowns[1].markdown_path is not None
-        self.assertTrue(markdowns[1].markdown_path.exists())
+    def test_nonempty_downloads_preserve_previous_markdown(self):
+        destination = self.markdown_path()
+        destination.parent.mkdir()
+        destination.write_text("Previous Markdown", encoding="utf-8")
+        with patch("utils.storage.save_markdown") as save:
+            downloads, _ = self.run_offline(DownloadRequest("all", "all"), [page(1, [1]), page(1, [2])])
+        self.assertTrue(all(isinstance(result, DownloadConfirmation) for result in downloads))
+        self.assertTrue(all(result.raw_file_path.exists() for result in downloads))
+        self.assertEqual(destination.read_text(), "Previous Markdown")
+        self.assertFalse(self.markdown_path("rené-researcher").exists())
+        save.assert_not_called()
 
     def test_raw_write_failure_preserves_markdown_and_other_author_still_completes(self):
         (self.data / "ada-researcher").mkdir()
         (self.data / "ada-researcher" / "raw").write_text("occupied", encoding="utf-8")
         self.markdown_path().write_text("Previous Markdown", encoding="utf-8")
-        (downloads, markdowns), _ = self.run_offline(DownloadRequest("all", "all"), [page(1, [1]), page(1, [2])])
+        downloads, _ = self.run_offline(DownloadRequest("all", "all"), [page(1, [1]), page(1, [2])])
         assert isinstance(downloads[0], DownloadError)
         self.assertIn("Raw saving failed", downloads[0].error)
-        self.assertIsInstance(downloads[1], DownloadRecord)
-        self.assertEqual([result.author for result in markdowns], ["René Researcher"])
+        self.assertIsInstance(downloads[1], DownloadConfirmation)
+        self.assertTrue(downloads[1].raw_file_path.exists())
         self.assertEqual(self.markdown_path().read_text(), "Previous Markdown")
 
-    def test_normalization_failure_retains_complete_raw_and_continues(self):
+    def test_metadata_needing_review_is_saved_without_normalization(self):
         self.run_offline(DownloadRequest(("Ada Researcher",), "all"), [page(1, [99])])
         old_raw = self.downloads()[0]
         old_raw_content = old_raw.read_bytes()
+        self.markdown_path().write_text("Previous Markdown", encoding="utf-8")
         old_markdown = self.markdown_path().read_bytes()
         bad = page(1, [1])
         bad["articles"][0]["abstract"] = []
-        (downloads, markdowns), _ = self.run_offline(DownloadRequest("all", "all"), [bad, page(0, [])])
-        assert isinstance(downloads[0], DownloadError)
+        downloads, _ = self.run_offline(DownloadRequest("all", "all"), [bad, page(0, [])])
+        assert isinstance(downloads[0], DownloadConfirmation)
         saved_raw = next(path for path in self.downloads() if path != old_raw)
         self.assertEqual(json.loads(saved_raw.read_text()), [bad])
-        self.assertIn(f"raw saved: {saved_raw}", downloads[0].error)
+        self.assertEqual(downloads[0].raw_file_path, saved_raw)
         self.assertEqual(old_raw.read_bytes(), old_raw_content)
         self.assertEqual(self.markdown_path().read_bytes(), old_markdown)
         self.assertEqual(len(self.downloads()), 2)
-        assert isinstance(downloads[1], DownloadRecord)
+        assert isinstance(downloads[1], DownloadConfirmation)
         self.assertEqual(downloads[1].publication_count, 0)
         self.assertEqual(json.loads(downloads[1].raw_file_path.read_text()), [page(0, [])])
-        self.assertEqual(markdowns, [])
         self.assertFalse(self.markdown_path("rené-researcher").exists())
 
     def test_multiple_authors_and_sources_keep_independent_results_in_processing_order(self):
-        ieee_records = [DownloadRecord("Ada Researcher", "ieee", 1, [Publication()], Path("ada-ieee.json")),
+        ieee_records = [DownloadConfirmation("Ada Researcher", "ieee", 1, Path("ada-ieee.json")),
                         DownloadError("René Researcher", "ieee", "Download failed: unavailable")]
-        other_records = [DownloadRecord("Ada Researcher", "test_source", 0, [], Path("ada-other.json")),
-                         DownloadRecord("René Researcher", "test_source", 1, [Publication()], Path("rene-other.json"))]
+        other_records = [DownloadConfirmation("Ada Researcher", "test_source", 0, Path("ada-other.json")),
+                         DownloadConfirmation("René Researcher", "test_source", 1, Path("rene-other.json"))]
         ieee = Mock(side_effect=ieee_records)
         other = Mock(side_effect=other_records)
-        builds = [MarkdownBuildResult("Ada Researcher", "ieee", Path("ada-ieee.md")),
-                  MarkdownBuildResult("René Researcher", "test_source", error="Markdown saving failed: disk error")]
         with patch("download_manager.SUPPORTED_SOURCES", ("ieee", "test_source")), \
-             patch.dict("download_manager.DOWNLOADERS", {"ieee": ieee, "test_source": other}), \
-             patch("download_manager.build_markdown", side_effect=builds) as builder:
-            downloads, markdowns = run_download(DownloadRequest("all", "all"))
+             patch.dict("download_manager.DOWNLOADERS", {"ieee": ieee, "test_source": other}):
+            downloads = run_download(DownloadRequest("all", "all"))
         self.assertEqual([(result.author, result.source) for result in downloads], [
             ("Ada Researcher", "ieee"), ("Ada Researcher", "test_source"),
             ("René Researcher", "ieee"), ("René Researcher", "test_source"),
         ])
         self.assertEqual(downloads, [ieee_records[0], other_records[0], ieee_records[1], other_records[1]])
-        self.assertEqual(markdowns, builds)
-        self.assertEqual(builder.call_args_list, [
-            call(Author("Ada Researcher", ("University A", "Institute B")), "ieee", [Publication()]),
-            call(Author("René Researcher", ("University A", "Institute B", "Former University")),
-                 "test_source", [Publication()]),
-        ])
         self.assertEqual(ieee.call_count, 2)
         self.assertEqual(other.call_count, 2)
 
@@ -562,7 +463,7 @@ class DownloadManagerTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn(str(project / ".env"), result.stderr)
         self.assertIn("Download report: 0 succeeded; 2 failed.", result.stdout)
-        self.assertIn("Markdown report: 0 succeeded; 0 failed; 2 skipped.", result.stdout)
+        self.assertNotIn("Markdown", result.stdout)
         self.assertNotIn("Traceback", result.stderr)
         self.assertNotIn("must-not-be-used", result.stderr)
         self.assertFalse((project / "data" / "ada-researcher").exists())

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""CLI for downloading publication metadata and generating Markdown."""
+"""CLI for downloading publication metadata."""
 
 import argparse
 import sys
 from typing import Optional
 
-from models import DownloadError, DownloadRecord, DownloadRequest, Selection
+from models import DownloadConfirmation, DownloadError, DownloadRequest, Selection
 from download_manager import run_download
 from report_generator import update_download_counts, update_report
 
@@ -29,7 +29,7 @@ def parse_selection(value: str, lowercase: bool = False) -> Selection:
 
 
 def parse_request(argv: Optional[list[str]] = None) -> DownloadRequest:
-    parser = argparse.ArgumentParser(description="Download metadata and generate publication Markdown.")
+    parser = argparse.ArgumentParser(description="Download publication metadata.")
     parser.add_argument("selection", nargs="?", choices=("all",), help="all authors and sources; exclusive with flags.")
     parser.add_argument("--author", help="Comma-separated full author names, or all. Omitted means all.")
     parser.add_argument("--source", help="Comma-separated source keywords, or all. Omitted means all.")
@@ -56,7 +56,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     request = parse_request(argv)
     
     try:
-        download_results, markdown_results = run_download(request)
+        download_results = run_download(request)
     except (OSError, UnicodeError, ValueError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 1
@@ -72,21 +72,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     
     print(f"Download report: {len(download_results) - download_failures} succeeded; {download_failures} failed.")
 
-    markdown_failures = 0
-    for result in markdown_results:
-        if result.error is not None:
-            markdown_failures += 1
-            print(f"Markdown failed: {result.author} [{result.source}]: {result.error}", file=sys.stderr)
-        else:
-            print(f"Markdown completed: {result.author} [{result.source}]: {result.markdown_path}")
-    
-    skipped = len(download_results) - len(markdown_results)
-    print(f"Markdown report: {len(markdown_results) - markdown_failures} succeeded; "
-          f"{markdown_failures} failed; {skipped} skipped.")
-
     counts_by_author: dict[str, dict[str, int]] = {}
     for result in download_results:
-        if isinstance(result, DownloadRecord):
+        if isinstance(result, DownloadConfirmation):
             counts_by_author.setdefault(result.author, {})[result.source] = result.publication_count
     try:
         warnings = update_download_counts(counts_by_author)
@@ -96,7 +84,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     except (OSError, UnicodeError, ValueError) as error:
         print(f"Report update failed: {error}", file=sys.stderr)
 
-    return 1 if download_failures or markdown_failures else 0
+    return 1 if download_failures else 0
 
 
 if __name__ == "__main__":

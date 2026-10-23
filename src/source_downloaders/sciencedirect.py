@@ -11,8 +11,11 @@ from dotenv import dotenv_values
 
 import config
 from author_builder import Author
-from models import DownloadError, DownloadRecord, Publication
+from models import DownloadConfirmation, DownloadError, Publication
 from utils import storage
+
+
+__all__ = ["download"]
 
 
 SOURCE = "sciencedirect"
@@ -22,8 +25,8 @@ PAGE_SIZE = 25
 REQUEST_TIMEOUT_SECONDS = 30
 
 
-def download(author: Author) -> DownloadRecord | DownloadError:
-    """Return a complete download or a sanitized, stage-specific error."""
+def download(author: Author) -> DownloadConfirmation | DownloadError:
+    """Return a saved-download confirmation or a sanitized, stage-specific error."""
     api_key = ""
     raw_file_path = None
     stage = "Download"
@@ -38,14 +41,12 @@ def download(author: Author) -> DownloadRecord | DownloadError:
         if not api_key:
             raise ValueError(f"{API_KEY_NAME} is missing or empty in {config.ENV_FILE}.")
 
-        pages = download_pages(build_query(author), api_key)
+        pages = _download_pages(_build_query(author), api_key)
+        publication_count = _record_count(pages[0])
         stage = "Raw saving"
         raw_file_path = storage.save_raw(author.slug, SOURCE, pages)
-        stage = "Normalization"
-        publications = [normalize_article(article) for page in pages if record_count(page) > 0
-                        for article in page["search-results"]["entry"]]
-        return DownloadRecord(author=author.name, source=SOURCE, publication_count=len(publications),
-                              publications=publications, raw_file_path=raw_file_path)
+        return DownloadConfirmation(author=author.name, source=SOURCE, publication_count=publication_count,
+                                    raw_file_path=raw_file_path)
     except Exception as error:
         message = f"{stage} failed: {error}"
         if raw_file_path is not None:
@@ -55,7 +56,7 @@ def download(author: Author) -> DownloadRecord | DownloadError:
         return DownloadError(author=author.name, source=SOURCE, error=message)
 
 
-def build_query(author: Author) -> str:
+def _build_query(author: Author) -> str:
     """Search the canonical author name and any configured affiliation."""
     if not author.name.strip() or not author.affiliations:
         raise ValueError("An author name and at least one affiliation are required.")
@@ -80,7 +81,7 @@ def build_query(author: Author) -> str:
     return f'{author_query} AND ({affiliations})'
 
 
-def fetch_page(api_key: str, query: str, start: int) -> dict:
+def _fetch_page(api_key: str, query: str, start: int) -> dict:
     """Send credentials only in a header; never expose HTTP response bodies."""
     parameters = {"query": query, "view": "COMPLETE", "start": start, "count": PAGE_SIZE}
     request = Request(API_URL + "?" + urlencode(parameters),
@@ -106,7 +107,7 @@ def _count(value, field: str) -> int:
     return value
 
 
-def record_count(page: dict) -> int:
+def _record_count(page: dict) -> int:
     if not isinstance(page, dict):
         raise ValueError("ScienceDirect response must be a JSON object.")
     if any(page.get(key) for key in ("error", "errors", "error-response", "service-error")):
@@ -117,15 +118,15 @@ def record_count(page: dict) -> int:
     return _count(results.get("opensearch:totalResults"), "total result count")
 
 
-def download_pages(query: str, api_key: str) -> list[dict]:
+def _download_pages(query: str, api_key: str) -> list[dict]:
     """Reject partial, changing, repeated, or incorrectly offset result sets."""
     pages = []
     identifiers = set()
     total = None
     retrieved = 0
     while total is None or retrieved < total:
-        page = fetch_page(api_key, query, retrieved)
-        count = record_count(page)
+        page = _fetch_page(api_key, query, retrieved)
+        count = _record_count(page)
         if total is None:
             total = count
         elif count != total:
@@ -175,7 +176,7 @@ def _strings(value, field: str) -> tuple[str, ...]:
     return tuple(text for item in values if (text := _text(item, field)))
 
 
-def normalize_article(article: dict) -> Publication:
+def _normalize_article(article: dict) -> Publication:
     """Map Article Metadata fields, leaving fields absent from this API empty."""
     authors = article.get("authors")
     if authors is None:

@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 from support import PROJECT_ROOT
 import config
 from download_publications import main
-from models import DownloadError, DownloadRecord, MarkdownBuildResult
+from models import DownloadConfirmation, DownloadError
 from report_generator import update_download_counts, update_report
 
 
@@ -212,13 +212,10 @@ class ReportGeneratorTests(unittest.TestCase):
                 self.assertEqual(set(self.report_file.parent.iterdir()), {self.report_file, self.json_file})
 
     @patch("download_publications.run_download")
-    def test_cli_updates_json_and_html_from_record_counts_and_preserves_failed_counts(self, run):
+    def test_cli_updates_json_and_html_from_confirmations_and_preserves_failed_counts(self, run):
         update_download_counts({"Ada Researcher": {"ieee": 5}})
-        run.return_value = (
-            [DownloadRecord("René Researcher", "ieee", 17, [], Path("rene.json")),
-             DownloadError("Ada Researcher", "ieee", "Download failed")],
-            [MarkdownBuildResult("René Researcher", "ieee", Path("rene.md"))],
-        )
+        run.return_value = [DownloadConfirmation("René Researcher", "ieee", 17, Path("rene.json")),
+                            DownloadError("Ada Researcher", "ieee", "Download failed")]
         stdout, stderr = io.StringIO(), io.StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
             status = main(["all"])
@@ -227,12 +224,13 @@ class ReportGeneratorTests(unittest.TestCase):
         self.assertEqual(self.data()["René Researcher"]["ieee"], 17)
         self.assertEqual(self.cell("Ada Researcher").text, "5")
         self.assertEqual(self.cell("René Researcher").text, "17")
-        self.assertIn("Markdown report: 1 succeeded; 0 failed; 1 skipped.", stdout.getvalue())
+        self.assertIn("Download report: 1 succeeded; 1 failed.", stdout.getvalue())
+        self.assertNotIn("Markdown", stdout.getvalue())
         self.assertNotIn("Report update failed", stderr.getvalue())
 
     @patch("download_publications.run_download")
     def test_cli_keeps_json_when_html_save_fails(self, run):
-        run.return_value = ([DownloadRecord("Ada Researcher", "ieee", 7, [], Path("ada.json"))], [])
+        run.return_value = [DownloadConfirmation("Ada Researcher", "ieee", 7, Path("ada.json"))]
         self.report_file.write_text("<html>", encoding="utf-8")
         stderr = io.StringIO()
         with redirect_stdout(io.StringIO()), redirect_stderr(stderr):

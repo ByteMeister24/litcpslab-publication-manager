@@ -1,8 +1,7 @@
-"""Coordinate author/source downloads and Markdown builds without file writes."""
+"""Coordinate author/source downloads without file writes."""
 from source_downloaders import ieee_xplore, sciencedirect
-from markdown_builder import build_markdown
 from author_builder import get_selected_authors
-from models import DownloadError, DownloadRecord, DownloadRequest, MarkdownBuildResult, Selection
+from models import DownloadConfirmation, DownloadError, DownloadRequest, Selection
 
 
 SUPPORTED_SOURCES = ("ieee", "sciencedirect")
@@ -27,12 +26,8 @@ def _resolve_sources(source_selection: Selection) -> tuple[str, ...]:
     return tuple(dict.fromkeys(source_selection))
 
 
-def run_download(request: DownloadRequest) -> tuple[list[DownloadRecord | DownloadError], list[MarkdownBuildResult]]:
-    """Collect source records/errors and Markdown results for attempted builds.
-
-    Failed downloads have no corresponding Markdown result. Each list retains
-    processing order; records are identified by their author and source.
-    """
+def run_download(request: DownloadRequest) -> list[DownloadConfirmation | DownloadError]:
+    """Collect source confirmations/errors in author and source processing order."""
     
     if not isinstance(request, DownloadRequest):
         raise ValueError("Expected DownloadRequest.")
@@ -43,21 +38,11 @@ def run_download(request: DownloadRequest) -> tuple[list[DownloadRecord | Downlo
     if any(source not in DOWNLOADERS for source in selected_sources):
         raise ValueError("The selected source is not supported.")
 
-    download_results: list[DownloadRecord | DownloadError] = []
-    markdown_results: list[MarkdownBuildResult] = []
+    download_results: list[DownloadConfirmation | DownloadError] = []
     
     for author in selected_authors:
         for source in selected_sources:
             response = DOWNLOADERS[source](author)
             download_results.append(response)
-            
-            if isinstance(response, DownloadError):
-                continue
-
-            if response.publication_count == 0:
-                continue
-
-            build_report = build_markdown(author, source, response.publications)
-            markdown_results.append(build_report)
     
-    return download_results, markdown_results
+    return download_results

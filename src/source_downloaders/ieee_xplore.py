@@ -11,7 +11,10 @@ from dotenv import dotenv_values
 import config
 from utils import storage
 from author_builder import Author
-from models import DownloadError, Publication, DownloadRecord
+from models import DownloadConfirmation, DownloadError, Publication
+
+
+__all__ = ["download"]
 
 
 SOURCE = "ieee"
@@ -21,8 +24,8 @@ REQUEST_TIMEOUT_SECONDS = 30
 API_KEY_NAME = "IEEE_API_KEY"
 
 
-def download(author: Author) -> DownloadRecord | DownloadError:
-    """Return a completed record or a credential-safe error for this author."""
+def download(author: Author) -> DownloadConfirmation | DownloadError:
+    """Return a saved-download confirmation or a credential-safe error."""
     api_key = ""
     raw_file_path = None
     stage = "Download"
@@ -41,16 +44,15 @@ def download(author: Author) -> DownloadRecord | DownloadError:
         if not api_key:
             raise ValueError(f"{API_KEY_NAME} is missing or empty in {config.ENV_FILE}.")
 
-        query = build_query(author)
-        pages = download_pages(query, api_key)
+        query = _build_query(author)
+        pages = _download_pages(query, api_key)
+        publication_count = _record_count(pages[0])
         
         stage = "Raw saving"
         raw_file_path = storage.save_raw(author.slug, SOURCE, pages)
         
-        stage = "Normalization"
-        publications = [normalize_article(article) for page in pages for article in page.get("articles", [])]
-        return DownloadRecord(author=author.name, source=SOURCE, publication_count=len(publications),
-                              publications=publications, raw_file_path=raw_file_path)
+        return DownloadConfirmation(author=author.name, source=SOURCE, publication_count=publication_count,
+                                    raw_file_path=raw_file_path)
     except Exception as error:
         # The source boundary returns failures so the manager can process other pairs.
         message = f"{stage} failed: {error}"
@@ -82,7 +84,7 @@ def _strings(value, field: str) -> tuple[str, ...]:
     return tuple(text for item in values if (text := _text(item, field)))
 
 
-def normalize_article(article: dict) -> Publication:
+def _normalize_article(article: dict) -> Publication:
     """Map IEEE's nested fields into the common, source-independent record."""
     authors = article.get("authors")
     
@@ -142,7 +144,7 @@ def normalize_article(article: dict) -> Publication:
     )
 
 
-def build_query(author: Author) -> str:
+def _build_query(author: Author) -> str:
     """Constrain the full author name and every affiliation to their own fields."""
     if not author.name.strip() or not author.affiliations:
         raise ValueError("An author name and at least one affiliation are required.")
@@ -158,7 +160,7 @@ def build_query(author: Author) -> str:
     return f'"Authors":"{author.name}" AND ({affiliations})'
 
 
-def fetch_page(api_key: str, query: str, start_record: int) -> dict:
+def _fetch_page(api_key: str, query: str, start_record: int) -> dict:
     """Keep the credential-bearing URL out of errors and persisted metadata."""
     parameters = {
         "apikey": api_key,
@@ -185,7 +187,7 @@ def fetch_page(api_key: str, query: str, start_record: int) -> dict:
         raise ValueError(f"IEEE returned invalid JSON at record {start_record}.") from None
 
 
-def record_count(page: dict) -> int:
+def _record_count(page: dict) -> int:
     """Accept the JSON count and the totalfound name in IEEE's field reference."""
     if not isinstance(page, dict):
         raise ValueError("IEEE response must be a JSON object.")
@@ -199,7 +201,7 @@ def record_count(page: dict) -> int:
     return value
 
 
-def download_pages(query: str, api_key: str) -> list[dict]:
+def _download_pages(query: str, api_key: str) -> list[dict]:
     """Fail on incomplete or inconsistent pagination instead of saving a subset."""
     pages = []
     article_numbers = set()
@@ -207,8 +209,8 @@ def download_pages(query: str, api_key: str) -> list[dict]:
     retrieved = 0
 
     while total is None or retrieved < total:
-        page = fetch_page(api_key, query, retrieved + 1)
-        count = record_count(page)
+        page = _fetch_page(api_key, query, retrieved + 1)
+        count = _record_count(page)
         
         if total is None:
             total = count

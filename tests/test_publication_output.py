@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 from support import full_article, page
 import config
 from csv_to_semantic_markdown import publication_to_markdown
-from source_downloaders.ieee_xplore import normalize_article
+from source_downloaders.ieee_xplore import _normalize_article
 from author_builder import Author
 from models import MarkdownBuildResult, Publication
 from markdown_builder import build_markdown, _render_publications
@@ -20,7 +20,7 @@ from utils.storage import save_markdown, save_raw, write_complete_file
 
 class MarkdownTests(unittest.TestCase):
     def test_exact_existing_schema_including_all_labels_and_spacing(self):
-        markdown = _render_publications([normalize_article(full_article())])
+        markdown = _render_publications([_normalize_article(full_article())])
         expected = """## Über Research Across Systems
 
 Authors: First Author; Second Author

@@ -33,6 +33,14 @@ class Publication:
 
 
 @dataclass(frozen=True)
+class DownloadConfirmation:
+    author: str
+    source: str
+    publication_count: int
+    raw_file_path: Path
+
+
+@dataclass(frozen=True)
 class DownloadRecord:
     author: str
     source: str
