@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 from support import full_article, page
 import config
 from csv_to_semantic_markdown import publication_to_markdown
-from ieee_xplore import normalize_article
+from source_downloaders.ieee_xplore import normalize_article
 from author_builder import Author
 from models import MarkdownBuildResult, Publication
 from markdown_builder import build_markdown, _render_publications

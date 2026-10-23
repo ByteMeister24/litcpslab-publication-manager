@@ -230,7 +230,7 @@ class DownloadManagerTests(unittest.TestCase):
         clock = patch("utils.storage.datetime")
         clock.start().now.return_value = datetime(2026, 10, 22, 14, 30, tzinfo=ZoneInfo(config.DOWNLOAD_TIMEZONE))
         self.addCleanup(clock.stop)
-        network_guard = patch("ieee_xplore.urlopen", side_effect=AssertionError("Unexpected network access in offline tests"))
+        network_guard = patch("source_downloaders.ieee_xplore.urlopen", side_effect=AssertionError("Unexpected network access in offline tests"))
         network_guard.start()
         self.addCleanup(network_guard.stop)
         authors_file = self.data / "authors.yaml"
@@ -250,7 +250,7 @@ class DownloadManagerTests(unittest.TestCase):
 
     def run_offline(self, request, responses):
         stdout, stderr = io.StringIO(), io.StringIO()
-        with patch("ieee_xplore.fetch_page", side_effect=responses) as fetch, \
+        with patch("source_downloaders.ieee_xplore.fetch_page", side_effect=responses) as fetch, \
              redirect_stdout(stdout), redirect_stderr(stderr):
             results = run_download(request)
         self.assertEqual(stdout.getvalue(), "")
@@ -275,7 +275,7 @@ class DownloadManagerTests(unittest.TestCase):
         self.assertIn("Keywords: Author keyword; Second keyword; IEEE term", markdown)
         fetch.assert_called_once()
 
-    @patch("ieee_xplore.fetch_page", return_value=page(1, [1]))
+    @patch("source_downloaders.ieee_xplore.fetch_page", return_value=page(1, [1]))
     def test_cli_accepts_lowercase_and_mixed_case_authors_and_uses_database_names(self, fetch):
         stdout, stderr = io.StringIO(), io.StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
@@ -377,7 +377,7 @@ class DownloadManagerTests(unittest.TestCase):
     def test_invalid_yaml_is_reported_by_cli_without_requests_or_traceback(self):
         config.AUTHORS_FILE.write_text("Ada Researcher: [unfinished\n", encoding="utf-8")
         stderr = io.StringIO()
-        with patch("ieee_xplore.fetch_page") as fetch, redirect_stderr(stderr):
+        with patch("source_downloaders.ieee_xplore.fetch_page") as fetch, redirect_stderr(stderr):
             status = main(["all"])
         self.assertEqual(status, 1)
         self.assertIn(str(config.AUTHORS_FILE), stderr.getvalue())

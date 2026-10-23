@@ -1,6 +1,5 @@
 """Coordinate author/source downloads and Markdown builds without file writes."""
-import ieee_xplore
-import sciencedirect
+from source_downloaders import ieee_xplore, sciencedirect
 from markdown_builder import build_markdown
 from author_builder import get_selected_authors
 from models import DownloadError, DownloadRecord, DownloadRequest, MarkdownBuildResult, Selection

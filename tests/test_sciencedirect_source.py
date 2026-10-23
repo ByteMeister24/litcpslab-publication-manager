@@ -20,7 +20,7 @@ import download_manager
 from author_builder import Author
 from download_publications import parse_request
 from models import DownloadError, DownloadRecord, DownloadRequest, Publication
-from sciencedirect import PAGE_SIZE, build_query, download, download_pages, fetch_page, normalize_article
+from source_downloaders.sciencedirect import PAGE_SIZE, build_query, download, download_pages, fetch_page, normalize_article
 
 
 def article(number=1):
@@ -66,12 +66,12 @@ class ScienceDirectSourceTests(unittest.TestCase):
             patcher = patch.object(config, name, value)
             patcher.start()
             self.addCleanup(patcher.stop)
-        guard = patch("sciencedirect.urlopen", side_effect=AssertionError("Unexpected network access"))
+        guard = patch("source_downloaders.sciencedirect.urlopen", side_effect=AssertionError("Unexpected network access"))
         guard.start()
         self.addCleanup(guard.stop)
         self.author = Author("Ada Researcher", ("University A", "Institute B"))
 
-    @patch("sciencedirect.fetch_page")
+    @patch("source_downloaders.sciencedirect.fetch_page")
     def test_complete_download_saves_native_pages_before_normalization(self, fetch):
         pages = [page(2, [article(1)]), page(2, [article(2)], start=1)]
         original = copy.deepcopy(pages)
@@ -85,7 +85,7 @@ class ScienceDirectSourceTests(unittest.TestCase):
             self.assertEqual(json.loads(paths[0].read_text()), original)
             return normalize(entry)
 
-        with patch("sciencedirect.normalize_article", side_effect=normalize_after_save):
+        with patch("source_downloaders.sciencedirect.normalize_article", side_effect=normalize_after_save):
             result = download(self.author)
         self.assertIsInstance(result, DownloadRecord)
         self.assertEqual((result.author, result.source, result.publication_count),
@@ -98,7 +98,7 @@ class ScienceDirectSourceTests(unittest.TestCase):
         empty_pages = [page(0, []), page(0, [{"@_fa": "true", "error": "Result set was empty"}]),
                        {"search-results": {"opensearch:totalResults": "0", "opensearch:startIndex": "0"}}]
         for native in empty_pages:
-            with self.subTest(native=native), patch("sciencedirect.fetch_page", return_value=native), \
+            with self.subTest(native=native), patch("source_downloaders.sciencedirect.fetch_page", return_value=native), \
                  patch("download_manager.get_selected_authors", return_value=[self.author]), \
                  patch("download_manager.build_markdown") as builder:
                 downloads, builds = download_manager.run_download(DownloadRequest("all", ("sciencedirect",)))
@@ -109,7 +109,7 @@ class ScienceDirectSourceTests(unittest.TestCase):
                 self.assertEqual(builds, [])
                 builder.assert_not_called()
 
-    @patch("sciencedirect.fetch_page", return_value=page(0, []))
+    @patch("source_downloaders.sciencedirect.fetch_page", return_value=page(0, []))
     def test_credentials_use_only_file_and_disable_interpolation(self, fetch):
         with patch.dict(os.environ, {"SCIENCEDIRECT_API_KEY": "environment-key", "OTHER": "secret"}):
             self.assertIsInstance(download(self.author), DownloadRecord)
@@ -118,7 +118,7 @@ class ScienceDirectSourceTests(unittest.TestCase):
             self.assertIsInstance(download(self.author), DownloadRecord)
             self.assertEqual(fetch.call_args.args[0], "${OTHER}")
 
-    @patch("sciencedirect.fetch_page")
+    @patch("source_downloaders.sciencedirect.fetch_page")
     def test_missing_or_blank_credentials_fail_before_network(self, fetch):
         values = ["", "OTHER=value\n", "SCIENCEDIRECT_API_KEY\n", "SCIENCEDIRECT_API_KEY=\n",
                   "SCIENCEDIRECT_API_KEY='  '\n"]
@@ -131,22 +131,22 @@ class ScienceDirectSourceTests(unittest.TestCase):
         fetch.assert_not_called()
         self.assertFalse(self.data.exists())
 
-    @patch("sciencedirect.fetch_page")
+    @patch("source_downloaders.sciencedirect.fetch_page")
     def test_missing_or_unreadable_credential_file_is_safe(self, fetch):
         with patch.object(config, "ENV_FILE", self.root / "missing"):
             result = download(self.author)
             self.assertIsInstance(result, DownloadError)
             self.assertIn("credential file is missing", result.error)
-        with patch("sciencedirect.dotenv_values", side_effect=PermissionError("unknown-secret")):
+        with patch("source_downloaders.sciencedirect.dotenv_values", side_effect=PermissionError("unknown-secret")):
             result = download(self.author)
         self.assertIsInstance(result, DownloadError)
         self.assertIn("PermissionError", result.error)
         self.assertNotIn("unknown-secret", result.error)
         fetch.assert_not_called()
 
-    @patch("sciencedirect.fetch_page", side_effect=[page(2, [article()]), RuntimeError("failure file-key")])
+    @patch("source_downloaders.sciencedirect.fetch_page", side_effect=[page(2, [article()]), RuntimeError("failure file-key")])
     def test_partial_retrieval_returns_sanitized_error_without_saving(self, fetch):
-        with patch("sciencedirect.storage.save_raw") as save, patch("sciencedirect.normalize_article") as normalize:
+        with patch("source_downloaders.sciencedirect.storage.save_raw") as save, patch("source_downloaders.sciencedirect.normalize_article") as normalize:
             result = download(self.author)
         self.assertIsInstance(result, DownloadError)
         self.assertIn("Download failed", result.error)
@@ -155,17 +155,17 @@ class ScienceDirectSourceTests(unittest.TestCase):
         save.assert_not_called()
         normalize.assert_not_called()
 
-    @patch("sciencedirect.fetch_page", return_value=page(1, [article()]))
+    @patch("source_downloaders.sciencedirect.fetch_page", return_value=page(1, [article()]))
     def test_raw_save_failure_prevents_normalization(self, fetch):
-        with patch("sciencedirect.storage.save_raw", side_effect=OSError("disk error file-key")), \
-             patch("sciencedirect.normalize_article") as normalize:
+        with patch("source_downloaders.sciencedirect.storage.save_raw", side_effect=OSError("disk error file-key")), \
+             patch("source_downloaders.sciencedirect.normalize_article") as normalize:
             result = download(self.author)
         self.assertIsInstance(result, DownloadError)
         self.assertIn("Raw saving failed", result.error)
         self.assertNotIn("file-key", result.error)
         normalize.assert_not_called()
 
-    @patch("sciencedirect.fetch_page")
+    @patch("source_downloaders.sciencedirect.fetch_page")
     def test_normalization_failure_retains_raw_and_previous_markdown(self, fetch):
         native = page(1, [article()])
         native["search-results"]["entry"][0]["dc:description"] = False
@@ -182,9 +182,9 @@ class ScienceDirectSourceTests(unittest.TestCase):
         self.assertIn(f"raw saved: {paths[0]}", result.error)
         self.assertEqual(destination.read_text(), "Previous export")
 
-    @patch("sciencedirect.fetch_page", return_value=page(1, [article()]))
+    @patch("source_downloaders.sciencedirect.fetch_page", return_value=page(1, [article()]))
     def test_normalization_exception_redacts_key_and_keeps_raw_path(self, fetch):
-        with patch("sciencedirect.normalize_article", side_effect=ValueError("bad metadata file-key")):
+        with patch("source_downloaders.sciencedirect.normalize_article", side_effect=ValueError("bad metadata file-key")):
             result = download(self.author)
         self.assertIsInstance(result, DownloadError)
         self.assertNotIn("file-key", result.error)
@@ -197,7 +197,7 @@ import sys
 sys.path.insert(0, sys.argv[1])
 from unittest.mock import patch
 with patch('dotenv.dotenv_values', side_effect=AssertionError('credential read')):
-    import sciencedirect
+    from source_downloaders import sciencedirect
     import download_manager
     import download_publications
 """
@@ -212,7 +212,7 @@ with patch('dotenv.dotenv_values', side_effect=AssertionError('credential read')
             with self.subTest(source=source):
                 ieee = Mock(return_value=DownloadRecord(self.author.name, "ieee", 0, [], Path("ieee.json")))
                 request = parse_request(["--author", self.author.name, "--source", source])
-                with patch("sciencedirect.fetch_page", return_value=page(1, [article()])) as fetch, \
+                with patch("source_downloaders.sciencedirect.fetch_page", return_value=page(1, [article()])) as fetch, \
                      patch("download_manager.get_selected_authors", return_value=[self.author]), \
                      patch.dict(download_manager.DOWNLOADERS, {"ieee": ieee}):
                     downloads, builds = download_manager.run_download(request)
@@ -242,7 +242,7 @@ class ScienceDirectRequestTests(unittest.TestCase):
             with self.subTest(author=author), self.assertRaises(ValueError):
                 build_query(author)
 
-    @patch("sciencedirect.urlopen")
+    @patch("source_downloaders.sciencedirect.urlopen")
     def test_request_uses_complete_json_encoded_query_and_header_credentials(self, open_url):
         native = page(0, [], start=25)
         open_url.return_value.__enter__.return_value = io.BytesIO(json.dumps(native).encode())
@@ -263,14 +263,14 @@ class ScienceDirectRequestTests(unittest.TestCase):
         errors = [HTTPError(secret, code, secret, {}, None) for code in [401, 403, 429, 503]]
         errors.extend([URLError(secret), TimeoutError(secret), IncompleteRead(b"partial")])
         for error in errors:
-            with self.subTest(error=error), patch("sciencedirect.urlopen", side_effect=error) as open_url:
+            with self.subTest(error=error), patch("source_downloaders.sciencedirect.urlopen", side_effect=error) as open_url:
                 with self.assertRaises(RuntimeError) as caught:
                     fetch_page("secret-key", "query", 0)
                 self.assertNotIn("secret-key", str(caught.exception))
                 self.assertNotIn("https://", str(caught.exception))
                 open_url.assert_called_once()
 
-    @patch("sciencedirect.urlopen")
+    @patch("source_downloaders.sciencedirect.urlopen")
     def test_invalid_json_and_encoding_fail(self, open_url):
         for content in [b"<html>Bad gateway</html>", b"\xff"]:
             with self.subTest(content=content):
@@ -278,7 +278,7 @@ class ScienceDirectRequestTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     fetch_page("secret-key", "query", 0)
 
-    @patch("sciencedirect.fetch_page")
+    @patch("source_downloaders.sciencedirect.fetch_page")
     def test_complete_pagination_advances_by_actual_page_length(self, fetch):
         pages = [page(27, [article(i) for i in range(PAGE_SIZE)]),
                  page(27, [article(25)], start=25), page(27, [article(26)], start=26)]
@@ -288,7 +288,7 @@ class ScienceDirectRequestTests(unittest.TestCase):
         self.assertEqual(pages, original)
         self.assertEqual([request.args[2] for request in fetch.call_args_list], [0, 25, 26])
 
-    @patch("sciencedirect.fetch_page")
+    @patch("source_downloaders.sciencedirect.fetch_page")
     def test_exact_page_boundary_stops_without_another_request(self, fetch):
         fetch.return_value = page(PAGE_SIZE, [article(i) for i in range(PAGE_SIZE)])
         self.assertEqual(len(download_pages("query", "key")), 1)
@@ -310,7 +310,7 @@ class ScienceDirectRequestTests(unittest.TestCase):
             native["search-results"]["entry"] = entries
             invalid.append(native)
         for native in invalid:
-            with self.subTest(native=native), patch("sciencedirect.fetch_page", return_value=native):
+            with self.subTest(native=native), patch("source_downloaders.sciencedirect.fetch_page", return_value=native):
                 with self.assertRaises(ValueError):
                     download_pages("query", "key")
 
@@ -318,7 +318,7 @@ class ScienceDirectRequestTests(unittest.TestCase):
         for pages in [[page(2, [article()]), page(2, [], start=1)],
                       [page(2, [article()]), page(3, [article(2)], start=1)],
                       [page(2, [article()]), page(2, [article()], start=1)]]:
-            with self.subTest(pages=pages), patch("sciencedirect.fetch_page", side_effect=pages):
+            with self.subTest(pages=pages), patch("source_downloaders.sciencedirect.fetch_page", side_effect=pages):
                 with self.assertRaises(ValueError):
                     download_pages("query", "key")
 

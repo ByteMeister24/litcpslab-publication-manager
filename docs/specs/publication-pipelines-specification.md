@@ -20,7 +20,7 @@ All implementation paths below are relative to `src/`.
 | `download_manager.py` | Resolve sources, request selected authors, process author/source pairs sequentially, and collect download and Markdown outcomes |
 | `author_builder.py` | Define `Author`, validate the complete author database, and return selected `Author` instances |
 | `utils/yaml_loader.py` | Parse the complete YAML mapping safely and reject duplicate keys |
-| `ieee_xplore.py` | Load IEEE credentials, build queries, retrieve and validate pages, save raw data, normalize publications, and construct download outcomes |
+| `source_downloaders/` (`ieee_xplore.py`, `sciencedirect.py`) | Load source credentials, build queries, retrieve and validate pages, save raw data, normalize publications, and construct download outcomes |
 | `markdown_builder.py` | Render publications, save Markdown, and return build feedback |
 | `report_generator.py` | Update publication counts in the static current/past member HTML tables and return decrease warnings |
 | `utils/storage.py` | Apply filename rules and publish completed files safely |
