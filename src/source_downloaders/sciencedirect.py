@@ -64,8 +64,20 @@ def build_query(author: Author) -> str:
         if not value.strip() or any(char in value for char in '"\\*?{}') or any(ord(char) < 32 for char in value):
             raise ValueError("Search names and affiliations must be non-empty literal text "
                              "without double quotes, backslashes, wildcards, braces, or control characters.")
+    name_parts = author.name.split()
+    name_queries = []
+    # Full names have no surname boundary; retain each possible given/family split.
+    for boundary in range(1, len(name_parts)):
+        given_name = " ".join(name_parts[:boundary])
+        surname = " ".join(name_parts[boundary:])
+        name_queries.append(f'(authfirst("{given_name}") AND authlastname("{surname}"))')
+    if not name_queries:
+        name_queries.append(f'authlastname("{name_parts[0]}")')
+    author_query = " OR ".join(name_queries)
+    if len(name_queries) > 1:
+        author_query = f"({author_query})"
     affiliations = " OR ".join(f'aff("{value}")' for value in author.affiliations)
-    return f'authors("{author.name}") AND ({affiliations})'
+    return f'{author_query} AND ({affiliations})'
 
 
 def fetch_page(api_key: str, query: str, start: int) -> dict:

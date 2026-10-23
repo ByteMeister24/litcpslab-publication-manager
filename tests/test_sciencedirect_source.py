@@ -109,6 +109,25 @@ class ScienceDirectSourceTests(unittest.TestCase):
                 self.assertEqual(builds, [])
                 builder.assert_not_called()
 
+    @patch("source_downloaders.sciencedirect.urlopen")
+    def test_mainak_download_sends_given_and_surname_with_affiliation_group(self, open_url):
+        native = article()
+        native["prism:doi"] = "10.1016/j.ifacol.2022.04.231"
+        response = page(1, [native])
+        open_url.return_value.__enter__.return_value = io.BytesIO(json.dumps(response).encode())
+        author = Author("Mainak Majumder", ("JKU Linz", "Technische Hochschule Ostwestfalen-Lippe"))
+
+        result = download(author)
+
+        self.assertIsInstance(result, DownloadRecord)
+        self.assertEqual(result.publication_count, 1)
+        self.assertEqual(result.publications[0].doi, "10.1016/j.ifacol.2022.04.231")
+        request = open_url.call_args.args[0]
+        self.assertEqual(parse_qs(urlsplit(request.full_url).query)["query"],
+                         ['(authfirst("Mainak") AND authlastname("Majumder")) '
+                          'AND (aff("JKU Linz") OR aff("Technische Hochschule Ostwestfalen-Lippe"))'])
+        self.assertEqual(json.loads(result.raw_file_path.read_text()), [response])
+
     @patch("source_downloaders.sciencedirect.fetch_page", return_value=page(0, []))
     def test_credentials_use_only_file_and_disable_interpolation(self, fetch):
         with patch.dict(os.environ, {"SCIENCEDIRECT_API_KEY": "environment-key", "OTHER": "secret"}):
@@ -233,7 +252,19 @@ class ScienceDirectRequestTests(unittest.TestCase):
     def test_query_uses_full_name_and_any_affiliation_without_date_filter(self):
         author = Author("René O'Neil", ("R&D University", "Institute B"))
         self.assertEqual(build_query(author),
-                         'authors("René O\'Neil") AND (aff("R&D University") OR aff("Institute B"))')
+                         '(authfirst("René") AND authlastname("O\'Neil")) '
+                         'AND (aff("R&D University") OR aff("Institute B"))')
+
+    def test_compound_names_keep_each_possible_given_and_family_split(self):
+        author = Author("Ada van Researcher", ("University",))
+        self.assertEqual(build_query(author),
+                         '((authfirst("Ada") AND authlastname("van Researcher")) OR '
+                         '(authfirst("Ada van") AND authlastname("Researcher"))) '
+                         'AND (aff("University"))')
+
+    def test_single_name_uses_surname_field(self):
+        self.assertEqual(build_query(Author("Researcher", ("University",))),
+                         'authlastname("Researcher") AND (aff("University"))')
 
     def test_invalid_search_literals_are_rejected(self):
         invalid = [Author("", ("University",)), Author("Ada", ()), Author("Ada", ("",))]
