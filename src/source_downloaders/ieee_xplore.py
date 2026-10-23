@@ -6,12 +6,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from dotenv import dotenv_values
-
-import config
-from utils import storage
 from author_builder import Author
 from models import DownloadConfirmation, DownloadError, Publication
+from source_downloaders.common import download_source as _download_source
 
 
 __all__ = ["download"]
@@ -25,42 +22,20 @@ API_KEY_NAME = "IEEE_API_KEY"
 
 
 def download(author: Author) -> DownloadConfirmation | DownloadError:
-    """Return a saved-download confirmation or a credential-safe error."""
-    api_key = ""
-    raw_file_path = None
-    stage = "Download"
-    try:
-        if not config.ENV_FILE.is_file():
-            raise ValueError(f"IEEE credential file is missing: {config.ENV_FILE}.")
-        
-        try:
-            settings = dotenv_values(config.ENV_FILE, interpolate=False)
-        except Exception as error:
-            # File parsing can fail before the key is available for redaction.
-            raise ValueError(f"Cannot read IEEE credential file ({type(error).__name__}).") from None
-        
-        api_key = (settings.get(API_KEY_NAME) or "").strip()
-        
-        if not api_key:
-            raise ValueError(f"{API_KEY_NAME} is missing or empty in {config.ENV_FILE}.")
+    """Return a saved-download confirmation or a sanitized, stage-specific error."""
+    return _download_source(
+        author,
+        source=SOURCE,
+        source_name="IEEE",
+        api_key_name=API_KEY_NAME,
+        build_query=_build_query,
+        download_pages=_download_pages,
+        count_publications=_count_publications,
+    )
 
-        query = _build_query(author)
-        pages = _download_pages(query, api_key)
-        publication_count = _record_count(pages[0])
-        
-        stage = "Raw saving"
-        raw_file_path = storage.save_raw(author.slug, SOURCE, pages)
-        
-        return DownloadConfirmation(author=author.name, source=SOURCE, publication_count=publication_count,
-                                    raw_file_path=raw_file_path)
-    except Exception as error:
-        # The source boundary returns failures so the manager can process other pairs.
-        message = f"{stage} failed: {error}"
-        if raw_file_path is not None:
-            message += f"; raw saved: {raw_file_path}"
-        if api_key:
-            message = message.replace(api_key, "[REDACTED]")
-        return DownloadError(author=author.name, source=SOURCE, error=message)
+
+def _count_publications(pages: list[dict]) -> int:
+    return _record_count(pages[0])
 
 
 def _text(value, field: str) -> str:

@@ -2,11 +2,11 @@
 
 ## Scope
 
-The pipeline retrieves publication metadata from IEEE Xplore, preserves native
-JSON responses, and generates Markdown using the
-[publication schema](../../schema/publication-schema.md). IEEE is the only
-implemented source. Additional publishers, PDF downloading, and reconversion of
-historical raw downloads are outside the current pipeline.
+The pipeline retrieves publication metadata from IEEE Xplore and ScienceDirect,
+preserves native JSON responses, and generates Markdown using the
+[publication schema](../../schema/publication-schema.md). Additional publishers,
+PDF downloading, and reconversion of historical raw downloads are outside the
+current pipeline.
 
 For commands and setup, see the [download guide](../citation-download.md).
 
@@ -17,10 +17,12 @@ All implementation paths below are relative to `src/`.
 | Component | Responsibility |
 | --- | --- |
 | `download_publications.py` | Parse CLI arguments into `DownloadRequest`, call the manager, print reports, update HTML counts, and return an exit code |
+| `desktop_app.py` | Collect selections and per-run credentials, launch the existing CLI subprocess, and display its output and exit status |
 | `download_manager.py` | Resolve sources, request selected authors, process author/source pairs sequentially, and collect download and Markdown outcomes |
 | `author_builder.py` | Define `Author`, validate the complete author database, and return selected `Author` instances |
 | `utils/yaml_loader.py` | Parse the complete YAML mapping safely and reject duplicate keys |
-| `source_downloaders/` (`ieee_xplore.py`, `sciencedirect.py`) | Load source credentials, build queries, retrieve and validate pages, save raw data, normalize publications, and construct download outcomes |
+| `source_downloaders/ieee_xplore.py`, `source_downloaders/sciencedirect.py` | Define source settings, build queries, retrieve and validate pages, normalize native publications, and expose `download(author)` |
+| `source_downloaders/common.py` | Load credentials, run the supplied source functions, save complete raw pages, and construct successful or sanitized error outcomes |
 | `markdown_builder.py` | Render publications, save Markdown, and return build feedback |
 | `report_generator.py` | Update publication counts in the static current/past member HTML tables and return decrease warnings |
 | `utils/storage.py` | Apply filename rules and publish completed files safely |
@@ -32,8 +34,48 @@ dictionary. Source-specific API URLs, page sizes, timeouts, and credential-key
 names belong to their source modules.
 
 The CLI handles reporting. The manager, sources, and helpers do not print.
-Sources and the Markdown Builder invoke storage directly; the manager performs
-no file writes.
+The shared source workflow and the Markdown Builder invoke storage directly;
+the manager performs no file writes.
+
+## Desktop launcher and credentials
+
+The Tkinter launcher provides a comma-separated author text field (also accepting
+`all`), supported-source checkboxes, and a masked API-key field beside each source.
+Fields begin empty and sources unchecked. It validates only required inputs;
+the CLI retains author and comma-list validation. One run is allowed per window,
+with inputs and closing disabled until completion. A background pipe reader sends
+stdout, stderr, and the exit code to the UI; no progress percentage is inferred.
+
+The launcher passes a subprocess argument list without a shell. Development runs
+invoke `download_publications.py` with the current Python interpreter; packaged
+runs invoke the sibling CLI executable built from the same entry point. Download,
+Markdown, report, storage, and exit-code behavior remain owned by that CLI.
+
+The explicit opt-in marker `PUBLICATION_MANAGER_CREDENTIAL_MODE=environment`
+instructs both source modules to read their existing key names (`IEEE_API_KEY`,
+`SCIENCEDIRECT_API_KEY`) from the process environment instead of `.env`. Keys
+are trimmed and checked before any request. In this mode, `.env` is never read,
+and missing keys fail rather than falling back to file credentials. Error
+redaction applies to both credential modes.
+
+Without the exact opt-in marker value, credential behavior is unchanged:
+`dotenv_values(config.ENV_FILE, interpolate=False)` reads only the project `.env`
+file, and environment API keys are ignored. Imports do not load credentials.
+
+The launcher copies its environment, removes inherited publisher keys, and adds
+only fresh keys for selected sources to the child's environment. It does not
+change its own process environment or write credentials to disk, arguments, or
+logs. Key fields clear after a successful subprocess start; every run requires
+fresh entry. Existing `.env` files are untouched.
+
+Portable distribution uses two PyInstaller one-folder executables with a shared
+`_internal` runtime. Bundled module paths retain the existing `PROJECT_ROOT`
+calculation, resolving to the folder beside the executables. That writable folder
+contains copies of the author database and schema, an empty data directory, and
+report assets with fresh zero counts. Existing credentials, downloads, and report
+counts are excluded. Bundled timezone data supplies `Europe/Vienna` on Windows.
+Builds run separately on x64 Linux and Windows. See the
+[desktop guide](../desktop-app.md) for building and platform verification.
 
 ## Data contracts
 
@@ -129,7 +171,18 @@ def download(author: Author) -> DownloadRecord | DownloadError:
     ...
 ```
 
-Sources catch exceptions within `download()` and return sanitized error records.
+Each source's `download()` delegates to `source_downloaders.common.download_source()`.
+The shared function takes the author, source keyword, display name, credential-key
+name, and the source's query builder, page downloader, and page normalizer. It
+loads credentials and builds the query inside the download failure boundary,
+retrieves all pages, saves them unchanged, then normalizes them and constructs
+the `DownloadRecord`. Source functions retain all API-format knowledge, including
+ScienceDirect's empty-result sentinel handling. No source-specific conditions
+belong in the shared workflow.
+
+The shared function catches exceptions and returns sanitized error records with
+the existing Download, Raw saving, or Normalization stage and any retained raw
+path. The public `download(author)` interface remains unchanged.
 The manager appends each outcome unchanged. It skips Markdown for
 `DownloadError` and for count-zero records; otherwise it passes the author,
 source, and normalized publications to `build_markdown()`.
@@ -153,11 +206,10 @@ The IEEE module uses Python's standard-library HTTP client with these settings:
 | Timeout | 30 seconds per request |
 | Automatic retries | None |
 
-Credentials are loaded inside `download()` using
-`dotenv_values(config.ENV_FILE, interpolate=False)`. Only the project-root
-`.env` file supplies `IEEE_API_KEY`; process environment variables are not a
-fallback. The trimmed key is validated before query execution. Imports do not
-load credentials.
+Credentials are loaded inside `download()` according to the modes above.
+Normal CLI use reads `IEEE_API_KEY` only from the project-root `.env` file;
+process environment variables are not a fallback. The trimmed key is validated
+before query execution. Imports do not load credentials.
 
 Queries use the canonical author name and all configured affiliations, with no
 year restriction:
@@ -275,7 +327,9 @@ the selected file, validates it before changing the displayed counts, and
 refreshes both tables and their timestamp. It changes the open page only, works
 without a web server, and displays errors without changing existing counts.
 
-A new publisher supplies the same `download(author)` interface, owns its API
-settings and credentials, and is registered in `download_manager.SUPPORTED_SOURCES`
-and `DOWNLOADERS`. The existing CSV converter remains a separate utility with
+A new publisher supplies the same `download(author)` interface, delegates the
+common workflow with its own query, retrieval, and normalization functions,
+owns its API settings and credential-key name, and is registered in
+`download_manager.SUPPORTED_SOURCES` and `DOWNLOADERS`.
+The existing CSV converter remains a separate utility with
 caller-supplied input and output paths; it is not part of the API pipeline.

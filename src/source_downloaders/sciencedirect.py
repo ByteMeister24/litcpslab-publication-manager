@@ -7,12 +7,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from dotenv import dotenv_values
-
-import config
 from author_builder import Author
 from models import DownloadConfirmation, DownloadError, Publication
-from utils import storage
+from source_downloaders.common import download_source as _download_source
 
 
 __all__ = ["download"]
@@ -27,33 +24,19 @@ REQUEST_TIMEOUT_SECONDS = 30
 
 def download(author: Author) -> DownloadConfirmation | DownloadError:
     """Return a saved-download confirmation or a sanitized, stage-specific error."""
-    api_key = ""
-    raw_file_path = None
-    stage = "Download"
-    try:
-        if not config.ENV_FILE.is_file():
-            raise ValueError(f"ScienceDirect credential file is missing: {config.ENV_FILE}.")
-        try:
-            settings = dotenv_values(config.ENV_FILE, interpolate=False)
-        except Exception as error:
-            raise ValueError(f"Cannot read ScienceDirect credential file ({type(error).__name__}).") from None
-        api_key = (settings.get(API_KEY_NAME) or "").strip()
-        if not api_key:
-            raise ValueError(f"{API_KEY_NAME} is missing or empty in {config.ENV_FILE}.")
+    return _download_source(
+        author,
+        source=SOURCE,
+        source_name="ScienceDirect",
+        api_key_name=API_KEY_NAME,
+        build_query=_build_query,
+        download_pages=_download_pages,
+        count_publications=_count_publications,
+    )
 
-        pages = _download_pages(_build_query(author), api_key)
-        publication_count = _record_count(pages[0])
-        stage = "Raw saving"
-        raw_file_path = storage.save_raw(author.slug, SOURCE, pages)
-        return DownloadConfirmation(author=author.name, source=SOURCE, publication_count=publication_count,
-                                    raw_file_path=raw_file_path)
-    except Exception as error:
-        message = f"{stage} failed: {error}"
-        if raw_file_path is not None:
-            message += f"; raw saved: {raw_file_path}"
-        if api_key:
-            message = message.replace(api_key, "[REDACTED]")
-        return DownloadError(author=author.name, source=SOURCE, error=message)
+
+def _count_publications(pages: list[dict]) -> int:
+    return _record_count(pages[0])
 
 
 def _build_query(author: Author) -> str:

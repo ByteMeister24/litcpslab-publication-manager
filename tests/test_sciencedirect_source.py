@@ -147,7 +147,7 @@ class ScienceDirectSourceTests(unittest.TestCase):
             result = download(self.author)
             self.assertIsInstance(result, DownloadError)
             self.assertIn("credential file is missing", result.error)
-        with patch("source_downloaders.sciencedirect.dotenv_values", side_effect=PermissionError("unknown-secret")):
+        with patch("source_downloaders.common.dotenv_values", side_effect=PermissionError("unknown-secret")):
             result = download(self.author)
         self.assertIsInstance(result, DownloadError)
         self.assertIn("PermissionError", result.error)
@@ -156,7 +156,7 @@ class ScienceDirectSourceTests(unittest.TestCase):
 
     @patch("source_downloaders.sciencedirect._fetch_page", side_effect=[page(2, [article()]), RuntimeError("failure file-key")])
     def test_partial_retrieval_returns_sanitized_error_without_saving(self, fetch):
-        with patch("source_downloaders.sciencedirect.storage.save_raw") as save, patch("source_downloaders.sciencedirect._normalize_article") as normalize:
+        with patch("source_downloaders.common.storage.save_raw") as save, patch("source_downloaders.sciencedirect._normalize_article") as normalize:
             result = download(self.author)
         self.assertIsInstance(result, DownloadError)
         self.assertIn("Download failed", result.error)
@@ -167,7 +167,7 @@ class ScienceDirectSourceTests(unittest.TestCase):
 
     @patch("source_downloaders.sciencedirect._fetch_page", return_value=page(1, [article()]))
     def test_raw_save_failure_prevents_normalization(self, fetch):
-        with patch("source_downloaders.sciencedirect.storage.save_raw", side_effect=OSError("disk error file-key")), \
+        with patch("source_downloaders.common.storage.save_raw", side_effect=OSError("disk error file-key")), \
              patch("source_downloaders.sciencedirect._normalize_article") as normalize:
             result = download(self.author)
         self.assertIsInstance(result, DownloadError)
