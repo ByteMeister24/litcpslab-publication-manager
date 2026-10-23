@@ -80,7 +80,7 @@ class IEEESourceTests(unittest.TestCase):
             result = download(self.author)
             assert isinstance(result, DownloadError)
             self.assertIn("credential file is missing", result.error)
-        with patch("source_downloaders.ieee_xplore.dotenv_values", side_effect=PermissionError("secret-key")):
+        with patch("source_downloaders.common.dotenv_values", side_effect=PermissionError("secret-key")):
             result = download(self.author)
         assert isinstance(result, DownloadError)
         self.assertIn("Cannot read IEEE credential file (PermissionError)", result.error)

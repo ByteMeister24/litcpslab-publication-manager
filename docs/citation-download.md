@@ -1,8 +1,11 @@
 # Publication download guide
 
-The pipeline downloads IEEE Xplore publication metadata, saves the native JSON
-responses, and generates Markdown exports. The available source keyword is
-`ieee`. See the [pipeline specification](specs/publication-pipelines-specification.md)
+For a double-clickable desktop launcher and portable Linux/Windows build
+instructions, see the [desktop app guide](desktop-app.md).
+
+The pipeline downloads IEEE Xplore and ScienceDirect publication metadata, saves
+the native JSON responses, and generates Markdown exports. The source keywords
+are `ieee` and `sciencedirect`. See the [pipeline specification](specs/publication-pipelines-specification.md)
 for component responsibilities and data contracts.
 
 ## Setup
@@ -71,7 +74,7 @@ The following examples use the names from the sample YAML above:
 - Flag values are required. Positional author/source names are invalid.
 - Surrounding whitespace is trimmed. Duplicates are processed once in selection
   order, including author names that differ only in case.
-- Source keywords are lowercased. Currently only `ieee` is supported.
+- Source keywords are lowercased. Currently `ieee` and `sciencedirect` are supported.
 - Empty items and `all` mixed with named selections are invalid. Unknown authors
   or sources fail validation before any request.
 

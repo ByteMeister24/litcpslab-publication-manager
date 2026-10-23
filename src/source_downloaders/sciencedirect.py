@@ -7,12 +7,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from dotenv import dotenv_values
-
-import config
 from author_builder import Author
 from models import DownloadError, DownloadRecord, Publication
-from utils import storage
+from source_downloaders.common import download_source
 
 
 SOURCE = "sciencedirect"
@@ -24,35 +21,20 @@ REQUEST_TIMEOUT_SECONDS = 30
 
 def download(author: Author) -> DownloadRecord | DownloadError:
     """Return a complete download or a sanitized, stage-specific error."""
-    api_key = ""
-    raw_file_path = None
-    stage = "Download"
-    try:
-        if not config.ENV_FILE.is_file():
-            raise ValueError(f"ScienceDirect credential file is missing: {config.ENV_FILE}.")
-        try:
-            settings = dotenv_values(config.ENV_FILE, interpolate=False)
-        except Exception as error:
-            raise ValueError(f"Cannot read ScienceDirect credential file ({type(error).__name__}).") from None
-        api_key = (settings.get(API_KEY_NAME) or "").strip()
-        if not api_key:
-            raise ValueError(f"{API_KEY_NAME} is missing or empty in {config.ENV_FILE}.")
+    return download_source(
+        author,
+        source=SOURCE,
+        source_name="ScienceDirect",
+        api_key_name=API_KEY_NAME,
+        build_query=build_query,
+        download_pages=download_pages,
+        normalize_pages=_normalize_pages,
+    )
 
-        pages = download_pages(build_query(author), api_key)
-        stage = "Raw saving"
-        raw_file_path = storage.save_raw(author.slug, SOURCE, pages)
-        stage = "Normalization"
-        publications = [normalize_article(article) for page in pages if record_count(page) > 0
-                        for article in page["search-results"]["entry"]]
-        return DownloadRecord(author=author.name, source=SOURCE, publication_count=len(publications),
-                              publications=publications, raw_file_path=raw_file_path)
-    except Exception as error:
-        message = f"{stage} failed: {error}"
-        if raw_file_path is not None:
-            message += f"; raw saved: {raw_file_path}"
-        if api_key:
-            message = message.replace(api_key, "[REDACTED]")
-        return DownloadError(author=author.name, source=SOURCE, error=message)
+
+def _normalize_pages(pages: list[dict]) -> list[Publication]:
+    return [normalize_article(article) for page in pages if record_count(page) > 0
+            for article in page["search-results"]["entry"]]
 
 
 def build_query(author: Author) -> str:
