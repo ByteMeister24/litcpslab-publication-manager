@@ -1,21 +1,17 @@
 """Convert a BibTeX file into the project's Publication instances."""
-
-import argparse
-import logging
 from pathlib import Path
-import sys
 
-import bibtexparser
+from bibtexparser.entrypoint import parse_string
 from bibtexparser.middlewares.names import split_multiple_persons_names
 from bibtexparser.model import Entry
 from pylatexenc.latex2text import LatexNodes2Text
 
-from models import Publication
+from publication_model import Publication
 
 
-def convert_bibtex(input_path: Path) -> list[Publication]:
+def normalize_file(input_path: Path) -> list[Publication]:
     """Read all entries in file order, raising on parsing or conversion errors."""
-    library = bibtexparser.parse_string(input_path.read_text(encoding="utf-8-sig"))
+    library = parse_string(input_path.read_text(encoding="utf-8-sig"))
     if library.failed_blocks:
         failed = library.failed_blocks[0]
         location = f" at line {failed.start_line + 1}" if failed.start_line is not None else ""
@@ -69,24 +65,3 @@ def _entry_to_publication(entry: Entry, decoder: LatexNodes2Text) -> Publication
         pdf_url=value("url"),
         publisher=text("publisher"),
     )
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Convert BibTeX entries to Publication instances.")
-    parser.add_argument("input_path", type=Path, help="Path to the input BibTeX file.")
-    args = parser.parse_args()
-
-    # Report parser failures through the single console error below.
-    logging.getLogger("bibtexparser").addHandler(logging.NullHandler())
-    try:
-        publications = convert_bibtex(args.input_path)
-    except (OSError, UnicodeError, ValueError) as error:
-        print(f"Error: {error}", file=sys.stderr)
-        return 1
-
-    print(f"Converted {len(publications)} publication(s).")
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

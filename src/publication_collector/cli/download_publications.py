@@ -5,27 +5,9 @@ import argparse
 import sys
 from typing import Optional
 
-from models import DownloadConfirmation, DownloadError, DownloadRequest, Selection
-from download_manager import run_download
-from report_generator import update_download_counts, update_report
-
-
-def parse_selection(value: str, lowercase: bool = False) -> Selection:
-    items = [item.strip() for item in value.split(",")]
-    
-    if lowercase:
-        items = [item.lower() for item in items]
-    
-    if not all(items):
-        raise ValueError("Selections must not contain empty comma-separated items.")
-    
-    items = list(dict.fromkeys(items))
-    if "all" in items:
-        if len(items) != 1:
-            raise ValueError("all cannot be mixed with named selections.")
-        return "all"
-    
-    return tuple(dict.fromkeys(items))
+from publication_collector.download_models import DownloadError, DownloadRequest
+from publication_collector.download_manager import run_download
+from helpers.selection import parse_selection
 
 
 def parse_request(argv: Optional[list[str]] = None) -> DownloadRequest:
@@ -68,24 +50,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             print(f"Download failed: {result.author} [{result.source}]: {result.error}", file=sys.stderr)
         else:
             print(f"Download completed: {result.author} [{result.source}]: {result.publication_count} publication(s); "
-                  f"raw: {result.raw_file_path}")
+                  f"download location: {result.raw_file_path}")
     
     print(f"Download report: {len(download_results) - download_failures} succeeded; {download_failures} failed.")
 
-    counts_by_author: dict[str, dict[str, int]] = {}
-    for result in download_results:
-        if isinstance(result, DownloadConfirmation):
-            counts_by_author.setdefault(result.author, {})[result.source] = result.publication_count
-    try:
-        warnings = update_download_counts(counts_by_author)
-        for warning in warnings:
-            print(f"Warning: {warning}", file=sys.stderr)
-        update_report()
-    except (OSError, UnicodeError, ValueError) as error:
-        print(f"Report update failed: {error}", file=sys.stderr)
-
     return 1 if download_failures else 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

@@ -4,9 +4,7 @@ import yaml
 from dataclasses import dataclass
 import config
 from utils.yaml_loader import convert_yaml_to_dict
-from typing import Literal, Union
-
-Selection = Union[tuple[str, ...], Literal["all"]]
+from helpers.selection import Selection
 
 @dataclass(frozen=True)
 class Author:

@@ -6,9 +6,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from author_builder import Author
-from models import DownloadConfirmation, DownloadError, Publication
-from source_downloaders.common import download_source as _download_source
+from helpers.author_builder import Author
+from publication_collector.download_models import DownloadConfirmation, DownloadError
+from publication_collector.source_downloaders.common import download_source
 
 
 __all__ = ["download"]
@@ -23,7 +23,7 @@ API_KEY_NAME = "IEEE_API_KEY"
 
 def download(author: Author) -> DownloadConfirmation | DownloadError:
     """Return a saved-download confirmation or a sanitized, stage-specific error."""
-    return _download_source(
+    return download_source(
         author,
         source=SOURCE,
         source_name="IEEE",
@@ -36,87 +36,6 @@ def download(author: Author) -> DownloadConfirmation | DownloadError:
 
 def _count_publications(pages: list[dict]) -> int:
     return _record_count(pages[0])
-
-
-def _text(value, field: str) -> str:
-    if value is None:
-        return ""
-    
-    if isinstance(value, str):
-        return value.strip()
-    
-    if isinstance(value, int) and not isinstance(value, bool):
-        return str(value)
-    
-    raise ValueError(f"IEEE field {field} must be text or an integer.")
-
-
-def _strings(value, field: str) -> tuple[str, ...]:
-    if value is None:
-        return ()
-    
-    values = value if isinstance(value, list) else [value]
-    return tuple(text for item in values if (text := _text(item, field)))
-
-
-def _normalize_article(article: dict) -> Publication:
-    """Map IEEE's nested fields into the common, source-independent record."""
-    authors = article.get("authors")
-    
-    if authors is None:
-        authors = []
-    
-    if isinstance(authors, dict):
-        authors = authors.get("authors", authors.get("author", []))
-    
-    if not isinstance(authors, list) or any(not isinstance(author, dict) for author in authors):
-        raise ValueError("IEEE authors must contain a list of author objects.")
-    
-    if authors and all(author.get("author_order") is not None for author in authors):
-        if any(isinstance(author["author_order"], bool)
-               or not isinstance(author["author_order"], (str, int)) for author in authors):
-            raise ValueError("IEEE author_order must be an integer.")
-        try:
-            authors = sorted(authors, key=lambda author: int(author["author_order"]))
-        except (TypeError, ValueError, OverflowError):
-            raise ValueError("IEEE author_order must be an integer.") from None
-    
-    names = tuple(name for author in authors if (name := _text(author.get("full_name"), "full_name")))
-    affiliations = tuple(value for author in authors
-                         for value in _strings(author.get("affiliation"), "affiliation"))
-    index_terms = article.get("index_terms")
-   
-    if index_terms is None:
-        index_terms = {}
-   
-    if not isinstance(index_terms, dict):
-        raise ValueError("IEEE index_terms must be an object.")
-   
-    keywords = []
-    for group in ("author_terms", "ieee_terms"):
-        terms = index_terms.get(group)
-     
-        if terms is None:
-            terms = []
-     
-        if isinstance(terms, dict):
-            terms = terms.get("terms", [])
-        keywords.extend(_strings(terms, group))
-
-    return Publication(
-        title=_text(article.get("title"), "title"),
-        authors=names,
-        affiliations=affiliations,
-        keywords=tuple(keywords),
-        abstract=_text(article.get("abstract"), "abstract"),
-        publication_title=_text(article.get("publication_title"), "publication_title"),
-        year=_text(article.get("publication_year"), "publication_year"),
-        issn="; ".join(_strings(article.get("issn"), "issn")),
-        isbn="; ".join(_strings(article.get("isbn"), "isbn")),
-        doi=_text(article.get("doi"), "doi"),
-        pdf_url=_text(article.get("pdf_url"), "pdf_url"),
-        publisher=_text(article.get("publisher"), "publisher"),
-    )
 
 
 def _build_query(author: Author) -> str:

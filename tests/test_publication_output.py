@@ -1,21 +1,21 @@
 """Schema rendering, publication history, and safe file publication."""
 
 from datetime import datetime
-import json
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
-from support import full_article, page
+from support import full_article
 import config
 from csv_to_semantic_markdown import publication_to_markdown
-from source_downloaders.ieee_xplore import _normalize_article
-from author_builder import Author
-from models import MarkdownBuildResult, Publication
-from markdown_builder import build_markdown, _render_publications
-from utils.storage import save_markdown, save_raw, write_complete_file
+from publication_normalizer.source_normalizers.ieee_xplore import _normalize_article
+from helpers.author_builder import Author
+from publication_model import Publication
+from publication_markdown.markdown_models import MarkdownBuildResult
+from publication_markdown.markdown_builder import build_markdown, _render_publications
+from utils.storage import save_final_markdown, save_file
 
 
 class MarkdownTests(unittest.TestCase):
@@ -75,31 +75,31 @@ class MarkdownBuilderTests(unittest.TestCase):
         self.author = Author("Ada Researcher", ("University A",))
 
     def test_builder_returns_saved_markdown_path(self):
-        result = build_markdown(self.author, "ieee", [Publication(title="Über Research")])
-        destination = self.data / self.author.slug / "ada-researcher-ieee-2026-10-22.md"
-        self.assertEqual(result, MarkdownBuildResult(self.author.name, "ieee", markdown_path=destination))
+        result = build_markdown(self.author, [Publication(title="Über Research")])
+        destination = self.data / self.author.slug / "final" / "Ada Researcher-final.md"
+        self.assertEqual(result, MarkdownBuildResult(self.author.name, markdown_path=destination))
         self.assertEqual(destination.read_text(encoding="utf-8"), _render_publications([Publication(title="Über Research")]))
 
-    def test_successful_empty_export_replaces_previous_markdown(self):
-        destination = save_markdown(self.author.slug, "ieee", "Previous Markdown")
-        result = build_markdown(self.author, "ieee", [])
-        self.assertEqual(result, MarkdownBuildResult(self.author.name, "ieee", markdown_path=destination))
-        self.assertEqual(destination.read_bytes(), b"")
+    def test_successful_export_replaces_previous_final_markdown(self):
+        destination = save_final_markdown(self.author.slug, self.author.name, "Previous Markdown")
+        result = build_markdown(self.author, [Publication(title="Replacement")])
+        self.assertEqual(result, MarkdownBuildResult(self.author.name, markdown_path=destination))
+        self.assertEqual(destination.read_text(), _render_publications([Publication(title="Replacement")]))
 
     def test_builder_reports_failed_stage_and_preserves_previous_markdown(self):
-        destination = save_markdown(self.author.slug, "ieee", "Previous Markdown")
-        for target, stage in [("markdown_builder._render_publications", "Markdown generation"),
+        destination = save_final_markdown(self.author.slug, self.author.name, "Previous Markdown")
+        for target, stage in [("publication_markdown.markdown_builder._render_publications", "Markdown generation"),
                               ("utils.storage.os.replace", "Markdown saving")]:
             with self.subTest(stage=stage), patch(target, side_effect=OSError("disk error")):
-                result = build_markdown(self.author, "ieee", [Publication(title="New work")])
-            self.assertEqual(result, MarkdownBuildResult(self.author.name, "ieee", error=f"{stage} failed: disk error"))
+                result = build_markdown(self.author, [Publication(title="New work")])
+            self.assertEqual(result, MarkdownBuildResult(self.author.name, error=f"{stage} failed: disk error"))
             self.assertEqual(destination.read_text(), "Previous Markdown")
             self.assertEqual(list(destination.parent.iterdir()), [destination])
 
     def test_generation_failure_does_not_call_storage(self):
-        with patch("markdown_builder._render_publications", side_effect=ValueError("invalid publication")), \
-             patch("utils.storage.save_markdown") as save:
-            result = build_markdown(self.author, "ieee", [Publication()])
+        with patch("publication_markdown.markdown_builder._render_publications", side_effect=ValueError("invalid publication")), \
+             patch("utils.storage.save_final_markdown") as save:
+            result = build_markdown(self.author, [Publication()])
         self.assertEqual(result.error, "Markdown generation failed: invalid publication")
         save.assert_not_called()
 
@@ -117,64 +117,46 @@ class StorageTests(unittest.TestCase):
         self.clock.now.return_value = datetime(2026, 10, 22, 14, 30, tzinfo=ZoneInfo(config.DOWNLOAD_TIMEZONE))
         self.addCleanup(clock.stop)
 
-    def test_markdown_filename_uses_creation_date_in_configured_timezone(self):
-        self.clock.now.return_value = datetime(2026, 10, 22, 0, 30, tzinfo=ZoneInfo(config.DOWNLOAD_TIMEZONE))
-        destination = save_markdown("ada-researcher", "ieee", "Über Research\n")
-        self.clock.now.assert_called_once_with(ZoneInfo(config.DOWNLOAD_TIMEZONE))
-        self.assertEqual(destination, self.data / "ada-researcher" / "ada-researcher-ieee-2026-10-22.md")
+    def test_final_markdown_filename_uses_canonical_name_without_date_or_source(self):
+        destination = save_final_markdown("ada-researcher", "Ada Researcher", "Über Research\n")
+        self.clock.now.assert_not_called()
+        self.assertEqual(destination, self.data / "ada-researcher" / "final" / "Ada Researcher-final.md")
         self.assertEqual(destination.read_text(encoding="utf-8"), "Über Research\n")
 
-    def test_markdown_exports_preserve_previous_dates_and_undated_files(self):
+    def test_final_markdown_exports_replace_fixed_path_and_preserve_other_files(self):
         author_directory = self.data / "ada-researcher"
         author_directory.mkdir()
         undated = author_directory / "ada-researcher-ieee.md"
         undated.write_text("Legacy export", encoding="utf-8")
-        first = save_markdown("ada-researcher", "ieee", "First day")
+        first = save_final_markdown("ada-researcher", "Ada Researcher", "First day")
         self.clock.now.return_value = datetime(2026, 10, 23, 14, 30, tzinfo=ZoneInfo(config.DOWNLOAD_TIMEZONE))
-        second = save_markdown("ada-researcher", "ieee", "Second day")
-        self.assertEqual(first.name, "ada-researcher-ieee-2026-10-22.md")
-        self.assertEqual(second.name, "ada-researcher-ieee-2026-10-23.md")
-        self.assertEqual(first.read_text(), "First day")
+        second = save_final_markdown("ada-researcher", "Ada Researcher", "Second day")
+        self.assertEqual(first, second)
+        self.assertEqual(second.name, "Ada Researcher-final.md")
         self.assertEqual(second.read_text(), "Second day")
         self.assertEqual(undated.read_text(), "Legacy export")
 
-    def test_identical_timestamps_produce_separate_dated_native_files(self):
-        instant = datetime(2026, 10, 21, 14, 30, tzinfo=ZoneInfo(config.DOWNLOAD_TIMEZONE))
-        with patch("utils.storage.datetime") as clock:
-            clock.now.return_value = instant
-            first = save_raw("ada-researcher", "ieee", [page(1, [1])])
-            second = save_raw("ada-researcher", "ieee", [page(1, [2])])
-        self.assertEqual(first.name, "ada-researcher-ieee-2026-10-21T14-30-00.000000+0200.json")
-        self.assertEqual(second.name, "ada-researcher-ieee-2-2026-10-21T14-30-00.000000+0200.json")
-        self.assertEqual(json.loads(first.read_text()), [page(1, [1])])
-        self.assertEqual(json.loads(second.read_text()), [page(1, [2])])
-
     def test_history_cannot_be_overwritten_and_temporary_files_are_removed(self):
         destination = self.data / "raw.json"
-        write_complete_file(destination, "original", replace=False)
+        save_file(destination, "original", replace=False)
         with self.assertRaises(FileExistsError):
-            write_complete_file(destination, "replacement", replace=False)
+            save_file(destination, "replacement", replace=False)
         self.assertEqual(destination.read_text(), "original")
         self.assertEqual(list(self.data.iterdir()), [destination])
 
     def test_markdown_is_utf8_and_replaced_only_after_completed_write(self):
-        destination = save_markdown("ada-researcher", "ieee", "Über old\n")
+        destination = save_final_markdown("ada-researcher", "Ada Researcher", "Über old\n")
         with patch("utils.storage.os.replace", side_effect=OSError("disk error")):
             with self.assertRaises(OSError):
-                save_markdown("ada-researcher", "ieee", "new")
+                save_final_markdown("ada-researcher", "Ada Researcher", "new")
         self.assertEqual(destination.read_text(encoding="utf-8"), "Über old\n")
         self.assertEqual(list(destination.parent.iterdir()), [destination])
-        self.assertEqual(save_markdown("ada-researcher", "ieee", "new"), destination)
+        self.assertEqual(save_final_markdown("ada-researcher", "Ada Researcher", "new"), destination)
         self.assertEqual(destination.read_text(), "new")
 
     def test_failed_raw_publication_leaves_no_incomplete_file(self):
         destination = self.data / "raw" / "result.json"
         with patch("utils.storage.os.link", side_effect=OSError("disk error")):
             with self.assertRaises(OSError):
-                write_complete_file(destination, "complete", replace=False)
+                save_file(destination, "complete", replace=False)
         self.assertEqual(list(destination.parent.iterdir()), [])
-
-    def test_invalid_json_is_not_published(self):
-        with self.assertRaises(ValueError):
-            save_raw("ada-researcher", "ieee", [{"invalid": float("nan")}])
-        self.assertEqual(list(self.data.iterdir()), [])

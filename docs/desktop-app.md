@@ -35,8 +35,8 @@ Use the existing project environment, with Tkinter available:
 .venv/bin/python src/desktop_app.py
 ```
 
-The launcher runs `src/download_publications.py` with the entered author and
-source arguments in a separate process. The original CLI remains available and
+The launcher runs `python -m publication_collector` from `src/` with the entered
+author and source arguments in a separate process. The collector CLI
 continues reading credentials from the project `.env` unless the explicit
 launcher credential mode is enabled.
 

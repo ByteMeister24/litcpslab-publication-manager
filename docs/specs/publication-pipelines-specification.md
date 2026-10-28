@@ -1,81 +1,68 @@
-# Publication pipeline specification
+# Publication workflow specification
 
 ## Scope
 
-The pipeline retrieves publication metadata from IEEE Xplore and ScienceDirect,
-preserves native JSON responses, and generates Markdown using the
-[publication schema](../../schema/publication-schema.md). Additional publishers,
-PDF downloading, and reconversion of historical raw downloads are outside the
-current pipeline.
+The project has three separate workflows:
+
+1. **Source collection:** retrieve publication lists from publisher APIs, store
+   complete native JSON, and print download confirmations or errors.
+2. **Normalization:** read saved IEEE/ScienceDirect JSON, Springer CSV, and ACM
+   BibTeX into the existing `Publication` dataclass and save one JSON array per author.
+3. **Markdown creation:** accept one or more database author names or `all`, read
+   their latest manually reviewed JSON datasets, and generate the predefined
+   Markdown format. Missing reviews skip the author; an empty review removes
+   that author's exact final Markdown file.
+
+The implemented source collection workflow supports IEEE Xplore and ScienceDirect.
+It does not normalize metadata, create Markdown, or update JSON/HTML count reports.
+Additional publishers and PDF downloading are outside its current scope.
+
+IEEE and ScienceDirect conversion helpers belong to the normalization package;
+the collector does not import them. Markdown rendering belongs to the third
+workflow. Existing standalone converters, frontend, and HTML reporting remain separate.
 
 For commands and setup, see the [download guide](../citation-download.md).
+For normalization commands and manual-input preparation, see the
+[normalization guide](../publication-normalization.md).
+For review preparation and final Markdown commands, see the
+[Markdown guide](../publication-markdown.md).
 
 ## Components and ownership
 
-All implementation paths below are relative to `src/`.
+Implementation paths below are relative to `src/`.
 
 | Component | Responsibility |
 | --- | --- |
-| `download_publications.py` | Parse CLI arguments into `DownloadRequest`, call the manager, print reports, update HTML counts, and return an exit code |
-| `desktop_app.py` | Collect selections and per-run credentials, launch the existing CLI subprocess, and display its output and exit status |
-| `download_manager.py` | Resolve sources, request selected authors, process author/source pairs sequentially, and collect download and Markdown outcomes |
-| `author_builder.py` | Define `Author`, validate the complete author database, and return selected `Author` instances |
+| `publication_collector/cli/download_publications.py` | Parse CLI arguments into `DownloadRequest`, call the manager, print outcomes and a console summary, and return an exit code |
+| `publication_collector/download_manager.py` | Validate selections, resolve sources, process author/source pairs sequentially, and collect returned outcomes |
+| `publication_collector/models.py` | Define `DownloadRequest`, `DownloadConfirmation`, and `DownloadError`; reuse the shared `helpers.selection.Selection` type |
+| `publication_collector/source_downloaders/ieee_xplore.py` | Own IEEE settings, query construction, retrieval, page validation, and publication counting |
+| `publication_collector/source_downloaders/sciencedirect.py` | Own ScienceDirect settings, query construction, retrieval, page validation, and publication counting |
+| `publication_collector/source_downloaders/common.py` | Load credentials, run the supplied source functions, construct the download filepath and JSON content, save complete raw pages, and construct a confirmation or sanitized error |
+| `publication_collector/__main__.py` | Run the collector as a Python module |
+| `publication_normalizer/cli/normalize_publications.py` | Parse author selections and print normalization outcomes, paths, errors, and exit status |
+| `publication_normalizer/normalization_manager.py` | Define per-author `NormalizationResult` outcomes, select inputs in source order, collect file-level results, and save complete or partial per-author datasets |
+| `publication_normalizer/source_normalizers/` | Read IEEE/ScienceDirect native pages, map Springer CSV fields, and reuse the BibTeX converter for ACM |
+| `publication_normalizer/__main__.py` | Run normalization as a Python module |
+| `publication_markdown/cli/generate_markdown.py` | Parse author selections and print generated, removed, skipped, and failed outcomes |
+| `publication_markdown/markdown_manager.py` | Select reviewed inputs, coordinate generation, and remove the exact final file for empty reviews |
+| `publication_markdown/json_reader.py` | Validate a complete reviewed JSON array and construct `Publication` instances |
+| `publication_markdown/markdown_builder.py` | Render publications using the existing schema and save combined final Markdown |
+| `publication_markdown/models.py` | Define `MarkdownBuildResult` and per-author `MarkdownResult` outcomes |
+| `publication_markdown/__main__.py` | Run Markdown generation as a Python module |
+| `publication_model.py` | Define the shared `Publication` dataclass |
+| `helpers/author_builder.py` | Define `Author`, validate the complete author database, and return selected authors |
+| `helpers/selection.py` | Define shared selection types and comma-list CLI parsing |
 | `utils/yaml_loader.py` | Parse the complete YAML mapping safely and reject duplicate keys |
-| `source_downloaders/ieee_xplore.py`, `source_downloaders/sciencedirect.py` | Define source settings, build queries, retrieve and validate pages, normalize native publications, and expose `download(author)` |
-| `source_downloaders/common.py` | Load credentials, run the supplied source functions, save complete raw pages, and construct successful or sanitized error outcomes |
-| `markdown_builder.py` | Render publications, save Markdown, and return build feedback |
-| `report_generator.py` | Update publication counts in the static current/past member HTML tables and return decrease warnings |
-| `utils/storage.py` | Apply filename rules and publish completed files safely |
-| `models.py` | Define the shared request, publication, download-outcome, and Markdown-result dataclasses |
-| `config.py` | Define project paths, timezone, filename formats, and publication field order |
+| `utils/storage.py` | Publish completed files safely and apply raw-download filename rules; remains shared under `src/` |
+| `utils/file_timestamps.py` | Read filesystem creation timestamps for uniform normalization input selection |
+| `config.py` | Define shared project paths, timezone, and filename formats |
 
-The manager owns the module-level `SUPPORTED_SOURCES` tuple and `DOWNLOADERS`
-dictionary. Source-specific API URLs, page sizes, timeouts, and credential-key
-names belong to their source modules.
-
-The CLI handles reporting. The manager, sources, and helpers do not print.
-The shared source workflow and the Markdown Builder invoke storage directly;
-the manager performs no file writes.
-
-## Desktop launcher and credentials
-
-The Tkinter launcher provides a comma-separated author text field (also accepting
-`all`), supported-source checkboxes, and a masked API-key field beside each source.
-Fields begin empty and sources unchecked. It validates only required inputs;
-the CLI retains author and comma-list validation. One run is allowed per window,
-with inputs and closing disabled until completion. A background pipe reader sends
-stdout, stderr, and the exit code to the UI; no progress percentage is inferred.
-
-The launcher passes a subprocess argument list without a shell. Development runs
-invoke `download_publications.py` with the current Python interpreter; packaged
-runs invoke the sibling CLI executable built from the same entry point. Download,
-Markdown, report, storage, and exit-code behavior remain owned by that CLI.
-
-The explicit opt-in marker `PUBLICATION_MANAGER_CREDENTIAL_MODE=environment`
-instructs both source modules to read their existing key names (`IEEE_API_KEY`,
-`SCIENCEDIRECT_API_KEY`) from the process environment instead of `.env`. Keys
-are trimmed and checked before any request. In this mode, `.env` is never read,
-and missing keys fail rather than falling back to file credentials. Error
-redaction applies to both credential modes.
-
-Without the exact opt-in marker value, credential behavior is unchanged:
-`dotenv_values(config.ENV_FILE, interpolate=False)` reads only the project `.env`
-file, and environment API keys are ignored. Imports do not load credentials.
-
-The launcher copies its environment, removes inherited publisher keys, and adds
-only fresh keys for selected sources to the child's environment. It does not
-change its own process environment or write credentials to disk, arguments, or
-logs. Key fields clear after a successful subprocess start; every run requires
-fresh entry. Existing `.env` files are untouched.
-
-Portable distribution uses two PyInstaller one-folder executables with a shared
-`_internal` runtime. Bundled module paths retain the existing `PROJECT_ROOT`
-calculation, resolving to the folder beside the executables. That writable folder
-contains copies of the author database and schema, an empty data directory, and
-report assets with fresh zero counts. Existing credentials, downloads, and report
-counts are excluded. Bundled timezone data supplies `Europe/Vienna` on Windows.
-Builds run separately on x64 Linux and Windows. See the
-[desktop guide](../desktop-app.md) for building and platform verification.
+The manager owns `SUPPORTED_SOURCES` and `DOWNLOADERS`. Source API URLs, page
+sizes, timeouts, and credential-key names belong to their source modules.
+The CLI owns console output; the manager and sources do not print. The shared
+source workflow invokes storage directly; the manager performs no file writes.
+The collector does not import frontend or report-generation modules.
 
 ## Data contracts
 
@@ -83,38 +70,30 @@ Builds run separately on x64 Linux and Windows. See the
 
 | Dataclass | Fields |
 | --- | --- |
-| `Author` | `name: str`, `affiliations: tuple[str, ...]`; defined in `author_builder.py` |
+| `Author` | `name: str`, `affiliations: tuple[str, ...]`; defined in `helpers/author_builder.py` |
 | `DownloadRequest` | `authors: Selection`, `sources: Selection` |
-| `Publication` | `title`, `authors`, `affiliations`, `keywords`, `abstract`, `publication_title`, `year`, `issn`, `isbn`, `doi`, `pdf_url`, `publisher` |
-| `DownloadRecord` | `author: str`, `source: str`, `publication_count: int`, `publications: list[Publication]`, `raw_file_path: Path` |
+| `DownloadConfirmation` | `author: str`, `source: str`, `publication_count: int`, `raw_file_path: Path` |
 | `DownloadError` | `author: str`, `source: str`, `error: str` |
-| `MarkdownBuildResult` | `author: str`, `source: str`, optional `markdown_path: Path`, optional `error: str` |
 
-`Publication.authors`, `affiliations`, and `keywords` are tuples of strings
-defaulting to empty tuples. Its other fields are strings defaulting to empty
-strings. A `DownloadRecord` with count zero and an empty publication list is a
-success. `DownloadError` is a returned dataclass, not an exception.
-
-The public coordination interface is:
+The collector's public coordination interface is:
 
 ```python
-def run_download(request: DownloadRequest) -> tuple[
-    list[DownloadRecord | DownloadError],
-    list[MarkdownBuildResult],
-]:
+from publication_collector.models import DownloadConfirmation, DownloadError, DownloadRequest
+
+
+def run_download(request: DownloadRequest) -> list[DownloadConfirmation | DownloadError]:
     ...
 ```
 
-The first list contains the source-returned outcome for every author/source
-pair. The second contains one result for every attempted Markdown build,
-including failed builds. Errors and zero-publication records skip building and
-produce no Markdown result. Both lists preserve processing order; associate
-records by `(author, source)` rather than list position.
+Each selected author/source pair produces one source-returned outcome, unchanged,
+in author order followed by source order. A confirmation contains no normalized
+publication objects. A zero-publication download is successful and saves its native
+response pages. `DownloadError` is a returned dataclass, not an exception.
 
 ## Author database and selection
 
-`config.AUTHORS_FILE` points to `db/authors.yaml`. Each full author name maps
-directly to its complete list of affiliations:
+`config.AUTHORS_FILE` points to `db/authors.yaml`. Each full name maps directly
+to its complete affiliation list:
 
 ```yaml
 Ada Researcher:
@@ -122,214 +101,365 @@ Ada Researcher:
   - Institute B
 ```
 
-`convert_yaml_to_dict(filepath)` uses a PyYAML `SafeLoader` subclass, reads
-UTF-8 with optional BOM, and returns a nonempty mapping. It rejects non-string
-keys, duplicate keys, and invalid YAML.
+`convert_yaml_to_dict(filepath)` uses a PyYAML `SafeLoader` subclass, accepts
+UTF-8 with an optional BOM, and requires a nonempty mapping. It rejects
+non-string keys, duplicate keys, and invalid YAML.
 
-`get_selected_authors(selection) -> list[Author]` loads and validates the whole
-mapping before selection. Names must contain nonblank text without control
-characters. Each affiliation value must be a nonempty list of nonblank strings
-without control characters. Affiliations are converted to tuples in their
-original order, retaining duplicates. No affiliation merging occurs.
+`get_selected_authors(selection)` validates the whole mapping before selection.
+Names must contain nonblank text without control characters. Each affiliation
+value must be a nonempty list of nonblank strings without control characters.
+Affiliations become tuples in their original order, retaining duplicates.
 
 For `"all"`, authors follow database order. Named selections use `casefold()`
-for matching and deduplication, preserve first-selected order, and return the
+for matching and deduplication, preserve first-selected order, and retain the
 original YAML spelling and affiliations. Unknown names fail validation. Named
-selection also rejects a database containing multiple names that normalize to
-the same lookup key.
-
+selection rejects database names that collide under case-insensitive matching.
 `Author.slug` lowercases the name and replaces spaces with hyphens.
 
 ## CLI contract
 
-The entry point is `src/download_publications.py`.
+The collection workflow has its own installed console entry point:
+`publication_collector ...`. The project-root `pyproject.toml` registers it as
+`publication_collector.cli.download_publications:main`.
 
-- Bare `all` selects every author and available source and is exclusive with
+Installing with `python -m pip install -e .` in the project environment makes the
+checkout importable. After activating that environment, both
+`publication_collector ...` and `python -m publication_collector ...` work without
+setting `PYTHONPATH`. The editable installation retains shared `config.py` in the
+checkout, so configured data and credential paths remain independent of the
+current working directory.
+
+- Bare `all` selects every author and supported source and is exclusive with
   `--author` and `--source`.
 - Each flag accepts comma-separated selections or `all`; an omitted flag means
   all for that dimension.
-- No arguments, valueless flags, and positional author/source names are usage
-  errors.
+- No arguments, valueless flags, and positional author/source names are usage errors.
 - Selections are trimmed and deduplicated. Source keywords are lowercased.
 - Empty items and `all` mixed with named selections are usage errors.
 - Unknown authors and sources fail validation before requests.
 
-The CLI always passes a `DownloadRequest`. Bare `all` becomes
-`DownloadRequest(authors="all", sources="all")`; the manager does not accept a
-standalone `"all"` string.
+The CLI always passes a `DownloadRequest`. The manager does not accept a bare
+`"all"` string. Successful outcomes print the author, source, count, and raw path
+to stdout. Errors print the author, source, and sanitized error to stderr.
+A final console summary counts successes and failures. No persistent count
+report is read, created, or updated.
 
-## Download coordination
+Exit codes are `0` when all downloads succeed, `1` for validation or download/raw
+storage failures, and `2` for CLI usage errors. A successful zero-result search
+returns `0`.
+
+## Source download coordination
 
 The manager validates author and source selections and resolves registered
-downloaders before making requests. It then calls each source once per selected
-author, in author order followed by source order.
-
-Each source implements:
+downloaders before making requests. It calls each source once per selected
+author, sequentially. Every source implements:
 
 ```python
-def download(author: Author) -> DownloadRecord | DownloadError:
+def download(author: Author) -> DownloadConfirmation | DownloadError:
     ...
 ```
 
-Each source's `download()` delegates to `source_downloaders.common.download_source()`.
-The shared function takes the author, source keyword, display name, credential-key
-name, and the source's query builder, page downloader, and page normalizer. It
-loads credentials and builds the query inside the download failure boundary,
-retrieves all pages, saves them unchanged, then normalizes them and constructs
-the `DownloadRecord`. Source functions retain all API-format knowledge, including
-ScienceDirect's empty-result sentinel handling. No source-specific conditions
-belong in the shared workflow.
+Each source delegates to
+`publication_collector.source_downloaders.common.download_source()`, passing its
+source identifiers, credential-key name, query builder, page downloader, and
+publication counter. The common workflow:
 
-The shared function catches exceptions and returns sanitized error records with
-the existing Download, Raw saving, or Normalization stage and any retained raw
-path. The public `download(author)` interface remains unchanged.
-The manager appends each outcome unchanged. It skips Markdown for
-`DownloadError` and for count-zero records; otherwise it passes the author,
-source, and normalized publications to `build_markdown()`.
+1. Loads and validates credentials.
+2. Builds the source-specific query and retrieves every validated native page.
+3. Gets the source-specific publication count.
+4. Constructs the configured download filepath, serializes complete native pages
+   unchanged as a JSON array, and calls `storage.save_file()` with `replace=False`.
+5. Returns `DownloadConfirmation` with the saved path and count.
 
-The builder returns `MarkdownBuildResult` with a saved path or an error
-identifying Markdown generation or saving. A build failure does not change the
-download outcome. The manager continues processing other pairs after returned
-source or builder failures.
+Exceptions become sanitized `DownloadError` outcomes identifying the Download
+or Raw saving stage. Failures do not stop the remaining author/source pairs.
+No normalization or Markdown function runs during collection.
 
-## IEEE retrieval and normalization
+## Credentials
 
-The IEEE module uses Python's standard-library HTTP client with these settings:
+Normal CLI use reads `IEEE_API_KEY` and `SCIENCEDIRECT_API_KEY` only from the
+project-root `.env` file with `dotenv_values(..., interpolate=False)`. Imports
+and CLI help do not load credentials. Keys are trimmed and validated before
+requests. Missing, unassigned, or blank keys return download errors; process
+environment keys are not a fallback.
 
-| Setting | Value |
-| --- | --- |
-| Endpoint | `https://ieeexploreapi.ieee.org/api/v1/search/articles` |
-| Format | JSON |
-| Page size | 200 |
-| Start record | 1 initially; then retrieved count + 1 |
-| Sort | `article_number`, ascending |
-| Timeout | 30 seconds per request |
-| Automatic retries | None |
+The existing explicit opt-in marker
+`PUBLICATION_MANAGER_CREDENTIAL_MODE=environment` instead reads source keys
+from the process environment. In this mode `.env` is never read, and missing
+keys fail without fallback. This credential compatibility behavior is preserved;
+frontend changes are outside the collection workflow. Credential values are
+redacted before errors leave the source.
 
-Credentials are loaded inside `download()` according to the modes above.
-Normal CLI use reads `IEEE_API_KEY` only from the project-root `.env` file;
-process environment variables are not a fallback. The trimmed key is validated
-before query execution. Imports do not load credentials.
+## Publisher retrieval
 
-Queries use the canonical author name and all configured affiliations, with no
-year restriction:
+| Setting | IEEE Xplore | ScienceDirect |
+| --- | --- | --- |
+| Endpoint | `https://ieeexploreapi.ieee.org/api/v1/search/articles` | `https://api.elsevier.com/content/metadata/article` |
+| Response format | JSON | JSON with `view=COMPLETE` |
+| Page size | 200 | 25 |
+| Initial position | Record 1 | Offset 0 |
+| Next position | Retrieved count + 1 | Retrieved count |
+| Credentials | `apikey` query parameter | `X-ELS-APIKey` header |
+| Timeout | 30 seconds per request | 30 seconds per request |
+| Automatic retries | None | None |
+
+Both sources combine the canonical author name with any configured affiliation,
+without a year filter. Search values must be nonblank literal text without
+unsupported query syntax or control characters. Missing or unmatched affiliations
+can exclude publications.
+
+IEEE uses the scoped query:
 
 ```text
 "Authors":"Ada Researcher" AND ("Author Affiliations":"University A" OR "Author Affiliations":"Institute B")
 ```
 
-Search values must be nonblank literal text without double quotes, backslashes,
-wildcards, or control characters. Publications with missing or unmatched
-affiliations can be missed.
+IEEE sorts by ascending article number. It validates total counts and article
+lists and rejects changing totals, API errors, incomplete or oversized pages,
+excess records, and missing or repeated article numbers. Zero results may omit
+the articles field. Short pages advance by their actual length.
 
-Every response must be a JSON object with a valid `total_records` or
-`totalfound` count and a valid articles list. Zero-count responses may omit the
-articles field. Retrieval rejects API error responses, changing totals,
-incomplete or oversized pages, excess records, and missing or repeated article
-numbers. Short pages advance by their actual length.
+ScienceDirect builds `authfirst`/`authlastname` clauses for each possible
+given/family name split and groups configured affiliations with `aff` clauses.
+It validates total counts, page offsets, and entries and rejects changing totals,
+API errors, incomplete or oversized pages, excess records, and missing or
+repeated PII identifiers. Its empty-result sentinel is accepted while preserving
+the original response page in storage.
 
-After every page is retrieved and validated, the source saves the complete native
-pages before normalizing any publication. All native fields remain in the raw
-JSON. Normalization converts each article to `Publication` in response order:
+These checks establish complete retrieval; publication metadata is not normalized
+or validated against a normalized schema during collection.
 
-- Preserve all returned authors and affiliations. Sort authors by
-  `author_order` when every author has that value; otherwise keep returned order.
-- Accept nested authors under `authors.authors` or `authors.author`.
-- Combine `index_terms.author_terms` before `index_terms.ieee_terms`.
-- Treat absent metadata as empty fields and reject malformed values.
-- Use returned publication affiliations, without substituting search affiliations.
+## Storage
 
-Errors identify the failed download, raw-saving, or normalization stage.
-Credential values are redacted before errors leave the source. If normalization
-fails after saving, the error message includes the retained raw-file path.
-
-## Storage and rendering
-
-Paths are rooted at `config.PROJECT_ROOT`, independently of the working
-directory. API outputs use these patterns:
+Paths are rooted at shared `config.PROJECT_ROOT`, independently of the current
+working directory. Raw output uses:
 
 ```text
-data/<author-slug>/raw/<author-slug>-<source><sequence>-<timestamp>.json
-data/<author-slug>/<author-slug>-<source>-<YYYY-MM-DD>.md
+data/<author-slug>/download/<source>/<author-slug>-<source>-<timestamp>.json
 ```
 
-Dates use `Europe/Vienna`. Raw timestamps include date, time, microseconds, and
-UTC offset. The sequence is empty for the first filename and becomes `-2`,
-`-3`, and so on when a timestamp collides. Raw files are never overwritten.
+`config.DOWNLOAD_DIRECTORY_FORMAT` defaults to `{author_slug}/download/{source}`,
+relative to `config.DATA_DIRECTORY`. The shared download workflow and normalization
+format it with the author slug and source at runtime. `config.DOWNLOAD_FILENAME_FORMAT`
+controls the filename.
 
-Markdown exports replace only an existing file for the same author, source,
-and date. Earlier dates and undated exports are retained. Storage writes to a
-temporary file in the destination directory, then publishes the completed raw
-file with a hard link or replaces Markdown atomically with `os.replace()`.
-Temporary files are removed after success or failure.
+Dates use `Europe/Vienna`. Timestamps include date, time, microseconds, and UTC
+offset. Filename collisions return a raw-saving error, preserving the existing file.
 
-Rendering follows `config.PUBLICATION_FIELDS` and the documented
-[publication schema](../../schema/publication-schema.md), in this order:
+Storage writes to a temporary file in the destination directory, then atomically
+publishes the completed raw file with a hard link. Temporary files are cleaned
+up after success or failure. Failed or partial retrieval publishes no new raw
+dataset. Existing downloads, normalized files, Markdown, and reports are untouched.
 
-`Authors`, `Author Affiliations`, `Keywords`, `Abstract`, `Publication`,
-`Year`, `ISSN`, `ISBN`, `DOI`, `Link`, `Publisher`.
+## Adding a publisher
 
-Each publication has one H2 title on a single line, with blank lines separating
-the heading and field labels. Tuple values are joined with `; `; absent values retain empty
-labels. Publication order is preserved and output uses UTF-8. `Publication`
-denotes the containing publication; `Link` uses `pdf_url`. The schema document
-is a reference contract; rendering does not parse it at runtime.
+Add a module under `publication_collector/source_downloaders/` with its own
+settings, query, retrieval/validation, and publication-count functions. Expose
+`download(author)` by delegating to the common workflow, then register the source
+in `publication_collector.download_manager.SUPPORTED_SOURCES` and `DOWNLOADERS`.
+Normalization and Markdown generation belong to their separate workflows.
 
-A failed or partial retrieval publishes no new raw dataset and leaves existing
-exports intact. Raw saving must succeed before building Markdown. Normalization
-or Markdown failures retain completed raw files and preserve existing exports.
-Successful zero-result searches save raw metadata and skip Markdown.
+## Normalization inputs and selection
 
-## Reporting and extensions
+The installed command is `publication_normalizer`; its module entry point is
+`python -m publication_normalizer`. Both call the normalization CLI.
+Use bare `all`, `--author all`, or `--author "Name One, Name Two"`. No arguments,
+positional author names, source flags, empty comma-list entries, or bare `all`
+combined with `--author` are usage errors. Database author matching and validation
+use `helpers.author_builder`. Shared comma-list parsing lives in `helpers.selection`;
+the normalizer does not import the collector package.
 
-The CLI reports downloads and Markdown builds separately, with publication
-counts and saved paths on success or stage-specific errors on failure. The
-Markdown summary includes skipped builds. Exit codes are `0` for successful
-downloads and attempted builds, `1` for validation or pipeline failures, and
-`2` for CLI usage errors.
+Only source directories defined by `config.DOWNLOAD_DIRECTORY_FORMAT` are read.
+The default layout uses source subfolders under `data/<author-slug>/download/`:
 
-After printing the Markdown summary, the CLI collects successful
-`DownloadRecord.publication_count` values into an author → source → integer
-mapping, including count-zero records. It calls
-`update_download_counts(counts_by_author: dict[str, dict[str, int]]) -> list[str]`,
-prints returned warnings, and calls `update_report() -> None`. The updater
-receives no publication list, raw-file path, or Markdown result. Existing console
-reports and exit codes are preserved; warnings and update errors go to stderr.
+| Source folder | Matching extensions |
+| --- | --- |
+| `ieee` | `.json` |
+| `sciencedirect` | `.json` |
+| `springer` | `.csv` |
+| `acm` | `.bib`, `.bibtex` |
 
-`config.REPORT_JSON_FILE` points to `output/report.json`, the count store. Its
-top-level `updated_at` is an ISO datetime with a Europe/Vienna offset; remaining
-keys are canonical author names mapped to source keywords and nonnegative
-integer publication counts. Initially all 47 members have `ieee: 0`. Equal counts
-remain; increases replace the value. Decreases retain the previous count and
-return a console warning without persisting warning metadata. Failed or
-unprocessed author/source pairs retain their counts. Every completed pipeline
-execution refreshes the timestamp once, even if there are no successful records.
-Unknown authors are errors; new sources may be added for existing authors.
+Extension matching is case-insensitive. Other extensions and older flat files
+directly under `download/` are ignored. Sources are processed in the table order;
+records retain their order within pages/files. Duplicates are retained, and
+publication authors are not used to filter or assign records: the containing
+database author's directory determines the output owner.
 
-`config.REPORT_HTML_FILE` points to `output/report.html`. Its fixed Current
-Members and Past Members tables are seeded from the supplied Markdown member
-list. Each row's `data-author` identifies its database name; `data-source`
-identifies source headers and cells. Source columns are added to both tables as
-needed. JSON authors must match the HTML member tables.
+Every source uses the same rule: select the matching file with the newest
+filesystem creation timestamp. Each source contributes at most one input file.
+Filenames are unrestricted; embedded timestamps are visual references.
+Modification and metadata-change times do not determine
+which version is selected. A malformed selected file is reported; older files
+are not substituted.
 
-`update_report()` reads JSON, parses the well-formed HTML with standard-library
-`ElementTree`, and writes saved counts into the corresponding cells. HTML values
-do not influence saved counts. It removes legacy cell warnings, preserves member
-groups and row order, and displays the JSON timestamp using
-`REPORT_DATETIME_FORMAT` and `DOWNLOAD_TIMEZONE`.
+`utils.file_timestamps.get_creation_timestamp()` reads native `st_birthtime`
+metadata when available and otherwise uses GNU `stat` to read filesystem birth
+time. Missing creation-time support or a failed timestamp lookup is a
+source-selection error; other sources continue processing.
 
-Both files save through the existing atomic-write helper. Missing or malformed
-files and failed saves leave the affected file intact. JSON failure skips HTML
-synchronization; HTML failure retains the newly saved JSON.
+## Normalization field mappings
 
-A small Update button opens a JSON file chooser. The adjacent `report.js` reads
-the selected file, validates it before changing the displayed counts, and
-refreshes both tables and their timestamp. It changes the open page only, works
-without a web server, and displays errors without changing existing counts.
+IEEE and ScienceDirect files contain a nonempty JSON array of native page objects.
+Flatten each page's articles or entries and use the existing publisher mappings,
+including author order, missing metadata defaults, identifiers, keywords, and
+dates. Accept zero-result responses with omitted entries and ScienceDirect's
+empty-result sentinel. Malformed pages or publication metadata fail that file.
+The readers do not repeat API requests or load credentials.
 
-A new publisher supplies the same `download(author)` interface, delegates the
-common workflow with its own query, retrieval, and normalization functions,
-owns its API settings and credential-key name, and is registered in
-`download_manager.SUPPORTED_SOURCES` and `DOWNLOADERS`.
-The existing CSV converter remains a separate utility with
-caller-supplied input and output paths; it is not part of the API pipeline.
+ACM reuses `bibtex_converter.convert_bibtex()`, including its existing field,
+author, LaTeX-text, and identifier handling. Invalid BibTeX rejects the whole
+file; the original standalone converter remains available.
+
+Springer CSV is read as UTF-8 with an optional BOM. The following columns are
+required; their values may be empty:
+
+| CSV column | `Publication` field |
+| --- | --- |
+| `Item Title` | `title` |
+| `Publication Title` | `publication_title` |
+| `Item DOI` | `doi` |
+| `Authors` | `authors` |
+| `Publication Year` | `year` |
+| `URL` | `pdf_url` |
+
+Authors are comma-separated and trimmed, with empty items omitted. The user
+corrects undelimited author cells manually; the parser does not infer name
+boundaries. By agreement, `URL` is copied into `pdf_url` even when it is a Springer
+page link. Keep every nonempty row, including collections. Map only the six
+columns above; all other `Publication` fields retain empty defaults. Unmapped
+columns do not enrich the output. Duplicate headers, missing required columns,
+extra row values, or malformed CSV are errors for that file.
+
+## Normalized output and failures
+
+`run_normalization(selection: Selection) -> list[NormalizationResult]` validates
+the entire author selection before processing. Each result contains `author`,
+`status` (`success`, `partial`, `failed`, or `skipped`), `publication_count`,
+optional `normalized_path`, and a tuple of `errors`.
+
+Output uses the canonical database name in the filename and the existing slug in
+the directory:
+
+```text
+data/<author-slug>/normalized/<canonical author name>-publications.json
+```
+
+`config.NORMALIZED_DIRECTORY_FORMAT` defines the directory relative to
+`config.DATA_DIRECTORY`, using the author slug. `config.NORMALIZED_FILENAME_FORMAT`
+defines the filename using the canonical author name. The document is a plain
+array of `Publication` objects with exactly the dataclass fields: `title`,
+`authors`, `affiliations`, `keywords`, `abstract`, `publication_title`, `year`,
+`issn`, `isbn`, `doi`, `pdf_url`, and `publisher`. Tuple fields serialize as JSON
+arrays. Missing strings are empty strings; missing tuple fields are empty arrays.
+JSON preserves Unicode, uses two-space indentation, and ends with a newline.
+
+Every run rebuilds the file from the selected raw inputs; it does not append to
+the previous normalized output. The normalization manager constructs the filepath,
+serializes the publications, and calls `storage.save_file()` with `replace=True`.
+The shared atomic-write helper replaces the file only after serialization and
+writing succeed. Raw files and paths remain
+unchanged. The workflow creates no Markdown or count reports.
+
+- No supported inputs: skip the author without creating/replacing a file.
+- At least one input parses successfully: save its results, including an empty
+  array for successful zero-result inputs.
+- A file fails: discard all of its records, report its path/error, and continue.
+  If another file succeeds, save those results with `partial` status.
+- Every input fails: retain existing JSON and return `failed` status.
+- Saving fails: retain existing JSON, report the failure, and continue other authors.
+
+The CLI prints completed/partial/skipped author outcomes and saved counts/paths
+to stdout, with file and saving errors on stderr. Its final summary counts all
+four statuses. Exit codes are `0` for successful/skipped processing, `1` when any
+author has partial/failed results or database validation fails, and `2` for CLI
+usage errors. No credentials, downloads, frontend, or report generation are
+invoked by normalization.
+
+## Reviewed JSON to final Markdown
+
+The installed command is `publication_markdown`; its module entry point is
+`python -m publication_markdown`. Accept bare `all`, `--author all`, or
+`--author "Name One, Name Two"`. Reuse shared comma-list parsing and the existing
+database author selection, including case-insensitive matching, canonical
+spelling, selection order, and deduplication. There is no directory argument,
+source flag, or top-level wrapper. Invalid CLI usage returns `2`; author/database
+validation failures return `1` before any outputs are changed.
+
+### Reviewed input selection
+
+`config.UPDATED_JSON_DIRECTORY_FORMAT` defaults to `{author_slug}/updated/`.
+`{author_slug}` is the existing author slug. Relative templates are rooted at
+`config.DATA_DIRECTORY`, independently of the working directory. Absolute templates
+are also supported. The final output location is independent of this input setting.
+
+Review creation and editing are manual. The workflow reads only JSON files in the
+configured author review directory. Filenames are unrestricted; for example:
+
+```text
+data/<author-slug>/updated/reviewed-publications.json
+```
+
+Use `utils.file_timestamps.get_creation_timestamp` to select the JSON file with
+the greatest filesystem creation timestamp. Extension matching is
+case-insensitive; other extensions and subdirectories are ignored. Filename
+timestamps and modification times do not affect selection. For equal creation
+times, select the first filename in sorted order. An unavailable or unreadable
+creation timestamp fails the author without selecting another file. Only the
+selected file's contents are read; malformed older contents do not affect a
+valid latest review.
+
+A missing review directory or no matching files skips the author and preserves
+existing final Markdown. An unreadable directory or selected file fails the
+author. Invalid latest JSON never falls back to an earlier review or to
+normalized/raw data. The workflow never creates, copies, or edits review inputs.
+
+### JSON contract and rendering
+
+`read_publications(path)` requires a JSON array of publication objects. Only the
+existing `Publication` fields are accepted. The `authors`, `affiliations`, and
+`keywords` values must be arrays containing only strings; they become tuples.
+Every other supplied field must be a string. Missing fields use the dataclass
+defaults. Unknown keys, non-object records, incorrect types (including `null`,
+numeric years, and mixed arrays), malformed JSON, or invalid encoding reject the
+whole review before writing. UTF-8 with an optional BOM is supported.
+
+Retain reviewed record order and duplicates. Manually added records appear in
+the final output; removed records disappear. Do not filter by publication author
+names or supplement the review from another dataset.
+
+The existing renderer lives in `publication_markdown/markdown_builder.py`, with
+the interface `build_markdown(author, publications) -> MarkdownBuildResult`.
+Its result contains `author`, optional `markdown_path`, and optional `error`,
+without a source field. Preserve single-line headings, Unicode, schema field
+order, labels, blank lines, empty field labels, and the final newline.
+
+### Final output and failures
+
+The combined final path is:
+
+```text
+data/<author-slug>/final/<canonical author name>-final.md
+```
+
+`config.FINAL_MARKDOWN_FILENAME_FORMAT` defines the filename. For a nonempty
+validated review, render all publications and use the shared atomic storage
+helper to replace the final file only after a complete UTF-8 write. Repeated
+runs replace that fixed file rather than creating dated or per-source outputs.
+
+For a valid empty review (`[]`), remove only that exact final file. An absent
+file is a successful no-op; do not create/remove directories or remove other
+files. Missing or invalid reviews never trigger deletion.
+
+`run_markdown(selection) -> list[MarkdownResult]` validates all selected authors
+before processing them. Results contain `author`, `status` (`generated`,
+`removed`, `skipped`, or `failed`), `publication_count`, optional `markdown_path`,
+optional `reviewed_path`, and optional `error`. The `removed` status includes an
+already absent final file. Reading, validation, rendering, replacement, and
+removal failures preserve previous final content and do not stop other authors.
+
+The CLI prints generated counts/paths, removal outcomes (including already
+absent files), and missing-input skips to stdout. Failures and their paths/stages
+are printed to stderr. Return `0` for successful processing/skips and `1` if any
+author fails. Generation does not load credentials, contact APIs, normalize data,
+invoke frontend/reporting, or modify raw, normalized, or reviewed inputs. It
+imports `helpers.author_builder` without depending on the collector package.

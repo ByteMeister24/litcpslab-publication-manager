@@ -17,7 +17,7 @@ import desktop_app
 class LauncherProcessTests(unittest.TestCase):
     def test_author_text_and_source_arguments_are_forwarded_unchanged(self):
         command = desktop_app.build_command(" René Researcher, Ada Researcher ", ("ieee", "sciencedirect"))
-        self.assertEqual(command, [sys.executable, "-u", str(PROJECT_ROOT / "src" / "download_publications.py"),
+        self.assertEqual(command, [sys.executable, "-u", "-m", "publication_collector",
                                    "--author", "René Researcher, Ada Researcher", "--source", "ieee,sciencedirect"])
         self.assertEqual(desktop_app.build_command("all", ("ieee",))[-4:], ["--author", "all", "--source", "ieee"])
         # Parsing, including invalid comma lists, belongs to the existing CLI.
@@ -63,7 +63,7 @@ class LauncherProcessTests(unittest.TestCase):
             self.assertNotIn("run-only-key", repr(command))
             self.assertEqual(options["env"]["IEEE_API_KEY"], "run-only-key")
             self.assertFalse(options["shell"])
-            self.assertEqual(options["cwd"], Path(directory))
+            self.assertEqual(options["cwd"], Path(directory) / "src")
             self.assertEqual(options["encoding"], "utf-8")
             self.assertEqual(options["stdin"], subprocess.DEVNULL)
             self.assertEqual(options["stdout"], subprocess.PIPE)

@@ -1,7 +1,8 @@
 """Coordinate author/source downloads without file writes."""
-from source_downloaders import ieee_xplore, sciencedirect
-from author_builder import get_selected_authors
-from models import DownloadConfirmation, DownloadError, DownloadRequest, Selection
+from helpers.author_builder import get_selected_authors
+from helpers.selection import Selection
+from publication_collector.download_models import DownloadConfirmation, DownloadError, DownloadRequest
+from publication_collector.source_downloaders import ieee_xplore, sciencedirect
 
 
 SUPPORTED_SOURCES = ("ieee", "sciencedirect")

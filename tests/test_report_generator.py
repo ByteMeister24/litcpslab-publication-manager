@@ -1,8 +1,6 @@
-"""JSON count history, HTML synchronization, and additive CLI integration."""
+"""Standalone JSON count history and HTML synchronization."""
 
-from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime
-import io
 import json
 from pathlib import Path
 import tempfile
@@ -13,8 +11,6 @@ from zoneinfo import ZoneInfo
 
 from support import PROJECT_ROOT
 import config
-from download_publications import main
-from models import DownloadConfirmation, DownloadError
 from report_generator import update_download_counts, update_report
 
 
@@ -210,34 +206,6 @@ class ReportGeneratorTests(unittest.TestCase):
                 self.assertEqual(self.json_file.read_bytes(), original_json)
                 self.assertEqual(self.report_file.read_bytes(), original_html)
                 self.assertEqual(set(self.report_file.parent.iterdir()), {self.report_file, self.json_file})
-
-    @patch("download_publications.run_download")
-    def test_cli_updates_json_and_html_from_confirmations_and_preserves_failed_counts(self, run):
-        update_download_counts({"Ada Researcher": {"ieee": 5}})
-        run.return_value = [DownloadConfirmation("René Researcher", "ieee", 17, Path("rene.json")),
-                            DownloadError("Ada Researcher", "ieee", "Download failed")]
-        stdout, stderr = io.StringIO(), io.StringIO()
-        with redirect_stdout(stdout), redirect_stderr(stderr):
-            status = main(["all"])
-        self.assertEqual(status, 1)
-        self.assertEqual(self.data()["Ada Researcher"]["ieee"], 5)
-        self.assertEqual(self.data()["René Researcher"]["ieee"], 17)
-        self.assertEqual(self.cell("Ada Researcher").text, "5")
-        self.assertEqual(self.cell("René Researcher").text, "17")
-        self.assertIn("Download report: 1 succeeded; 1 failed.", stdout.getvalue())
-        self.assertNotIn("Markdown", stdout.getvalue())
-        self.assertNotIn("Report update failed", stderr.getvalue())
-
-    @patch("download_publications.run_download")
-    def test_cli_keeps_json_when_html_save_fails(self, run):
-        run.return_value = [DownloadConfirmation("Ada Researcher", "ieee", 7, Path("ada.json"))]
-        self.report_file.write_text("<html>", encoding="utf-8")
-        stderr = io.StringIO()
-        with redirect_stdout(io.StringIO()), redirect_stderr(stderr):
-            self.assertEqual(main(["all"]), 0)
-        self.assertEqual(self.data()["Ada Researcher"]["ieee"], 7)
-        self.assertEqual(self.report_file.read_text(), "<html>")
-        self.assertIn("Report update failed", stderr.getvalue())
 
 
 if __name__ == "__main__":

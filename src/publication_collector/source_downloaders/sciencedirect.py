@@ -1,15 +1,14 @@
 """Retrieve ScienceDirect article metadata while preserving native JSON pages."""
 
-from datetime import date
 from http.client import HTTPException
 import json
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from author_builder import Author
-from models import DownloadConfirmation, DownloadError, Publication
-from source_downloaders.common import download_source as _download_source
+from helpers.author_builder import Author
+from publication_collector.download_models import DownloadConfirmation, DownloadError
+from publication_collector.source_downloaders.common import download_source
 
 
 __all__ = ["download"]
@@ -24,7 +23,7 @@ REQUEST_TIMEOUT_SECONDS = 30
 
 def download(author: Author) -> DownloadConfirmation | DownloadError:
     """Return a saved-download confirmation or a sanitized, stage-specific error."""
-    return _download_source(
+    return download_source(
         author,
         source=SOURCE,
         source_name="ScienceDirect",
@@ -142,58 +141,3 @@ def _download_pages(query: str, api_key: str) -> list[dict]:
     return pages
 
 
-def _text(value, field: str) -> str:
-    if isinstance(value, dict) and "$" in value:
-        value = value["$"]
-    if value is None:
-        return ""
-    if isinstance(value, str):
-        return value.strip()
-    if isinstance(value, int) and not isinstance(value, bool):
-        return str(value)
-    raise ValueError(f"ScienceDirect field {field} must be text or an integer.")
-
-
-def _strings(value, field: str) -> tuple[str, ...]:
-    values = value if isinstance(value, list) else [value]
-    return tuple(text for item in values if (text := _text(item, field)))
-
-
-def _normalize_article(article: dict) -> Publication:
-    """Map Article Metadata fields, leaving fields absent from this API empty."""
-    authors = article.get("authors")
-    if authors is None:
-        names = _strings(article.get("dc:creator"), "dc:creator")
-    else:
-        if not isinstance(authors, dict):
-            raise ValueError("ScienceDirect authors must be an object.")
-        entries = authors.get("author", [])
-        if isinstance(entries, dict):
-            entries = [entries]
-        if not isinstance(entries, list) or any(not isinstance(author, dict) for author in entries):
-            raise ValueError("ScienceDirect authors must contain author objects.")
-        author_names = []
-        for author in entries:
-            given_name = _text(author.get("given-name"), "given-name")
-            surname = _text(author.get("surname"), "surname")
-            name = " ".join(part for part in (given_name, surname) if part)
-            if name:
-                author_names.append(name)
-        names = tuple(author_names)
-
-    dates = _strings(article.get("prism:coverDate"), "prism:coverDate")
-    year = str(date.fromisoformat(dates[0]).year) if dates else ""
-    keywords = tuple(keyword.strip() for text in _strings(article.get("authkeywords"), "authkeywords")
-                     for keyword in text.split("|") if keyword.strip())
-    # The metadata API's scidir/self links are article pages/API URLs, not PDF URLs.
-    return Publication(
-        title=_text(article.get("dc:title"), "dc:title"),
-        authors=names,
-        keywords=keywords,
-        abstract=_text(article.get("dc:description"), "dc:description"),
-        publication_title=_text(article.get("prism:publicationName"), "prism:publicationName"),
-        year=year,
-        issn="; ".join(_strings(article.get("prism:issn"), "prism:issn")),
-        isbn="; ".join(_strings(article.get("prism:isbn"), "prism:isbn")),
-        doi=_text(article.get("prism:doi"), "prism:doi"),
-    )

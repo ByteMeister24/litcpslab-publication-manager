@@ -63,7 +63,7 @@ def update_download_counts(counts_by_author: dict[str, dict[str, int]]) -> list[
     now = datetime.now(ZoneInfo(config.DOWNLOAD_TIMEZONE))
     data = {"updated_at": now.isoformat(timespec="seconds"), **saved_counts}
     content = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
-    storage.write_complete_file(config.REPORT_JSON_FILE, content, replace=True)
+    storage.save_file(config.REPORT_JSON_FILE, content, replace=True)
     return warnings
 
 
@@ -111,4 +111,4 @@ def update_report() -> None:
     ET.indent(tree, space="  ")
     # Explicit closing tags keep the external script valid when opened as HTML.
     document = "<!DOCTYPE html>\n" + ET.tostring(root, encoding="unicode", short_empty_elements=False) + "\n"
-    storage.write_complete_file(config.REPORT_HTML_FILE, document, replace=True)
+    storage.save_file(config.REPORT_HTML_FILE, document, replace=True)

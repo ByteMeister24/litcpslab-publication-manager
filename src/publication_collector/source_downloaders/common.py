@@ -1,13 +1,16 @@
 """Shared download workflow; publisher modules supply queries and record counts."""
 
 from collections.abc import Callable
+from datetime import datetime
+import json
 import os
+from zoneinfo import ZoneInfo
 
 from dotenv import dotenv_values
 
 import config
-from author_builder import Author
-from models import DownloadConfirmation, DownloadError
+from helpers.author_builder import Author
+from publication_collector.download_models import DownloadConfirmation, DownloadError
 from utils import storage
 
 
@@ -43,7 +46,7 @@ def download_source(
 ) -> DownloadConfirmation | DownloadError:
     """Save complete native pages and return a confirmation or sanitized error."""
     api_key = ""
-    raw_file_path = None
+    download_file_path = None
     stage = "Download"
     try:
         api_key = _load_api_key(source_name, api_key_name)
@@ -52,14 +55,21 @@ def download_source(
         publication_count = count_publications(pages)
 
         stage = "Raw saving"
-        raw_file_path = storage.save_raw(author.slug, source, pages)
+        content = json.dumps(pages, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+        timestamp = datetime.now(ZoneInfo(config.DOWNLOAD_TIMEZONE)).strftime(config.DOWNLOAD_TIMESTAMP_FORMAT)
+        download_directory = config.DATA_DIRECTORY / config.DOWNLOAD_DIRECTORY_FORMAT.format(
+            author_slug=author.slug, source=source,
+        )
+        filepath = download_directory / config.DOWNLOAD_FILENAME_FORMAT.format(
+            author_slug=author.slug, source=source, timestamp=timestamp)
+        storage.save_file(filepath, content, replace=False)
 
         return DownloadConfirmation(author=author.name, source=source, publication_count=publication_count,
-                                    raw_file_path=raw_file_path)
+                                    raw_file_path=filepath)
     except Exception as error:
         message = f"{stage} failed: {error}"
-        if raw_file_path is not None:
-            message += f"; raw saved: {raw_file_path}"
+        if download_file_path is not None:
+            message += f"; raw saved: {download_file_path}"
         if api_key:
             message = message.replace(api_key, "[REDACTED]")
         return DownloadError(author=author.name, source=source, error=message)

@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 from support import page
 import config
-from author_builder import Author
-from models import DownloadError, DownloadConfirmation
-from source_downloaders import common, ieee_xplore, sciencedirect
+from helpers.author_builder import Author
+from publication_collector.download_models import DownloadError, DownloadConfirmation
+from publication_collector.source_downloaders import common, ieee_xplore, sciencedirect
 
 
 SOURCES = (ieee_xplore, sciencedirect)

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "litcpslab-publication-manager"
+version = "0.1.0"
+description = "Collect publication lists and prepare publication metadata."
+dynamic = ["dependencies"]
+
+[project.scripts]
+publication_collector = "publication_collector.cli.download_publications:main"
+publication_normalizer = "publication_normalizer.cli.normalize_publications:main"
+publication_markdown = "publication_markdown.cli.generate_markdown:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+py-modules = ["config", "publication_model"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["publication_collector*", "publication_normalizer*", "publication_markdown*", "helpers*", "utils*"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }

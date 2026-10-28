@@ -18,7 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 import config
-from download_manager import SUPPORTED_SOURCES
+from publication_collector.download_manager import SUPPORTED_SOURCES
 from utils.yaml_loader import convert_yaml_to_dict
 
 

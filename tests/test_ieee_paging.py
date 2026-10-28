@@ -9,8 +9,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlsplit
 
 from support import page
-from author_builder import Author
-from source_downloaders.ieee_xplore import PAGE_SIZE, _build_query, _download_pages, _fetch_page
+from helpers.author_builder import Author
+from publication_collector.source_downloaders.ieee_xplore import PAGE_SIZE, _build_query, _download_pages, _fetch_page
 
 
 class IEEEDownloadTests(unittest.TestCase):
@@ -29,7 +29,7 @@ class IEEEDownloadTests(unittest.TestCase):
             with self.subTest(author=author), self.assertRaises(ValueError):
                 _build_query(author)
 
-    @patch("source_downloaders.ieee_xplore.urlopen")
+    @patch("publication_collector.source_downloaders.ieee_xplore.urlopen")
     def test_request_uses_encoded_query_paging_and_https(self, open_url):
         response = page(1, [10])
         open_url.return_value.__enter__.return_value = io.BytesIO(json.dumps(response).encode())
@@ -46,7 +46,7 @@ class IEEEDownloadTests(unittest.TestCase):
         })
         self.assertGreater(open_url.call_args.kwargs["timeout"], 0)
 
-    @patch("source_downloaders.ieee_xplore._fetch_page")
+    @patch("publication_collector.source_downloaders.ieee_xplore._fetch_page")
     def test_all_pages_and_unknown_native_metadata_are_preserved(self, fetch):
         pages = [page(201, range(1, 201)), page(201, [201])]
         pages[0]["extra_native_field"] = {"untouched": ["é", True]}
@@ -54,26 +54,26 @@ class IEEEDownloadTests(unittest.TestCase):
         self.assertEqual(_download_pages(self.author, "test-key"), pages)
         self.assertEqual([call.args[2] for call in fetch.call_args_list], [1, 201])
 
-    @patch("source_downloaders.ieee_xplore._fetch_page")
+    @patch("publication_collector.source_downloaders.ieee_xplore._fetch_page")
     def test_short_intermediate_pages_advance_by_actual_record_count(self, fetch):
         pages = [page(3, [1]), page(3, [2, 3])]
         fetch.side_effect = pages
         self.assertEqual(_download_pages(self.author, "test-key"), pages)
         self.assertEqual([call.args[2] for call in fetch.call_args_list], [1, 2])
 
-    @patch("source_downloaders.ieee_xplore._fetch_page")
+    @patch("publication_collector.source_downloaders.ieee_xplore._fetch_page")
     def test_exact_page_boundary_does_not_request_an_extra_page(self, fetch):
         fetch.return_value = page(PAGE_SIZE, range(PAGE_SIZE))
         self.assertEqual(len(_download_pages(self.author, "test-key")), 1)
         fetch.assert_called_once()
 
-    @patch("source_downloaders.ieee_xplore._fetch_page")
+    @patch("publication_collector.source_downloaders.ieee_xplore._fetch_page")
     def test_zero_results_can_omit_the_unpopulated_articles_field(self, fetch):
         fetch.return_value = {"total_records": 0}
         self.assertEqual(_download_pages(self.author, "test-key"), [{"total_records": 0}])
         fetch.assert_called_once()
 
-    @patch("source_downloaders.ieee_xplore._fetch_page")
+    @patch("publication_collector.source_downloaders.ieee_xplore._fetch_page")
     def test_documented_count_name_and_string_count(self, fetch):
         fetch.return_value = {"totalfound": "1", "articles": [{"article_number": 10}]}
         self.assertEqual(len(_download_pages(self.author, "test-key")), 1)
@@ -89,7 +89,7 @@ class IEEEDownloadTests(unittest.TestCase):
             page(PAGE_SIZE + 1, range(PAGE_SIZE + 1)),
         ]
         for invalid in invalid_pages:
-            with self.subTest(response=invalid), patch("source_downloaders.ieee_xplore._fetch_page", return_value=invalid):
+            with self.subTest(response=invalid), patch("publication_collector.source_downloaders.ieee_xplore._fetch_page", return_value=invalid):
                 with self.assertRaises(ValueError):
                     _download_pages(self.author, "test-key")
 
@@ -97,7 +97,7 @@ class IEEEDownloadTests(unittest.TestCase):
         for responses in [[page(2, [1]), page(2, [])],
                           [page(2, [1]), page(3, [2])],
                           [page(2, [1]), page(2, [1])]]:
-            with self.subTest(responses=responses), patch("source_downloaders.ieee_xplore._fetch_page", side_effect=responses):
+            with self.subTest(responses=responses), patch("publication_collector.source_downloaders.ieee_xplore._fetch_page", side_effect=responses):
                 with self.assertRaises(ValueError):
                     _download_pages(self.author, "test-key")
 
@@ -106,13 +106,13 @@ class IEEEDownloadTests(unittest.TestCase):
         errors = [HTTPError(secret_url, 429, secret_url, {}, None), URLError(secret_url),
                   TimeoutError(secret_url), IncompleteRead(b"partial")]
         for error in errors:
-            with self.subTest(error=error), patch("source_downloaders.ieee_xplore.urlopen", side_effect=error):
+            with self.subTest(error=error), patch("publication_collector.source_downloaders.ieee_xplore.urlopen", side_effect=error):
                 with self.assertRaises(RuntimeError) as caught:
                     _fetch_page("secret-key", "query", 1)
                 self.assertNotIn("secret-key", str(caught.exception))
                 self.assertNotIn("https://", str(caught.exception))
 
-    @patch("source_downloaders.ieee_xplore.urlopen")
+    @patch("publication_collector.source_downloaders.ieee_xplore.urlopen")
     def test_invalid_json_and_encoding_fail(self, open_url):
         for content in [b"<html>Bad gateway</html>", b"\xff"]:
             with self.subTest(content=content):

@@ -21,7 +21,7 @@ desktop_exe = EXE(
     upx=False,
 )
 
-cli = Analysis([str(source / "download_publications.py")], pathex=[str(source)], datas=timezone_data)
+cli = Analysis([str(source / "publication_collector" / "__main__.py")], pathex=[str(source)], datas=timezone_data)
 cli_exe = EXE(
     PYZ(cli.pure),
     cli.scripts,

@@ -11,8 +11,8 @@ from tkinter import messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
 import config
-from download_manager import SUPPORTED_SOURCES
-from source_downloaders import ieee_xplore, sciencedirect
+from publication_collector.download_manager import SUPPORTED_SOURCES
+from publication_collector.source_downloaders import ieee_xplore, sciencedirect
 
 
 SOURCE_API_KEYS = {
@@ -36,7 +36,7 @@ def build_command(authors: str, sources: tuple[str, ...]) -> list[str]:
         suffix = ".exe" if sys.platform == "win32" else ""
         command = [str(Path(sys.executable).parent / f"download_publications{suffix}")]
     else:
-        command = [sys.executable, "-u", str(config.PROJECT_ROOT / "src" / "download_publications.py")]
+        command = [sys.executable, "-u", "-m", "publication_collector"]
     return command + ["--author", authors.strip(), "--source", ",".join(sources)]
 
 
@@ -63,7 +63,7 @@ def start_download(authors: str, sources: tuple[str, ...], api_keys: dict[str, s
     environment = build_environment(sources, api_keys)
     return subprocess.Popen(
         command,
-        cwd=config.PROJECT_ROOT,
+        cwd=config.PROJECT_ROOT if getattr(sys, "frozen", False) else config.PROJECT_ROOT / "src",
         env=environment,
         shell=False,
         stdin=subprocess.DEVNULL,

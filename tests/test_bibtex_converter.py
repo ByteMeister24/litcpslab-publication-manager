@@ -1,17 +1,15 @@
-"""Offline tests for BibTeX conversion and its console command."""
+"""Offline tests for ACM BibTeX normalization."""
 
 from contextlib import redirect_stderr, redirect_stdout
 import io
 from pathlib import Path
-import subprocess
-import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
-from support import PROJECT_ROOT
-from bibtex_converter import convert_bibtex
-from models import Publication
+import support
+from publication_normalizer.source_normalizers.acm import normalize_file
+from publication_model import Publication
 
 
 class BibtexConverterTests(unittest.TestCase):
@@ -44,7 +42,7 @@ class BibtexConverterTests(unittest.TestCase):
     pages = {1--10}
 }
 ''')
-        publications = convert_bibtex(self.input_path)
+        publications = normalize_file(self.input_path)
         self.assertEqual(publications, [Publication(
             title="A Protected Title",
             authors=("Smith, Ada", "Doe, René"),
@@ -66,7 +64,7 @@ class BibtexConverterTests(unittest.TestCase):
 @article{a, title={Second}}
 @misc{untitled}
 ''')
-        self.assertEqual(convert_bibtex(self.input_path), [
+        self.assertEqual(normalize_file(self.input_path), [
             Publication(title="First", publication_title="A Conference"),
             Publication(title="Second"),
             Publication(),
@@ -74,7 +72,7 @@ class BibtexConverterTests(unittest.TestCase):
 
     def test_blank_journal_falls_back_to_booktitle(self):
         self.write_bibtex('@inproceedings{k, journal={ }, booktitle={A Conference}}')
-        self.assertEqual(convert_bibtex(self.input_path), [Publication(publication_title="A Conference")])
+        self.assertEqual(normalize_file(self.input_path), [Publication(publication_title="A Conference")])
 
     def test_authors_split_before_decoding_protected_names(self):
         self.write_bibtex(r'''
@@ -82,7 +80,7 @@ class BibtexConverterTests(unittest.TestCase):
     author = {M{\"u}ller, Anna and {Research and Development Group} AND de la Cruz, Jr., Juan}
 }
 ''')
-        self.assertEqual(convert_bibtex(self.input_path)[0].authors, (
+        self.assertEqual(normalize_file(self.input_path)[0].authors, (
             "Müller, Anna", "Research and Development Group", "de la Cruz, Jr., Juan",
         ))
 
@@ -96,7 +94,7 @@ class BibtexConverterTests(unittest.TestCase):
     publisher = {Research \& Development}
 }
 ''')
-        self.assertEqual(convert_bibtex(self.input_path), [Publication(
+        self.assertEqual(normalize_file(self.input_path), [Publication(
             title="An Important Study",
             abstract="Größe, café, and $x_{i}$.",
             affiliations=("Universität A",),
@@ -106,7 +104,7 @@ class BibtexConverterTests(unittest.TestCase):
 
     def test_utf8_bom_and_uppercase_field_names_are_supported(self):
         self.write_bibtex('\ufeff@ARTICLE{k, TITLE={Über Research}, AUTHOR={Ada and René}, YEAR=2026}')
-        self.assertEqual(convert_bibtex(self.input_path), [
+        self.assertEqual(normalize_file(self.input_path), [
             Publication(title="Über Research", authors=("Ada", "René"), year="2026"),
         ])
 
@@ -117,7 +115,7 @@ class BibtexConverterTests(unittest.TestCase):
 @preamble{"A preamble"}
 @article{k, title="A Title", journal=venue}
 ''')
-        self.assertEqual(convert_bibtex(self.input_path), [
+        self.assertEqual(normalize_file(self.input_path), [
             Publication(title="A Title", publication_title="A Journal"),
         ])
 
@@ -125,7 +123,7 @@ class BibtexConverterTests(unittest.TestCase):
         for content in ("", " \n\t", "@comment{Nothing to convert}"):
             with self.subTest(content=content):
                 self.write_bibtex(content)
-                self.assertEqual(convert_bibtex(self.input_path), [])
+                self.assertEqual(normalize_file(self.input_path), [])
 
     def test_unexpanded_string_concatenation_raises_instead_of_returning_incorrect_text(self):
         for content in (
@@ -135,11 +133,11 @@ class BibtexConverterTests(unittest.TestCase):
             with self.subTest(content=content):
                 self.write_bibtex(content)
                 with self.assertRaisesRegex(ValueError, "Entry 'k'.*concatenation.*unsupported"):
-                    convert_bibtex(self.input_path)
+                    normalize_file(self.input_path)
 
     def test_literal_hashes_and_url_fragments_are_preserved(self):
         self.write_bibtex('@article{k, title={A # Title}, url={https://example.invalid/a#part}}')
-        self.assertEqual(convert_bibtex(self.input_path), [
+        self.assertEqual(normalize_file(self.input_path), [
             Publication(title="A # Title", pdf_url="https://example.invalid/a#part"),
         ])
 
@@ -147,7 +145,7 @@ class BibtexConverterTests(unittest.TestCase):
         self.write_bibtex('@article{valid, title={Valid}}\n@article{broken, title={Never closed}')
         with self.assertLogs("bibtexparser", level="WARNING"), \
              self.assertRaisesRegex(ValueError, "parsing failed at line 2.*end of file"):
-            convert_bibtex(self.input_path)
+            normalize_file(self.input_path)
 
     def test_duplicate_entries_and_fields_are_rejected(self):
         cases = (
@@ -159,60 +157,26 @@ class BibtexConverterTests(unittest.TestCase):
             with self.subTest(content=content):
                 self.write_bibtex(content)
                 with self.assertRaisesRegex(ValueError, message):
-                    convert_bibtex(self.input_path)
+                    normalize_file(self.input_path)
 
     def test_missing_unreadable_and_invalid_utf8_files_raise(self):
         with self.assertRaises(FileNotFoundError):
-            convert_bibtex(self.input_path)
+            normalize_file(self.input_path)
         with patch.object(Path, "read_text", side_effect=PermissionError("Access denied")):
             with self.assertRaises(PermissionError):
-                convert_bibtex(self.input_path)
+                normalize_file(self.input_path)
         self.input_path.write_bytes(b"\xff")
         with self.assertRaises(UnicodeError):
-            convert_bibtex(self.input_path)
+            normalize_file(self.input_path)
 
     def test_conversion_is_silent_and_does_not_write_files(self):
         content = '@article{k, title={A Title}}'
         self.write_bibtex(content)
         stdout, stderr = io.StringIO(), io.StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
-            publications = convert_bibtex(self.input_path)
+            publications = normalize_file(self.input_path)
         self.assertEqual(publications, [Publication(title="A Title")])
         self.assertEqual(stdout.getvalue(), "")
         self.assertEqual(stderr.getvalue(), "")
         self.assertEqual(self.input_path.read_text(encoding="utf-8"), content)
         self.assertEqual(list(self.directory.iterdir()), [self.input_path])
-
-    def run_command(self, *arguments: str) -> subprocess.CompletedProcess:
-        return subprocess.run(
-            [sys.executable, "-B", str(PROJECT_ROOT / "src" / "bibtex_converter.py"), *arguments],
-            cwd=self.directory, capture_output=True, text=True, check=False,
-        )
-
-    def test_console_success_and_empty_input(self):
-        for content, count in (("@article{k, title={Title}}", 1), ("", 0)):
-            with self.subTest(count=count):
-                self.write_bibtex(content)
-                result = self.run_command(str(self.input_path))
-                self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertEqual(result.stdout, f"Converted {count} publication(s).\n")
-                self.assertEqual(result.stderr, "")
-
-    def test_console_errors_are_simple_and_return_one(self):
-        for content in (None, '@article{broken, title={Never closed}'):
-            with self.subTest(content=content):
-                if content is not None:
-                    self.write_bibtex(content)
-                result = self.run_command(str(self.input_path))
-                self.assertEqual(result.returncode, 1)
-                self.assertEqual(result.stdout, "")
-                self.assertTrue(result.stderr.startswith("Error: "), result.stderr)
-                self.assertEqual(len(result.stderr.splitlines()), 1)
-
-    def test_console_usage_errors_return_two(self):
-        for arguments in ((), ("one.bib", "two.bib"), ("one.bib", "--author", "Ada")):
-            with self.subTest(arguments=arguments):
-                result = self.run_command(*arguments)
-                self.assertEqual(result.returncode, 2)
-                self.assertEqual(result.stdout, "")
-                self.assertIn("usage:", result.stderr)
