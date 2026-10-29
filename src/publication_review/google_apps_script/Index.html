@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Publication review</title>
+  <style>
+    :root { color-scheme: light; font: 15px/1.5 system-ui, sans-serif; color: #182b3a; background: #f3f6f8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1540px; margin: auto; padding: 34px 28px 60px; }
+    h1 { font-size: clamp(26px, 4vw, 36px); line-height: 1.2; margin: 0 0 10px; letter-spacing: -.8px; }
+    h2 { font-size: 18px; margin: 0; }
+    p { margin: 8px 0 0; }
+    .intro { color: #536779; max-width: 780px; margin-bottom: 24px; }
+    .eyebrow { text-transform: uppercase; font-size: 11px; font-weight: 750; letter-spacing: 1.7px; color: #087a70; margin-bottom: 10px; }
+    .card { background: white; border: 1px solid #dce4e9; border-radius: 12px; padding: 22px; margin-bottom: 18px; }
+    .selection { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 18px; }
+    label { display: block; font-size: 13px; font-weight: 650; }
+    select, input, textarea { font: inherit; color: inherit; background: white; border: 1px solid #bccbd5; border-radius: 6px; padding: 9px 11px; width: 100%; }
+    select { min-width: min(360px, 75vw); margin-top: 6px; }
+    input:focus, textarea:focus, select:focus { outline: 2px solid #198d82; outline-offset: 1px; }
+    textarea { resize: vertical; min-height: 62px; }
+    button { font: inherit; font-weight: 650; border: 1px solid #bccbd5; border-radius: 6px; padding: 9px 14px; background: white; color: #203d50; cursor: pointer; }
+    button:hover { background: #edf4f5; }
+    button.primary { background: #08796f; border-color: #08796f; color: white; }
+    button.primary:hover { background: #065e57; }
+    button:disabled, select:disabled { opacity: .55; cursor: default; }
+    .badge { display: inline-block; font-size: 12px; font-weight: 650; color: #416071; background: #ecf2f5; border-radius: 30px; padding: 6px 12px; }
+    .badge.saved { color: #07655b; background: #e2f5ee; }
+    .muted { font-size: 13px; color: #607586; }
+    #savedAt { display: block; margin-top: 5px; }
+    #message { padding: 12px 16px; border: 1px solid #b7dacf; border-radius: 8px; background: #edf9f3; margin-bottom: 18px; white-space: pre-wrap; }
+    #message.error { background: #fff0ee; color: #8c2925; border-color: #edc2bc; }
+    #message.info { background: #eef5fb; color: #294d6b; border-color: #cbddeb; }
+    fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 18px 0; }
+    .toolbar .spacer { flex: 1; }
+    #search { max-width: 320px; }
+    .table-card { padding: 0; overflow: hidden; }
+    .table-heading { padding: 20px 22px 0; }
+    .table-note { padding: 0 22px 16px; }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; background: #edf3f6; padding: 13px 10px; color: #506675; }
+    td { border-top: 1px solid #e5ecf0; padding: 12px 10px; vertical-align: top; }
+    td textarea, td input { padding: 7px 8px; font-size: 13px; border-color: #d0dce4; }
+    td textarea { min-height: 72px; }
+    td:first-child { text-align: center; min-width: 65px; }
+    td:nth-child(2) { min-width: 300px; }
+    td:nth-child(3) { min-width: 195px; }
+    td:nth-child(4) { min-width: 80px; }
+    td:nth-child(5) { min-width: 205px; }
+    td:nth-child(6) { min-width: 190px; }
+    td:last-child { min-width: 103px; }
+    td input[type=checkbox] { width: 18px; height: 18px; accent-color: #08796f; margin-top: 10px; }
+    td:last-child button { display: block; width: 100%; font-size: 12px; padding: 7px; margin-bottom: 6px; }
+    tr.excluded { background: #f8fafb; }
+    tr.excluded textarea, tr.excluded input:not([type=checkbox]) { color: #84939e; }
+    #empty { text-align: center; color: #647889; padding: 35px; }
+    .coordinator { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+    dialog { border: 1px solid #b8cbd4; border-radius: 12px; width: min(800px, 94vw); max-height: 90vh; padding: 24px; color: inherit; }
+    dialog::backdrop { background: #142a3b88; }
+    .details-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+    .details-grid label { display: flex; flex-direction: column; gap: 5px; }
+    .details-grid .wide { grid-column: 1 / -1; }
+    .dialog-actions { display: flex; justify-content: end; gap: 10px; margin-top: 20px; }
+    [hidden] { display: none !important; }
+    @media (max-width: 650px) { main { padding: 24px 14px; } .card { padding: 16px; } .details-grid { grid-template-columns: 1fr; } .toolbar .spacer { display: none; } #search { max-width: none; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Research publications</div>
+  <h1>Review your publication list</h1>
+  <p class="intro">Select your name, check the list, and save your review. You can correct details, leave out publications that are not yours, and add missing work.</p>
+  <div id="message" role="status" aria-live="polite" hidden></div>
+
+  <section class="card selection" aria-label="Author selection">
+    <label for="author">Your name<select id="author" disabled><option value="">Loading names…</option></select></label>
+    <div><span id="reviewStatus" class="badge">Select your name to begin</span><span id="savedAt" class="muted"></span></div>
+  </section>
+
+  <fieldset id="editor" disabled>
+    <div class="toolbar">
+      <button id="add" type="button">+ Add publication</button>
+      <input id="search" type="search" placeholder="Search this list" aria-label="Search publications">
+      <span class="spacer"></span>
+      <button id="backup" type="button">Download current edits</button>
+      <button id="reload" type="button">Reload saved list</button>
+      <button id="save" type="button" class="primary">Save review</button>
+    </div>
+    <section class="card table-card" aria-label="Publications">
+      <div class="table-heading"><h2 id="listHeading">Publications</h2><p id="counts" class="muted">Choose an author to see their publications.</p></div>
+      <p class="muted table-note">Uncheck “Include” to leave out a publication. Enter one author per line. “Details” opens every metadata field. Changes are saved only when you select “Save review”.</p>
+      <div class="table-scroll">
+        <table id="publications" hidden>
+          <thead><tr><th>Include</th><th>Title</th><th>Authors</th><th>Year</th><th>Publication</th><th>DOI</th><th>Actions</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p id="empty">Select your name above.</p>
+    </section>
+  </fieldset>
+
+  <section class="card coordinator">
+    <div><h2>Collect completed reviews</h2><p id="progress" class="muted">Loading review status…</p></div>
+    <div class="toolbar"><button id="refreshStatus" type="button" disabled>Refresh status</button><button id="export" type="button" disabled>Download all saved reviews (.zip)</button></div>
+  </section>
+  <p class="muted">This is a shared review page for a trusted group. Anyone with the link can select any name and edit or download its publications.</p>
+</main>
+
+<dialog id="details" aria-labelledby="detailsHeading">
+  <form id="detailsForm">
+    <h2 id="detailsHeading">Publication details</h2>
+    <p class="muted">Use one item per line for authors, affiliations, and keywords. Other fields accept plain text.</p>
+    <div id="detailFields" class="details-grid"></div>
+    <div class="dialog-actions"><button id="cancelDetails" type="button">Cancel</button><button type="submit" class="primary">Apply changes</button></div>
+  </form>
+</dialog>
+
+<script>
+  const byId = id => document.getElementById(id);
+  let fields = [];
+  let authors = [];
+  let selectedId = '';
+  let revision = null;
+  let rows = [];
+  let dirty = false;
+  let editingRow = null;
+  let addingPublication = false;
+
+  function server(name, ...args) {
+    return new Promise((resolve, reject) => {
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(error => reject(new Error(error.message || String(error))))[name](...args);
+    });
+  }
+
+  function message(text, kind = '') {
+    const element = byId('message');
+    element.textContent = text;
+    element.className = kind;
+    element.hidden = !text;
+  }
+
+  function setBusy(value) {
+    byId('author').disabled = value || !authors.length;
+    byId('editor').disabled = value || !selectedId;
+    byId('refreshStatus').disabled = value;
+    byId('export').disabled = value || !authors.some(author => author.reviewed);
+    byId('save').textContent = value ? 'Please wait…' : 'Save review';
+  }
+
+  function updateCounts() {
+    const included = rows.filter(row => row.included).length;
+    byId('counts').textContent = included + ' included · ' + rows.length + ' in your list' + (dirty ? ' · Unsaved changes' : '');
+  }
+
+  function changed() {
+    dirty = true;
+    updateCounts();
+  }
+
+  function stringItems(text) {
+    return text.split(/\r?\n/).map(item => item.trim()).filter(item => item !== '');
+  }
+
+  function includedPublications() {
+    // Search only affects the displayed rows. Saving always considers the whole list.
+    return rows.filter(row => row.included).map(row => row.publication);
+  }
+
+  function render() {
+    const body = byId('rows');
+    body.replaceChildren();
+    const query = byId('search').value.trim().toLocaleLowerCase();
+    let visible = 0;
+    rows.forEach((row, index) => {
+      if (query && !Object.values(row.publication).flat().join(' ').toLocaleLowerCase().includes(query)) return;
+      visible += 1;
+      const tr = document.createElement('tr');
+      tr.classList.toggle('excluded', !row.included);
+      const includeCell = document.createElement('td');
+      const include = document.createElement('input');
+      include.type = 'checkbox';
+      include.checked = row.included;
+      include.setAttribute('aria-label', 'Include publication ' + (index + 1));
+      include.addEventListener('change', () => { row.included = include.checked; tr.classList.toggle('excluded', !row.included); changed(); });
+      includeCell.append(include);
+      tr.append(includeCell);
+      ['title', 'authors', 'year', 'publication_title', 'doi'].forEach(name => {
+        const field = fields.find(item => item.name === name);
+        const cell = document.createElement('td');
+        const input = document.createElement(name === 'year' || name === 'doi' ? 'input' : 'textarea');
+        input.value = field.array ? row.publication[name].join('\n') : row.publication[name];
+        input.setAttribute('aria-label', field.label + ', publication ' + (index + 1));
+        input.addEventListener('input', () => { row.publication[name] = field.array ? stringItems(input.value) : input.value; changed(); });
+        cell.append(input);
+        tr.append(cell);
+      });
+      const actions = document.createElement('td');
+      const edit = document.createElement('button');
+      edit.type = 'button'; edit.textContent = 'Details';
+      edit.addEventListener('click', () => openDetails(row));
+      actions.append(edit);
+      tr.append(actions);
+      body.append(tr);
+    });
+    byId('publications').hidden = visible === 0;
+    byId('empty').hidden = visible !== 0;
+    byId('empty').textContent = rows.length ? 'No publications match your search.' : 'No publications in this list. Use “Add publication” to add one.';
+    updateCounts();
+  }
+
+  function openDetails(row, adding = false) {
+    editingRow = row;
+    addingPublication = adding;
+    const container = byId('detailFields');
+    container.replaceChildren();
+    fields.forEach(field => {
+      const label = document.createElement('label');
+      label.textContent = field.label + (field.array ? ' (one per line)' : '');
+      if (field.name === 'title' || field.name === 'abstract') label.className = 'wide';
+      const input = document.createElement('textarea');
+      input.dataset.field = field.name;
+      input.value = field.array ? row.publication[field.name].join('\n') : row.publication[field.name];
+      input.dataset.original = input.value;
+      input.rows = field.name === 'abstract' ? 5 : 2;
+      label.append(input);
+      container.append(label);
+    });
+    byId('details').showModal();
+  }
+
+  function populateAuthors() {
+    const select = byId('author');
+    select.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = ''; placeholder.textContent = 'Select your name';
+    select.append(placeholder);
+    authors.forEach(author => {
+      const option = document.createElement('option');
+      option.value = author.id;
+      option.textContent = author.name + (author.reviewed ? ' — review saved' : '');
+      select.append(option);
+    });
+    select.value = selectedId;
+    const completed = authors.filter(author => author.reviewed).length;
+    byId('progress').textContent = completed + ' of ' + authors.length + ' authors have saved a review. The ZIP includes the latest saved list for each of them.';
+  }
+
+  function applyLoaded(data) {
+    selectedId = data.id;
+    revision = data.revision;
+    rows = data.publications.map(publication => ({publication: publication, included: true}));
+    dirty = false;
+    byId('search').value = '';
+    byId('author').value = selectedId;
+    byId('listHeading').textContent = data.name + ' — publications';
+    byId('reviewStatus').textContent = data.reviewed ? 'Review saved' : 'Review not saved yet';
+    byId('reviewStatus').className = data.reviewed ? 'badge saved' : 'badge';
+    byId('savedAt').textContent = data.savedAt ? 'Last saved: ' + new Date(data.savedAt).toLocaleString() : '';
+    render();
+  }
+
+  async function load(id) {
+    if (dirty && !window.confirm('Discard your unsaved edits and load the saved list?')) { byId('author').value = selectedId; return; }
+    setBusy(true);
+    message('Loading publications…', 'info');
+    try {
+      const data = await server('loadAuthor', id);
+      applyLoaded(data);
+      message(data.reviewed ? 'Your saved review is loaded. You can make further changes and save again.' : 'Check the publications and select “Save review” when you are finished.', 'info');
+    } catch (error) { byId('author').value = selectedId; message(error.message, 'error'); }
+    finally { setBusy(false); }
+  }
+
+  function download(content, filename, type) {
+    const url = URL.createObjectURL(new Blob([content], {type: type}));
+    const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = filename;
+    document.body.append(anchor); anchor.click(); anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  }
+
+  byId('author').addEventListener('change', () => {
+    const id = byId('author').value;
+    if (id) load(id); else byId('author').value = selectedId;
+  });
+  byId('reload').addEventListener('click', () => load(selectedId));
+  byId('search').addEventListener('input', render);
+  byId('add').addEventListener('click', () => {
+    const publication = {};
+    fields.forEach(field => { publication[field.name] = field.array ? [] : ''; });
+    const row = {publication: publication, included: true};
+    openDetails(row, true);
+  });
+  byId('cancelDetails').addEventListener('click', () => byId('details').close());
+  byId('detailsForm').addEventListener('submit', event => {
+    event.preventDefault();
+    byId('detailFields').querySelectorAll('textarea').forEach(input => {
+      if (input.value === input.dataset.original) return;
+      const field = fields.find(item => item.name === input.dataset.field);
+      editingRow.publication[field.name] = field.array ? stringItems(input.value) : input.value;
+      changed();
+    });
+    if (addingPublication) {
+      rows.push(editingRow); byId('search').value = ''; changed();
+    }
+    byId('details').close(); render();
+  });
+  byId('backup').addEventListener('click', () => {
+    download(JSON.stringify(includedPublications(), null, 2) + '\n', selectedId + '-current-edits.json', 'application/json');
+  });
+  byId('save').addEventListener('click', async () => {
+    const publications = includedPublications();
+    if (!publications.length && !window.confirm('This review includes no publications. Saving it will allow the Markdown workflow to remove your final publication file. Save an empty review?')) return;
+    setBusy(true); message('Saving your review…', 'info');
+    try {
+      const data = await server('saveReview', selectedId, publications, revision);
+      applyLoaded(data);
+      const author = authors.find(item => item.id === selectedId);
+      author.reviewed = true; author.savedAt = data.savedAt; populateAuthors();
+      message('Review saved. ' + data.publications.length + ' publication(s) included. You can close this page.');
+    } catch (error) { message(error.message, 'error'); }
+    finally { setBusy(false); }
+  });
+  byId('export').addEventListener('click', async () => {
+    setBusy(true); message('Preparing the saved reviews…', 'info');
+    try {
+      const archive = await server('exportReviews');
+      const bytes = Uint8Array.from(atob(archive.base64), character => character.charCodeAt(0));
+      download(bytes, archive.filename, 'application/zip');
+      message('Downloaded ' + archive.authorCount + ' saved review(s). Unsaved edits are not included.');
+    } catch (error) { message(error.message, 'error'); }
+    finally { setBusy(false); }
+  });
+  byId('refreshStatus').addEventListener('click', async () => {
+    setBusy(true);
+    try {
+      const catalog = await server('getCatalog');
+      authors = catalog.authors; populateAuthors(); message('Review status refreshed.', 'info');
+    } catch (error) { message(error.message, 'error'); }
+    finally { setBusy(false); }
+  });
+  window.addEventListener('beforeunload', event => {
+    const detailChanges = byId('details').open && Array.from(byId('detailFields').querySelectorAll('textarea'))
+      .some(input => input.value !== input.dataset.original);
+    if (dirty || detailChanges) { event.preventDefault(); event.returnValue = ''; }
+  });
+
+  async function start() {
+    setBusy(true);
+    try {
+      const catalog = await server('getCatalog');
+      fields = catalog.fields; authors = catalog.authors; populateAuthors();
+    } catch (error) { message(error.message, 'error'); }
+    finally { setBusy(false); }
+  }
+  start();
+</script>
+</body>
+</html>
