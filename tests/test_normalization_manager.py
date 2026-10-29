@@ -42,7 +42,9 @@ class NormalizationManagerTests(unittest.TestCase):
         self.addCleanup(guard.stop)
 
     def source_file(self, source, filename, content, slug="ada-researcher"):
-        path = config.DATA_DIRECTORY / slug / "download" / source / filename
+        path = config.DATA_DIRECTORY / config.DOWNLOAD_DIRECTORY_FORMAT.format(
+            author_slug=slug, source=source,
+        ) / filename
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
         self.creation_times.setdefault(path, float(len(self.creation_times) + 1))
@@ -55,16 +57,16 @@ class NormalizationManagerTests(unittest.TestCase):
         filename = f"{slug}-{source}-{timestamp}.json"
         return self.source_file(source, filename, json.dumps(payload, ensure_ascii=False), slug)
 
-    def springer_file(self, slug="ada-researcher", title="Springer"):
+    def springer_file(self, slug="ada-researcher", title="Springer", doi=""):
         path = self.source_file("springer", "SearchResults.csv", "", slug)
         with path.open("w", encoding="utf-8-sig", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=REQUIRED_COLUMNS)
             writer.writeheader()
-            writer.writerow({"Item Title": title, "Authors": "Ada Researcher, René Researcher"})
+            writer.writerow({"Item Title": title, "Item DOI": doi, "Authors": "Ada Researcher, René Researcher"})
         return path
 
     def normalized_file(self, slug="ada-researcher"):
-        return self.data / slug / "normalized" / f"{slug}-publications.json"
+        return config.DATA_DIRECTORY / "normalized" / config.NORMALIZED_FILENAME_FORMAT.format(author_slug=slug)
 
     def existing_output(self, content="Previous normalized JSON"):
         path = self.normalized_file()
@@ -75,7 +77,7 @@ class NormalizationManagerTests(unittest.TestCase):
     def read_result(self, result):
         return json.loads(result.normalized_path.read_text(encoding="utf-8"))
 
-    def test_four_sources_combined_in_order_with_exact_dataclass_fields(self):
+    def test_four_sources_deduplicated_in_order_with_exact_dataclass_fields(self):
         self.api_file(payload=[{"articles": [{"title": "Same title", "authors": {"authors": [
             {"full_name": "Another Author"}]}}]}])
         self.api_file("sciencedirect", [{"search-results": {"entry": [{"dc:title": "ScienceDirect"}]}}])
@@ -85,11 +87,12 @@ class NormalizationManagerTests(unittest.TestCase):
         result = run_normalization(("ADA RESEARCHER", "ada researcher"))[0]
         self.assertEqual(result.status, "success")
         self.assertEqual(result.author, "Ada Researcher")
-        self.assertEqual(result.publication_count, 4)
+        self.assertEqual(result.publication_count, 3)
+        self.assertEqual(result.duplicates_removed, 1)
         self.assertEqual(result.normalized_path, self.normalized_file())
         records = self.read_result(result)
         self.assertEqual([record["title"] for record in records],
-                         ["Same title", "ScienceDirect", "Same title", "Über ACM"])
+                         ["Same title", "ScienceDirect", "Über ACM"])
         for record in records:
             self.assertEqual(set(record), set(asdict(Publication())))
             for field in ("authors", "affiliations", "keywords"):
@@ -99,6 +102,62 @@ class NormalizationManagerTests(unittest.TestCase):
         self.assertEqual({path: path.read_bytes() for path in raw_files}, raw_files)
         self.http.assert_not_called()
         self.assertFalse(config.ENV_FILE.exists())
+
+    def test_doi_duplicates_within_and_across_sources_keep_first_record(self):
+        self.api_file(payload=[{"articles": [
+            {"title": "IEEE first", "doi": "10.1000/shared", "authors": {"authors": [
+                {"full_name": "First Author"}]}},
+            {"title": "IEEE duplicate", "doi": "https://doi.org/10.1000/shared", "abstract": "Do not merge"},
+            {"title": "IEEE unique", "doi": "10.1000/ieee"},
+        ]}])
+        self.api_file("sciencedirect", [{"search-results": {"entry": [
+            {"dc:title": "ScienceDirect duplicate", "prism:doi": "DOI:10.1000/SHARED"},
+            {"dc:title": "ScienceDirect unique", "prism:doi": "10.1000/sciencedirect"},
+        ]}}])
+        self.springer_file(title="Springer duplicate", doi="10.1000/shared")
+        self.source_file("acm", "export.bib", '''
+@article{duplicate,title={ACM duplicate},doi={10.1000/shared}}
+@article{unique,title={ACM unique},doi={10.1000/acm}}
+''')
+
+        result, = run_normalization(("Ada Researcher",))
+
+        self.assertEqual((result.status, result.publication_count, result.errors), ("success", 4, ()))
+        self.assertEqual(result.duplicates_removed, 4)
+        records = self.read_result(result)
+        self.assertEqual([record["title"] for record in records],
+                         ["IEEE first", "IEEE unique", "ScienceDirect unique", "ACM unique"])
+        self.assertEqual(records[0]["doi"], "10.1000/shared")
+        self.assertEqual(records[0]["authors"], ["First Author"])
+        self.assertEqual(records[0]["abstract"], "")
+
+    def test_duplicate_removal_preserves_partial_status_and_cleaned_count(self):
+        self.api_file(payload=[{"articles": [{"title": "First", "doi": "10.1000/shared"}]}])
+        self.springer_file(title="Duplicate", doi="10.1000/shared")
+        malformed = self.source_file("sciencedirect", "invalid.json", "invalid JSON")
+
+        result, = run_normalization(("Ada Researcher",))
+
+        self.assertEqual((result.status, result.publication_count), ("partial", 1))
+        self.assertEqual(result.duplicates_removed, 1)
+        self.assertEqual([record["title"] for record in self.read_result(result)], ["First"])
+        self.assertEqual(len(result.errors), 1)
+        self.assertIn(str(malformed), result.errors[0])
+
+    def test_duplicate_check_runs_separately_for_each_author(self):
+        for slug in ("ada-researcher", "rené-researcher"):
+            self.api_file(slug=slug, payload=[{"articles": [
+                {"title": "Shared paper", "doi": "10.1000/shared"},
+                {"title": "Shared paper", "doi": "10.1000/shared"},
+            ]}])
+
+        results = run_normalization("all")
+
+        self.assertEqual([result.publication_count for result in results], [1, 1])
+        self.assertEqual([result.duplicates_removed for result in results], [1, 1])
+        self.assertEqual([result.status for result in results], ["success", "success"])
+        for result in results:
+            self.assertEqual([record["doi"] for record in self.read_result(result)], ["10.1000/shared"])
 
     def test_download_and_normalization_use_the_configured_download_directory(self):
         with patch.object(config, "DOWNLOAD_DIRECTORY_FORMAT", "{source}/incoming/{author_slug}"):
@@ -175,13 +234,13 @@ class NormalizationManagerTests(unittest.TestCase):
     def test_missing_supported_inputs_and_legacy_layout_skip_without_replacing_output(self):
         previous = self.existing_output()
         legacy = self.data / "ada-researcher" / "download" / "older-ieee.json"
-        legacy.parent.mkdir()
+        legacy.parent.mkdir(parents=True)
         legacy.write_text(json.dumps([page(1, [1])]), encoding="utf-8")
         self.source_file("springer", "notes.txt", "unsupported")
         results = run_normalization("all")
         self.assertEqual([result.status for result in results], ["skipped", "skipped"])
         self.assertEqual(previous.read_text(), "Previous normalized JSON")
-        self.assertFalse((self.data / "rené-researcher").exists())
+        self.assertFalse(self.normalized_file("rené-researcher").exists())
 
     def test_successful_zero_result_file_skips_and_preserves_existing_output(self):
         previous = self.existing_output()
@@ -190,6 +249,7 @@ class NormalizationManagerTests(unittest.TestCase):
         with patch("utils.storage.save_file") as save:
             result = run_normalization(("Ada Researcher",))[0]
         self.assertEqual((result.status, result.publication_count), ("skipped", 0))
+        self.assertEqual(result.duplicates_removed, 0)
         self.assertIsNone(result.normalized_path)
         self.assertEqual(result.errors, ())
         self.assertEqual((previous.read_bytes(), previous.stat().st_mtime_ns), before)
@@ -210,7 +270,7 @@ class NormalizationManagerTests(unittest.TestCase):
                 result = run_normalization(("Ada Researcher",))[0]
                 self.assertEqual((result.status, result.publication_count), ("skipped", 0))
                 self.assertIsNone(result.normalized_path)
-                self.assertFalse((Path(directory) / "ada-researcher" / "normalized").exists())
+                self.assertFalse((Path(directory) / "normalized").exists())
                 self.assertEqual(path.read_bytes(), before)
                 save.assert_not_called()
 
@@ -238,7 +298,7 @@ class NormalizationManagerTests(unittest.TestCase):
         results = run_normalization("all")
         self.assertEqual([result.status for result in results], ["failed", "success"])
         self.assertEqual(previous.read_text(), "Previous normalized JSON")
-        self.assertEqual(results[1].normalized_path.name, "rené-researcher-publications.json")
+        self.assertEqual(results[1].normalized_path, self.normalized_file("rené-researcher"))
         self.assertEqual(len(results[0].errors), 2)
 
     def test_error_in_one_article_discards_all_records_from_that_file(self):
@@ -261,7 +321,8 @@ class NormalizationManagerTests(unittest.TestCase):
         save.assert_not_called()
 
     def test_reruns_replace_instead_of_append_and_are_deterministic(self):
-        self.springer_file()
+        self.api_file(payload=[{"articles": [{"title": "First", "doi": "10.1000/shared"}]}])
+        self.springer_file(title="Duplicate", doi="10.1000/shared")
         first = run_normalization(("Ada Researcher",))[0]
         original = first.normalized_path.read_bytes()
         second = run_normalization(("Ada Researcher",))[0]
@@ -273,9 +334,11 @@ class NormalizationManagerTests(unittest.TestCase):
         result = run_normalization(("Ada Researcher",))[0]
         self.assertEqual((result.status, result.publication_count), ("success", 1))
         self.assertEqual(result.errors, ())
+        self.assertEqual(result.duplicates_removed, 0)
 
     def test_save_failure_preserves_previous_file_cleans_temporary_files_and_continues(self):
         previous = self.existing_output()
+        self.api_file(payload=[{"articles": [{"title": "Springer"}]}])
         self.springer_file()
         self.springer_file(slug="rené-researcher")
         replace = os.replace
@@ -288,8 +351,9 @@ class NormalizationManagerTests(unittest.TestCase):
         with patch("utils.storage.os.replace", side_effect=fail_first):
             results = run_normalization("all")
         self.assertEqual([result.status for result in results], ["failed", "success"])
+        self.assertEqual([result.duplicates_removed for result in results], [1, 0])
         self.assertEqual(previous.read_text(), "Previous normalized JSON")
-        self.assertEqual(list(previous.parent.iterdir()), [previous])
+        self.assertEqual(set(previous.parent.iterdir()), {previous, self.normalized_file("rené-researcher")})
         self.assertIn("disk full", results[0].errors[-1])
 
     def test_unknown_authors_fail_before_normalizing_any_inputs(self):

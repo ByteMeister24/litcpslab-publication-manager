@@ -46,7 +46,8 @@ Implementation paths below are relative to `src/`.
 | `publication_collector/source_downloaders/common.py` | Load credentials, run the supplied source functions, construct the download filepath and JSON content, save complete raw pages, and construct a confirmation or sanitized error |
 | `publication_collector/__main__.py` | Run the collector as a Python module |
 | `publication_normalizer/cli/normalize_publications.py` | Parse author selections and print normalization outcomes, paths, errors, and exit status |
-| `publication_normalizer/normalization_manager.py` | Define per-author `NormalizationResult` outcomes, select inputs in source order, collect file-level results, and save complete or partial per-author datasets |
+| `publication_normalizer/normalization_manager.py` | Define per-author `NormalizationResult` outcomes, select inputs in source order, collect file-level results, remove duplicates, and save complete or partial per-author datasets |
+| `publication_normalizer/duplicate_checker.py` | Return a new publication list retaining the first copy of each DOI or unambiguous title identity without changing metadata |
 | `publication_normalizer/source_normalizers/` | Read IEEE/ScienceDirect native pages, map Springer CSV fields, and convert ACM BibTeX |
 | `publication_normalizer/__main__.py` | Run normalization as a Python module |
 | `publication_markdown/cli/generate_markdown.py` | Parse author selections and print generated, removed, skipped, and failed outcomes |
@@ -307,8 +308,9 @@ The default layout uses source subfolders under `data/<author-slug>/download/`:
 
 Extension matching is case-insensitive. Other extensions and older flat files
 directly under `download/` are ignored. Sources are processed in the table order;
-records retain their order within pages/files. Duplicates are retained, and
-publication authors are not used to filter or assign records: the containing
+records retain their order within pages/files. After aggregation, duplicate
+checking retains the first copy as defined below. Publication authors are not
+used to filter or assign records: the containing
 database author's directory determines the output owner.
 
 Every source uses the same rule: select the matching file with the newest
@@ -356,12 +358,43 @@ columns above; all other `Publication` fields retain empty defaults. Unmapped
 columns do not enrich the output. Duplicate headers, missing required columns,
 extra row values, or malformed CSV are errors for that file.
 
+## Normalization duplicate checking
+
+After all successful source conversions are aggregated for one author, call
+`publication_normalizer.duplicate_checker.remove_duplicates(publications:
+list[Publication]) -> list[Publication]` before JSON serialization. It returns a
+new list and checks both within-source and cross-source duplicates. Each author
+is checked independently.
+
+DOI comparison trims whitespace, ignores case, and removes a leading `doi:`
+label and HTTP/HTTPS resolver prefixes for `doi.org` or `dx.doi.org`. Title
+comparison trims and collapses whitespace and ignores case; punctuation remains
+significant. These transformations affect comparison keys only.
+
+First index the distinct nonempty DOI keys associated with each nonempty title
+key across the entire input. Then assign each record an identity:
+
+- A nonempty DOI key identifies the record, even when titles differ.
+- A DOI-less record uses the sole DOI associated with its title, if one exists.
+- Otherwise, a nonempty title identifies the record. If the title has multiple
+  distinct DOIs, DOI-less copies form a separate title group; the different DOI
+  groups remain separate.
+- Records lacking both keys are all retained.
+
+Retain the first record for each identity in source and page/file order, with all
+its fields unchanged. Later metadata is not merged. In particular, an earlier
+DOI-less copy can be retained instead of a later matching DOI-bearing copy.
+Duplicate removal is successful processing and adds no errors. Saved publication
+counts reflect the remaining records. The manager records the difference between
+the aggregated and cleaned list lengths as `NormalizationResult.duplicates_removed`.
+
 ## Normalized output and failures
 
 `run_normalization(selection: Selection) -> list[NormalizationResult]` validates
 the entire author selection before processing. Each result contains `author`,
 `status` (`success`, `partial`, `failed`, or `skipped`), `publication_count`,
-optional `normalized_path`, and a tuple of `errors`.
+optional `normalized_path`, a tuple of `errors`, and `duplicates_removed` (default
+`0`). The duplicate count is also retained when saving fails after the check.
 
 Output uses the existing author slug in both the filename and directory:
 
@@ -380,8 +413,8 @@ JSON preserves Unicode, uses two-space indentation, and ends with a newline.
 
 For authors with publications, each run rebuilds the file from the selected raw
 inputs; it does not append to the previous normalized output. The normalization
-manager constructs the filepath,
-serializes the publications, and calls `storage.save_file()` with `replace=True`.
+manager constructs the filepath, removes duplicates,
+serializes the remaining publications, and calls `storage.save_file()` with `replace=True`.
 The shared atomic-write helper replaces the file only after serialization and
 writing succeed. Raw files and paths remain
 unchanged. The workflow creates no Markdown.
@@ -397,7 +430,9 @@ unchanged. The workflow creates no Markdown.
 - Saving fails: retain existing JSON, report the failure, and continue other authors.
 
 The CLI prints completed/partial/skipped author outcomes and saved counts/paths
-to stdout, with file and saving errors on stderr. Its final summary counts all
+to stdout, with file and saving errors on stderr. Completed and partial outcomes
+include `<count> duplicate(s) removed`, including zero when nothing matched.
+Its final summary counts all
 four statuses. Exit codes are `0` for successful/skipped processing, `1` when any
 author has partial/failed results or database validation fails, and `2` for CLI
 usage errors. Skips report that there are no publications to normalize. No

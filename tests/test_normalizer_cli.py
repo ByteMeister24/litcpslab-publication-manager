@@ -48,7 +48,8 @@ class NormalizerCLITests(unittest.TestCase):
 
     @patch("publication_normalizer.cli.normalize_publications.run_normalization")
     def test_successes_and_skips_print_counts_paths_and_return_zero(self, run):
-        run.return_value = [NormalizationResult("Ada Researcher", "success", 2, Path("Ada Researcher-publications.json")),
+        run.return_value = [NormalizationResult("Ada Researcher", "success", 2, Path("Ada Researcher-publications.json"),
+                                               duplicates_removed=3),
                             NormalizationResult("René Researcher", "skipped")]
         stdout, stderr = io.StringIO(), io.StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
@@ -56,15 +57,26 @@ class NormalizerCLITests(unittest.TestCase):
         run.assert_called_once_with(("Ada Researcher", "René Researcher"))
         self.assertEqual(status, 0)
         self.assertIn("2 publication(s)", stdout.getvalue())
+        self.assertIn("3 duplicate(s) removed", stdout.getvalue())
         self.assertIn("Ada Researcher-publications.json", stdout.getvalue())
         self.assertIn("Normalization skipped: René Researcher", stdout.getvalue())
         self.assertIn("1 succeeded; 0 partial; 0 failed; 1 skipped", stdout.getvalue())
         self.assertEqual(stderr.getvalue(), "")
 
     @patch("publication_normalizer.cli.normalize_publications.run_normalization")
+    def test_success_reports_zero_duplicates_removed(self, run):
+        run.return_value = [NormalizationResult("Ada Researcher", "success", 1, Path("normalized.json"))]
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            status = main(["--author", "Ada Researcher"])
+        self.assertEqual(status, 0)
+        self.assertIn("0 duplicate(s) removed", stdout.getvalue())
+
+    @patch("publication_normalizer.cli.normalize_publications.run_normalization")
     def test_partial_and_failed_results_report_errors_and_return_one(self, run):
         run.return_value = [
-            NormalizationResult("Ada Researcher", "partial", 1, Path("partial.json"), ("bad.csv: missing column",)),
+            NormalizationResult("Ada Researcher", "partial", 1, Path("partial.json"), ("bad.csv: missing column",),
+                                duplicates_removed=2),
             NormalizationResult("René Researcher", "failed", errors=("export.bib: malformed",)),
         ]
         stdout, stderr = io.StringIO(), io.StringIO()
@@ -73,6 +85,7 @@ class NormalizerCLITests(unittest.TestCase):
         run.assert_called_once_with("all")
         self.assertEqual(status, 1)
         self.assertIn("Normalization partial: Ada Researcher", stdout.getvalue())
+        self.assertIn("2 duplicate(s) removed", stdout.getvalue())
         self.assertIn("bad.csv: missing column", stderr.getvalue())
         self.assertIn("export.bib: malformed", stderr.getvalue())
         self.assertIn("previous normalized file retained", stderr.getvalue())
@@ -102,7 +115,9 @@ class NormalizerCLITests(unittest.TestCase):
             root = Path(directory)
             authors = root / "authors.yaml"
             authors.write_text(AUTHOR_YAML, encoding="utf-8")
-            empty = root / "data" / "ada-researcher" / "download" / "acm" / "empty.bib"
+            empty = root / "data" / config.DOWNLOAD_DIRECTORY_FORMAT.format(
+                author_slug="ada-researcher", source="acm",
+            ) / "empty.bib"
             empty.parent.mkdir(parents=True)
             empty.write_text("", encoding="utf-8")
             stdout, stderr = io.StringIO(), io.StringIO()
@@ -114,7 +129,7 @@ class NormalizerCLITests(unittest.TestCase):
             self.assertIn("Normalization skipped: Ada Researcher: no publications to normalize.", stdout.getvalue())
             self.assertIn("0 succeeded; 0 partial; 0 failed; 1 skipped", stdout.getvalue())
             self.assertEqual(stderr.getvalue(), "")
-            self.assertFalse((root / "data" / "ada-researcher" / "normalized").exists())
+            self.assertFalse((root / "data" / "normalized").exists())
 
     def test_real_conversion_needs_no_api_modules_credentials_or_network(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -123,12 +138,16 @@ class NormalizerCLITests(unittest.TestCase):
                             ignore=shutil.ignore_patterns("__pycache__", "*.egg-info"))
             (project / "db").mkdir()
             (project / "db" / "authors.yaml").write_text(AUTHOR_YAML, encoding="utf-8")
-            raw = project / "data" / "ada-researcher" / "download" / "springer" / "SearchResults.csv"
+            raw = project / "data" / config.DOWNLOAD_DIRECTORY_FORMAT.format(
+                author_slug="ada-researcher", source="springer",
+            ) / "SearchResults.csv"
             raw.parent.mkdir(parents=True)
             with raw.open("w", encoding="utf-8", newline="") as stream:
                 writer = csv.DictWriter(stream, fieldnames=REQUIRED_COLUMNS)
                 writer.writeheader()
-                writer.writerow({"Item Title": "Über research", "Authors": "Ada Researcher, René Researcher"})
+                writer.writerow({"Item Title": "Über research", "Item DOI": "10.1000/offline",
+                                 "Authors": "Ada Researcher, René Researcher"})
+                writer.writerow({"Item Title": "Later duplicate", "Item DOI": "https://doi.org/10.1000/offline"})
             before = raw.read_bytes()
             script = '''
 from pathlib import Path
@@ -154,8 +173,13 @@ with patch.dict(sys.modules, {name: None for name in (
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("Normalization completed: Ada Researcher", result.stdout)
-            normalized = project / "data" / "ada-researcher" / "normalized" / "ada-researcher-publications.json"
-            self.assertEqual(json.loads(normalized.read_text())[0]["title"], "Über research")
+            self.assertIn("1 publication(s)", result.stdout)
+            self.assertIn("1 duplicate(s) removed", result.stdout)
+            normalized = project / "data" / "normalized" / config.NORMALIZED_FILENAME_FORMAT.format(
+                author_slug="ada-researcher",
+            )
+            records = json.loads(normalized.read_text())
+            self.assertEqual([record["title"] for record in records], ["Über research"])
             self.assertEqual(raw.read_bytes(), before)
             self.assertFalse((project / ".env").exists())
             self.assertFalse(list((project / "data").rglob("*.md")))

@@ -86,6 +86,33 @@ supplied URL is stored in `pdf_url` as agreed, including page links. Other field
 stay empty, even if an additional column has a similarly named value. Collections
 and other content types are retained. Input is UTF-8, with an optional BOM.
 
+## Duplicate checking
+
+Before saving, normalization automatically removes repeated publications from
+each author's combined list, including repetitions within a single source.
+Matching nonempty DOIs identify duplicates even if titles differ. Comparison
+ignores DOI case and surrounding whitespace and removes a leading `doi:` label
+and HTTP/HTTPS resolver prefixes for `doi.org` or `dx.doi.org`.
+
+When a DOI is missing, a matching title can identify the duplicate. Title
+comparison ignores case and trims/collapses whitespace; punctuation remains
+significant. A DOI-less copy joins the sole DOI associated with that title
+anywhere in the combined list. If the title has multiple different DOIs, those
+records stay separate and DOI-less copies form their own title group. Repeated
+DOI-less copies in that group are collapsed. Records lacking both DOI and title
+are all kept.
+
+The first copy is kept unchanged, and later copies do not fill its missing
+metadata. This also applies when the first copy has no DOI and a later matching
+copy does. Comparison never rewrites saved metadata. Reported publication counts
+reflect the cleaned list; removing duplicates does not cause a partial result.
+Completed and partial console outcomes also show how many duplicates were
+removed, including `0 duplicate(s) removed` when nothing matched. For example:
+
+```text
+Normalization completed: Ada Researcher: 12 publication(s); 3 duplicate(s) removed; normalized: ...
+```
+
 ## Output and partial results
 
 Each output is a plain JSON array with exactly the `Publication` fields. Authors,
@@ -95,7 +122,8 @@ author slug: the database name lowercased with spaces replaced by hyphens.
 The directory and filename templates in `src/config.py` both accept `{author_slug}`.
 
 Records are combined in IEEE, ScienceDirect, Springer, ACM order, preserving
-page/file record order. Repeated publications are retained. The workflow assigns
+page/file record order. Duplicate checking retains the first matching copy in
+that order. The workflow assigns
 all records in an author's raw folders to that author's output; it does not
 match or filter publication author names.
 
@@ -130,6 +158,6 @@ generation reads reviewed copies, not these generated normalized files.
 ```
 
 Tests cover publisher mappings, creation-time selection for all four formats,
-preserved duplicates, partial results, atomic replacement, and
+DOI/title duplicate removal, partial results, atomic replacement, and
 credential-free/network-free execution from another directory. For contracts and
 component ownership, see the [workflow specification](specs/publication-pipelines-specification.md).
