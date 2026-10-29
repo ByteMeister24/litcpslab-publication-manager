@@ -1,6 +1,5 @@
 """Load the complete YAML author mapping into Author dataclasses."""
 
-import yaml
 from dataclasses import dataclass
 import config
 from utils.yaml_loader import convert_yaml_to_dict

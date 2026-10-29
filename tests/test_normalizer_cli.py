@@ -123,7 +123,7 @@ def guard(event, args):
 
 sys.addaudithook(guard)
 with patch.dict(sys.modules, {name: None for name in (
-    'publication_collector', 'dotenv', 'desktop_app', 'report_generator', 'publication_markdown',
+    'publication_collector', 'dotenv', 'publication_markdown',
 )}):
     from publication_normalizer.cli.normalize_publications import main
     raise SystemExit(main(['--author', 'ada researcher']))

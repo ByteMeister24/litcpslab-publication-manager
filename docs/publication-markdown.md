@@ -3,6 +3,10 @@
 This workflow converts your manually reviewed publication JSON into the existing
 Markdown format. It runs independently of downloading and normalization.
 
+For colleagues to review lists through one shared browser link, use the
+[Google Apps Script review app](publication-review-google-apps-script.md).
+Its batch export supplies the reviewed JSON files used by this workflow.
+
 ## Install and run
 
 From the project directory, activate the project environment and refresh its

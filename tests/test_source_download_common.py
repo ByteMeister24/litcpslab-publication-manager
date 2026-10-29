@@ -1,7 +1,6 @@
 """Publisher-independent workflow and failure contracts."""
 
 import json
-import os
 from datetime import datetime
 from pathlib import Path
 import tempfile
@@ -22,12 +21,10 @@ class SharedDownloadTests(unittest.TestCase):
         self.addCleanup(directory.cleanup)
         self.root = Path(directory.name)
         self.author = Author("René Researcher", ("University A",))
+        (self.root / ".env").write_text("EXAMPLE_API_KEY=run-only-key\n", encoding="utf-8")
         for context in (
             patch.object(config, "DATA_DIRECTORY", self.root / "data"),
             patch.object(config, "ENV_FILE", self.root / ".env"),
-            patch.dict(os.environ, {
-                config.CREDENTIAL_MODE_VARIABLE: "environment", "EXAMPLE_API_KEY": "run-only-key"
-            }, clear=True),
         ):
             context.start()
             self.addCleanup(context.stop)
@@ -53,7 +50,6 @@ class SharedDownloadTests(unittest.TestCase):
         query.assert_called_once_with(self.author)
         retrieve.assert_called_once_with("source-specific query", "run-only-key")
         count.assert_called_once_with(pages)
-        self.assertFalse((self.root / ".env").exists())
         self.assertNotIn("run-only-key", result.raw_file_path.read_text(encoding="utf-8"))
 
     def test_configured_filepath_and_native_json_are_passed_to_save_file(self):

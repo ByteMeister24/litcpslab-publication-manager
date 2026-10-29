@@ -3,7 +3,7 @@
 The source collection workflow downloads IEEE Xplore and ScienceDirect publication
 lists and saves complete native JSON responses. It prints download confirmations
 or errors and a final summary. Normalization and Markdown creation are separate
-workflows; downloading does not generate Markdown or update JSON/HTML count reports.
+workflows; downloading does not generate Markdown.
 
 The implementation is in `src/publication_collector/`. See the
 [workflow specification](specs/publication-pipelines-specification.md) for
@@ -56,8 +56,7 @@ SCIENCEDIRECT_API_KEY=your-sciencedirect-api-key
 Normal CLI use reads this file at download time, ignores process environment
 API keys, and disables variable interpolation. A missing, unassigned, or blank
 key produces a download error before any HTTP request. Imports and CLI help do
-not load credentials. The existing explicit environment credential mode remains
-available as described in the specification.
+not load credentials.
 
 ## Run collection
 
@@ -136,7 +135,6 @@ summary after processing.
 
 Metadata requiring later normalization does not fail an otherwise valid complete
 download. Normalization and Markdown creation do not run during collection.
-Existing JSON/HTML report files are neither required nor updated.
 
 | Exit code | Meaning |
 | --- | --- |
@@ -156,17 +154,12 @@ URLs are preserved in native metadata when returned; PDF files are not downloade
 Collector tests are split between CLI behavior (`test_collector_cli.py`),
 coordination (`test_download_manager.py`), source-specific retrieval, and the
 shared download workflow. They use synthetic credentials, temporary directories,
-and mocked HTTP. Regressions cover unchanged report files, the package entry point,
+and mocked HTTP. Regressions cover the package entry point,
 selection, pagination, credential redaction, raw storage, and continued processing
-after failures. Existing converter, rendering, and frontend tests remain separate.
+after failures. Normalization and rendering tests remain separate.
 
-## Existing conversion utilities
+## Normalization
 
-The existing [CSV converter](../src/csv_to_semantic_markdown.py) and
-[BibTeX converter](../src/bibtex_converter.py) remain separate from collection.
-The CSV utility converts a manual IEEE CSV directly to Markdown. The BibTeX
-utility returns `Publication` instances and its CLI prints the converted count.
 The separate [normalization workflow](publication-normalization.md) now combines
 saved IEEE/ScienceDirect JSON, one Springer CSV, and one ACM BibTeX file into
-per-author normalized JSON. It reuses the BibTeX converter. The direct IEEE CSV
-converter remains a standalone utility outside that workflow.
+per-author normalized JSON.

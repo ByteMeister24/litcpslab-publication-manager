@@ -11,7 +11,6 @@ import unittest
 from unittest.mock import patch
 
 from support import PROJECT_ROOT
-import config
 from publication_collector.cli.download_publications import main, parse_request
 from publication_collector.download_models import DownloadConfirmation, DownloadError, DownloadRequest
 
@@ -104,34 +103,6 @@ class CLITests(unittest.TestCase):
             self.assertEqual(main(["all"]), 1)
         self.assertIn("Unknown author", stderr.getvalue())
 
-    @patch("publication_collector.cli.download_publications.run_download")
-    def test_download_outcomes_do_not_create_or_update_report_files(self, run):
-        confirmation = DownloadConfirmation("Ada Researcher", "ieee", 3, Path("raw.json"))
-        error = DownloadError("René Researcher", "ieee", "Download failed: unavailable")
-        for outcomes, expected_status in (([confirmation], 0), ([error], 1), ([confirmation, error], 1)):
-            for existing in (False, True):
-                with self.subTest(outcomes=outcomes, existing=existing), tempfile.TemporaryDirectory() as directory:
-                    output = Path(directory) / "output"
-                    json_path, html_path = output / "report.json", output / "report.html"
-                    if existing:
-                        output.mkdir()
-                        json_path.write_text("invalid JSON must be ignored", encoding="utf-8")
-                        html_path.write_text("<html>existing report</html>", encoding="utf-8")
-                    original = {path: path.read_bytes() for path in output.glob("*")}
-                    run.return_value = outcomes
-                    stdout, stderr = io.StringIO(), io.StringIO()
-                    with patch.object(config, "REPORT_JSON_FILE", json_path), \
-                            patch.object(config, "REPORT_HTML_FILE", html_path), \
-                            redirect_stdout(stdout), redirect_stderr(stderr):
-                        status = main(["all"])
-                    self.assertEqual(status, expected_status)
-                    self.assertEqual({path: path.read_bytes() for path in output.glob("*")}, original)
-                    self.assertNotIn("Report update", stdout.getvalue() + stderr.getvalue())
-                    if error not in outcomes:
-                        self.assertEqual(stderr.getvalue(), "")
-                    if not existing:
-                        self.assertFalse(output.exists())
-
     def test_package_entry_point_shows_help_from_another_directory(self):
         with tempfile.TemporaryDirectory() as directory:
             result = subprocess.run(
@@ -146,13 +117,12 @@ class CLITests(unittest.TestCase):
             self.assertEqual(result.stderr, "")
             self.assertEqual(list(Path(directory).iterdir()), [])
 
-    def test_collector_imports_without_frontend_reporting_or_conversion_modules(self):
+    def test_collector_imports_without_normalization_or_markdown_modules(self):
         script = """
 from unittest.mock import patch
 import sys
 with patch.dict(sys.modules, {name: None for name in (
-    'desktop_app', 'tkinter', 'report_generator', 'publication_markdown',
-    'bibtex_converter', 'csv_to_semantic_markdown',
+    'publication_normalizer', 'publication_markdown',
 )}):
     from publication_collector.cli.download_publications import main
     main(['--help'])

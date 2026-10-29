@@ -3,7 +3,6 @@
 from collections.abc import Callable
 from datetime import datetime
 import json
-import os
 from zoneinfo import ZoneInfo
 
 from dotenv import dotenv_values
@@ -15,12 +14,6 @@ from utils import storage
 
 
 def _load_api_key(source_name: str, api_key_name: str) -> str:
-    if os.environ.get(config.CREDENTIAL_MODE_VARIABLE) == "environment":
-        api_key = os.environ.get(api_key_name, "").strip()
-        if not api_key:
-            raise ValueError(f"{api_key_name} is missing or empty in launcher credentials.")
-        return api_key
-
     if not config.ENV_FILE.is_file():
         raise ValueError(f"{source_name} credential file is missing: {config.ENV_FILE}.")
     try:
@@ -46,7 +39,6 @@ def download_source(
 ) -> DownloadConfirmation | DownloadError:
     """Save complete native pages and return a confirmation or sanitized error."""
     api_key = ""
-    download_file_path = None
     stage = "Download"
     try:
         api_key = _load_api_key(source_name, api_key_name)
@@ -68,8 +60,6 @@ def download_source(
                                     raw_file_path=filepath)
     except Exception as error:
         message = f"{stage} failed: {error}"
-        if download_file_path is not None:
-            message += f"; raw saved: {download_file_path}"
         if api_key:
             message = message.replace(api_key, "[REDACTED]")
         return DownloadError(author=author.name, source=source, error=message)

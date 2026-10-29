@@ -114,7 +114,7 @@ def guard(event, args):
 sys.addaudithook(guard)
 with patch.dict(sys.modules, {name: None for name in (
     'publication_collector', 'publication_normalizer',
-    'bibtex_converter', 'bibtexparser', 'dotenv', 'desktop_app', 'tkinter', 'report_generator',
+    'bibtexparser', 'dotenv',
 )}):
     from publication_markdown.cli.generate_markdown import main
     raise SystemExit(main(['--author', 'ada researcher']))

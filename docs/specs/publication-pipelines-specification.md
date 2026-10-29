@@ -14,18 +14,20 @@ The project has three separate workflows:
    that author's exact final Markdown file.
 
 The implemented source collection workflow supports IEEE Xplore and ScienceDirect.
-It does not normalize metadata, create Markdown, or update JSON/HTML count reports.
+It does not normalize metadata or create Markdown.
 Additional publishers and PDF downloading are outside its current scope.
 
 IEEE and ScienceDirect conversion helpers belong to the normalization package;
 the collector does not import them. Markdown rendering belongs to the third
-workflow. Existing standalone converters, frontend, and HTML reporting remain separate.
+workflow.
 
 For commands and setup, see the [download guide](../citation-download.md).
 For normalization commands and manual-input preparation, see the
 [normalization guide](../publication-normalization.md).
 For review preparation and final Markdown commands, see the
 [Markdown guide](../publication-markdown.md).
+For a shared browser-based review page, see the
+[Google Apps Script setup guide](../publication-review-google-apps-script.md).
 
 ## Components and ownership
 
@@ -42,7 +44,7 @@ Implementation paths below are relative to `src/`.
 | `publication_collector/__main__.py` | Run the collector as a Python module |
 | `publication_normalizer/cli/normalize_publications.py` | Parse author selections and print normalization outcomes, paths, errors, and exit status |
 | `publication_normalizer/normalization_manager.py` | Define per-author `NormalizationResult` outcomes, select inputs in source order, collect file-level results, and save complete or partial per-author datasets |
-| `publication_normalizer/source_normalizers/` | Read IEEE/ScienceDirect native pages, map Springer CSV fields, and reuse the BibTeX converter for ACM |
+| `publication_normalizer/source_normalizers/` | Read IEEE/ScienceDirect native pages, map Springer CSV fields, and convert ACM BibTeX |
 | `publication_normalizer/__main__.py` | Run normalization as a Python module |
 | `publication_markdown/cli/generate_markdown.py` | Parse author selections and print generated, removed, skipped, and failed outcomes |
 | `publication_markdown/markdown_manager.py` | Select reviewed inputs, coordinate generation, and remove the exact final file for empty reviews |
@@ -62,7 +64,7 @@ The manager owns `SUPPORTED_SOURCES` and `DOWNLOADERS`. Source API URLs, page
 sizes, timeouts, and credential-key names belong to their source modules.
 The CLI owns console output; the manager and sources do not print. The shared
 source workflow invokes storage directly; the manager performs no file writes.
-The collector does not import frontend or report-generation modules.
+The collector does not import normalization or Markdown modules.
 
 ## Data contracts
 
@@ -141,8 +143,7 @@ current working directory.
 The CLI always passes a `DownloadRequest`. The manager does not accept a bare
 `"all"` string. Successful outcomes print the author, source, count, and raw path
 to stdout. Errors print the author, source, and sanitized error to stderr.
-A final console summary counts successes and failures. No persistent count
-report is read, created, or updated.
+A final console summary counts successes and failures.
 
 Exit codes are `0` when all downloads succeed, `1` for validation or download/raw
 storage failures, and `2` for CLI usage errors. A successful zero-result search
@@ -183,12 +184,7 @@ and CLI help do not load credentials. Keys are trimmed and validated before
 requests. Missing, unassigned, or blank keys return download errors; process
 environment keys are not a fallback.
 
-The existing explicit opt-in marker
-`PUBLICATION_MANAGER_CREDENTIAL_MODE=environment` instead reads source keys
-from the process environment. In this mode `.env` is never read, and missing
-keys fail without fallback. This credential compatibility behavior is preserved;
-frontend changes are outside the collection workflow. Credential values are
-redacted before errors leave the source.
+Credential values are redacted before errors leave the source.
 
 ## Publisher retrieval
 
@@ -249,7 +245,7 @@ offset. Filename collisions return a raw-saving error, preserving the existing f
 Storage writes to a temporary file in the destination directory, then atomically
 publishes the completed raw file with a hard link. Temporary files are cleaned
 up after success or failure. Failed or partial retrieval publishes no new raw
-dataset. Existing downloads, normalized files, Markdown, and reports are untouched.
+dataset. Existing downloads, normalized files, and Markdown are untouched.
 
 ## Adding a publisher
 
@@ -306,9 +302,9 @@ dates. Accept zero-result responses with omitted entries and ScienceDirect's
 empty-result sentinel. Malformed pages or publication metadata fail that file.
 The readers do not repeat API requests or load credentials.
 
-ACM reuses `bibtex_converter.convert_bibtex()`, including its existing field,
-author, LaTeX-text, and identifier handling. Invalid BibTeX rejects the whole
-file; the original standalone converter remains available.
+ACM converts BibTeX in `publication_normalizer/source_normalizers/acm.py`,
+including field, author, LaTeX-text, and identifier handling. Invalid BibTeX
+rejects the whole file.
 
 Springer CSV is read as UTF-8 with an optional BOM. The following columns are
 required; their values may be empty:
@@ -358,7 +354,7 @@ the previous normalized output. The normalization manager constructs the filepat
 serializes the publications, and calls `storage.save_file()` with `replace=True`.
 The shared atomic-write helper replaces the file only after serialization and
 writing succeed. Raw files and paths remain
-unchanged. The workflow creates no Markdown or count reports.
+unchanged. The workflow creates no Markdown.
 
 - No supported inputs: skip the author without creating/replacing a file.
 - At least one input parses successfully: save its results, including an empty
@@ -372,8 +368,7 @@ The CLI prints completed/partial/skipped author outcomes and saved counts/paths
 to stdout, with file and saving errors on stderr. Its final summary counts all
 four statuses. Exit codes are `0` for successful/skipped processing, `1` when any
 author has partial/failed results or database validation fails, and `2` for CLI
-usage errors. No credentials, downloads, frontend, or report generation are
-invoked by normalization.
+usage errors. No credentials or downloads are invoked by normalization.
 
 ## Reviewed JSON to final Markdown
 
@@ -461,5 +456,63 @@ The CLI prints generated counts/paths, removal outcomes (including already
 absent files), and missing-input skips to stdout. Failures and their paths/stages
 are printed to stderr. Return `0` for successful processing/skips and `1` if any
 author fails. Generation does not load credentials, contact APIs, normalize data,
-invoke frontend/reporting, or modify raw, normalized, or reviewed inputs. It
+or modify raw, normalized, or reviewed inputs. It
 imports `helpers.author_builder` without depending on the collector package.
+
+## Shared browser review app
+
+The optional `publication_review` package provides a Google Apps Script app
+between normalization and Markdown generation. It does not change the three
+existing workflow entry points or make them depend on Google services.
+
+The coordinator uploads an `authors.json` manifest and normalized JSON files to
+a private input folder on Google Drive. The manifest maps canonical database
+names and author slugs to input filenames. `prepare_upload.py` optionally
+assembles those copies and the manifest from local configuration; users can
+instead upload existing JSON files and create the manifest manually. Originals
+and the author database remain unchanged.
+
+The installed `prepare_upload --output <new-directory> --author <names-or-all>`
+command calls `publication_review.prepare_upload:main`. It uses the same
+arguments as `python -m publication_review.prepare_upload`; omitting `--author`
+selects all authors. Output paths may be absolute or relative to the working
+directory. This preparation command does not contact Google services.
+
+Apps Script hosts `google_apps_script/Index.html` and runs `Code.gs` as the
+deploying account. Script Properties identify separate input and saved-review
+folders. One shared anonymous-access link displays an author selector and an
+editable table. The agreed name-only access model permits anyone with the link
+to select, edit, and download any listed author's publications.
+
+Reviewers can include/exclude records, add publications, search the list,
+and edit every `Publication` field. Search does not limit which included records
+are saved. List fields use one item per line when edited; untouched values,
+Unicode, order, and duplicates are preserved. Save is explicit, including for
+unchanged lists and empty reviews. Cancelling a new publication adds no record.
+
+The server validates complete publication arrays using the existing field
+contract and fills missing defaults. A save creates a new plain-JSON revision in
+the author's saved-review subfolder. Script locking and an expected-revision
+token prevent stale browsers from overwriting newer saves. Source fingerprints
+bind reviews to the source folder, author, and source content; changed inputs
+require a new review round. Sources and prior saved revisions are not overwritten.
+
+New saved filenames use `<author-slug>-reviewed-YYYY-MM-DDTHH-MM-SS.json` in the
+Apps Script project's timezone (default `Europe/Vienna`). Saves within the same
+second use collision suffixes starting at `-2`. The fingerprint is stored as
+versioned JSON metadata in the Drive file's description, outside the publication
+array. A temporary name keeps a new file out of selection until its description
+is set and its final name published. Failed publication moves that new temporary
+file to trash; any cleanup failure is reported and the temporary file remains
+ignored. Existing hash/UUID filenames remain readable without modifying them.
+An invalid description on the latest readable review fails loading and export
+without falling back to older history. The catalog can still list other authors.
+
+The catalog reports saved status. Batch export includes only the latest saved
+review per author, selected by Drive creation time, including explicit empty
+reviews. ZIP entries follow `data/<author-slug>/updated/<readable-review-name>.json`
+and contain only `Publication` fields, so the existing Markdown reader can use
+them after extraction. New reviews retain their saved filename; older hash-named
+reviews get a readable export name derived from Drive creation time. Unsaved
+authors and unsaved browser edits are excluded.
+The app does not synchronize local files automatically or deploy itself.

@@ -18,18 +18,12 @@ NORMALIZED_DIRECTORY_FORMAT = "{author_slug}/normalized"
 NORMALIZED_FILENAME_FORMAT = "{author_slug}-publications.json"
 
 ENV_FILE = PROJECT_ROOT / ".env"
-REPORT_HTML_FILE = PROJECT_ROOT / "output" / "report.html"
-REPORT_JSON_FILE = PROJECT_ROOT / "output" / "report.json"
-CREDENTIAL_MODE_VARIABLE = "PUBLICATION_MANAGER_CREDENTIAL_MODE"
 
 UPDATED_JSON_DIRECTORY_FORMAT = "{author_slug}/updated/"
 
 FINAL_MARKDOWN_DIRECTORY_FORMAT = "{author_slug}/final"
 FINAL_MARKDOWN_FILENAME_FORMAT = "{author_slug}-final-{timestamp}.md"
 FINAL_MARKDOWN_DATE_FORMAT = "%Y-%m-%d"
-
-MARKDOWN_FILENAME_FORMAT = "{author}-{source}-{date}.md"
-REPORT_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S %Z"
 
 # Markdown label and common Publication attribute, in schema order.
 PUBLICATION_FIELDS = (

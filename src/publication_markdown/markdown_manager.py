@@ -7,7 +7,6 @@ from helpers.author_builder import Author, get_selected_authors
 from publication_markdown.json_reader import read_publications
 from publication_markdown.markdown_builder import build_markdown
 from publication_markdown.markdown_models import MarkdownResult
-from utils import storage
 from utils.file_timestamps import get_creation_timestamp
 from helpers.selection import Selection
 from datetime import datetime
@@ -27,7 +26,6 @@ def _latest_review(directory: Path) -> Path | None:
 
 def _generate_markdown(author: Author) -> MarkdownResult:
     reviewed_path = None
-    stage = "Reviewed input selection"
     
     updated_directory = config.DATA_DIRECTORY / config.UPDATED_JSON_DIRECTORY_FORMAT.format(author_slug=author.slug)
     
@@ -36,8 +34,8 @@ def _generate_markdown(author: Author) -> MarkdownResult:
     final_directory = config.DATA_DIRECTORY / config.FINAL_MARKDOWN_DIRECTORY_FORMAT.format(author_slug=author.slug)
     final_filepath = final_directory/final_filename
     
+    stage = f"Reviewed input selection ({updated_directory})"
     try:    
-        stage = f"Reviewed input selection ({updated_directory})"
         reviewed_path = _latest_review(updated_directory)
         
         if reviewed_path is None:
