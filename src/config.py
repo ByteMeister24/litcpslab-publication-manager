@@ -9,7 +9,7 @@ DATA_DIRECTORY = PROJECT_ROOT / "data"
 DATABASE_DIRECTORY = PROJECT_ROOT / "db"
 AUTHORS_FILE = DATABASE_DIRECTORY / "authors.yaml"
 
-DOWNLOAD_DIRECTORY_FORMAT = "{author_slug}/download/{source}"
+DOWNLOAD_DIRECTORY_FORMAT = "downloads/{author_slug}/{source}"
 DOWNLOAD_FILENAME_FORMAT = "{author_slug}-{source}-{timestamp}.json"
 DOWNLOAD_TIMEZONE = "Europe/Vienna"
 DOWNLOAD_TIMESTAMP_FORMAT = "%Y-%m-%dT%H-%M-%S.%f%z"
