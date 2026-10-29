@@ -14,8 +14,7 @@ DOWNLOAD_FILENAME_FORMAT = "{author_slug}-{source}-{timestamp}.json"
 DOWNLOAD_TIMEZONE = "Europe/Vienna"
 DOWNLOAD_TIMESTAMP_FORMAT = "%Y-%m-%dT%H-%M-%S.%f%z"
 
-NORMALIZED_DIRECTORY_FORMAT = "{author_slug}/normalized"
-NORMALIZED_FILENAME_FORMAT = "{author_slug}-publications.json"
+NORMALIZED_FILENAME_FORMAT = "{author_slug}-publications-normalized.json"
 
 ENV_FILE = PROJECT_ROOT / ".env"
 

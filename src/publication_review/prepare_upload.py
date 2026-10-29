@@ -26,9 +26,9 @@ def prepare_upload(output: Path, selection: Selection = "all") -> tuple[int, lis
         if slug in (".", "..") or any(character in slug for character in ("/", "\\")):
             raise ValueError(f"Author slug cannot be used as a folder name: {slug!r}.")
         
-        filename = config.NORMALIZED_FILENAME_FORMAT.format(author=author.name, author_slug=slug)
-        directory = config.DATA_DIRECTORY / config.NORMALIZED_DIRECTORY_FORMAT.format(author=author.name, author_slug=slug)
-        source = directory / filename
+        normalized_filename = config.NORMALIZED_FILENAME_FORMAT.format(author=author.name, author_slug=slug)
+        normalized_directory = config.DATA_DIRECTORY / "normalized"
+        source = normalized_directory / normalized_filename
         
         if not source.exists():
             skipped.append(author.name)
