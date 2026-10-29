@@ -11,11 +11,14 @@ The project has three separate workflows:
 3. **Markdown creation:** accept one or more database author names or `all`, read
    their latest manually reviewed JSON datasets, and generate the predefined
    Markdown format. Missing reviews skip the author; an empty review removes
-   that author's exact final Markdown file.
+   that author's exact final Markdown file for the current day.
 
 The implemented source collection workflow supports IEEE Xplore and ScienceDirect.
 It does not normalize metadata or create Markdown.
 Additional publishers and PDF downloading are outside its current scope.
+
+A standalone ACM query script supports manual searching and export; it does
+not retrieve publications or invoke any of the three workflows.
 
 IEEE and ScienceDirect conversion helpers belong to the normalization package;
 the collector does not import them. Markdown rendering belongs to the third
@@ -37,7 +40,7 @@ Implementation paths below are relative to `src/`.
 | --- | --- |
 | `publication_collector/cli/download_publications.py` | Parse CLI arguments into `DownloadRequest`, call the manager, print outcomes and a console summary, and return an exit code |
 | `publication_collector/download_manager.py` | Validate selections, resolve sources, process author/source pairs sequentially, and collect returned outcomes |
-| `publication_collector/models.py` | Define `DownloadRequest`, `DownloadConfirmation`, and `DownloadError`; reuse the shared `helpers.selection.Selection` type |
+| `publication_collector/download_models.py` | Define `DownloadRequest`, `DownloadConfirmation`, and `DownloadError`; reuse the shared `helpers.selection.Selection` type |
 | `publication_collector/source_downloaders/ieee_xplore.py` | Own IEEE settings, query construction, retrieval, page validation, and publication counting |
 | `publication_collector/source_downloaders/sciencedirect.py` | Own ScienceDirect settings, query construction, retrieval, page validation, and publication counting |
 | `publication_collector/source_downloaders/common.py` | Load credentials, run the supplied source functions, construct the download filepath and JSON content, save complete raw pages, and construct a confirmation or sanitized error |
@@ -47,16 +50,17 @@ Implementation paths below are relative to `src/`.
 | `publication_normalizer/source_normalizers/` | Read IEEE/ScienceDirect native pages, map Springer CSV fields, and convert ACM BibTeX |
 | `publication_normalizer/__main__.py` | Run normalization as a Python module |
 | `publication_markdown/cli/generate_markdown.py` | Parse author selections and print generated, removed, skipped, and failed outcomes |
-| `publication_markdown/markdown_manager.py` | Select reviewed inputs, coordinate generation, and remove the exact final file for empty reviews |
+| `publication_markdown/markdown_manager.py` | Select reviewed inputs, construct the final output path, coordinate generation, and remove the exact final file for empty reviews |
 | `publication_markdown/json_reader.py` | Validate a complete reviewed JSON array and construct `Publication` instances |
-| `publication_markdown/markdown_builder.py` | Render publications using the existing schema and save combined final Markdown |
-| `publication_markdown/models.py` | Define `MarkdownBuildResult` and per-author `MarkdownResult` outcomes |
+| `publication_markdown/markdown_builder.py` | Render publications using the existing schema and save combined Markdown to the supplied final path |
+| `publication_markdown/markdown_models.py` | Define `MarkdownBuildResult` and per-author `MarkdownResult` outcomes |
 | `publication_markdown/__main__.py` | Run Markdown generation as a Python module |
 | `publication_model.py` | Define the shared `Publication` dataclass |
 | `helpers/author_builder.py` | Define `Author`, validate the complete author database, and return selected authors |
 | `helpers/selection.py` | Define shared selection types and comma-list CLI parsing |
+| `generate_acm_queries.py` | Select database authors, construct ACM search queries, and save a plain text file for manual use |
 | `utils/yaml_loader.py` | Parse the complete YAML mapping safely and reject duplicate keys |
-| `utils/storage.py` | Publish completed files safely and apply raw-download filename rules; remains shared under `src/` |
+| `utils/storage.py` | Atomically publish completed text files, replacing existing files only when requested |
 | `utils/file_timestamps.py` | Read filesystem creation timestamps for uniform normalization input selection |
 | `config.py` | Define shared project paths, timezone, and filename formats |
 
@@ -80,7 +84,7 @@ The collector does not import normalization or Markdown modules.
 The collector's public coordination interface is:
 
 ```python
-from publication_collector.models import DownloadConfirmation, DownloadError, DownloadRequest
+from publication_collector.download_models import DownloadConfirmation, DownloadError, DownloadRequest
 
 
 def run_download(request: DownloadRequest) -> list[DownloadConfirmation | DownloadError]:
@@ -225,6 +229,32 @@ the original response page in storage.
 These checks establish complete retrieval; publication metadata is not normalized
 or validated against a normalized schema during collection.
 
+## Manual ACM query generation
+
+Run `python src/generate_acm_queries.py all`, `--author all`, or
+`--author "Name One, Name Two"` from the project root. Reuse
+`helpers.selection.parse_selection` and `helpers.author_builder.get_selected_authors`
+for the existing selection, validation, ordering, and canonical-name contracts.
+
+Generate one query per selected author using ACM's **Edit Query** syntax:
+
+```text
+ContribAuthor:("Ada Researcher") AND Affiliation:("University A" OR "Institute B")
+```
+
+Quote each full author name and affiliation as an exact phrase. Escape literal
+query-special characters and backslashes within those phrases. Join affiliations
+with `OR` inside the affiliation field, and combine it with the author field
+using `AND`. Preserve the configured affiliation order and spelling.
+
+The script constructs all queries before calling `utils.storage.save_file()` with
+`replace=True`. Save UTF-8 text with one query per line and a final newline at
+`config.DATA_DIRECTORY / "acm-queries" / "queries.txt"`, independently of the
+current working directory. Each successful run replaces the previous selection;
+validation or saving failures retain any existing file. Return `0` for success,
+`1` for validation or saving failures, and `2` for invalid CLI usage. Do not load
+credentials, contact ACM, or download, normalize, or render publications.
+
 ## Storage
 
 Paths are rooted at shared `config.PROJECT_ROOT`, independently of the current
@@ -333,42 +363,45 @@ the entire author selection before processing. Each result contains `author`,
 `status` (`success`, `partial`, `failed`, or `skipped`), `publication_count`,
 optional `normalized_path`, and a tuple of `errors`.
 
-Output uses the canonical database name in the filename and the existing slug in
-the directory:
+Output uses the existing author slug in both the filename and directory:
 
 ```text
-data/<author-slug>/normalized/<canonical author name>-publications.json
+data/<author-slug>/normalized/<author-slug>-publications.json
 ```
 
 `config.NORMALIZED_DIRECTORY_FORMAT` defines the directory relative to
 `config.DATA_DIRECTORY`, using the author slug. `config.NORMALIZED_FILENAME_FORMAT`
-defines the filename using the canonical author name. The document is a plain
+defines the filename using `{author_slug}`. The document is a plain
 array of `Publication` objects with exactly the dataclass fields: `title`,
 `authors`, `affiliations`, `keywords`, `abstract`, `publication_title`, `year`,
 `issn`, `isbn`, `doi`, `pdf_url`, and `publisher`. Tuple fields serialize as JSON
 arrays. Missing strings are empty strings; missing tuple fields are empty arrays.
 JSON preserves Unicode, uses two-space indentation, and ends with a newline.
 
-Every run rebuilds the file from the selected raw inputs; it does not append to
-the previous normalized output. The normalization manager constructs the filepath,
+For authors with publications, each run rebuilds the file from the selected raw
+inputs; it does not append to the previous normalized output. The normalization
+manager constructs the filepath,
 serializes the publications, and calls `storage.save_file()` with `replace=True`.
 The shared atomic-write helper replaces the file only after serialization and
 writing succeed. Raw files and paths remain
 unchanged. The workflow creates no Markdown.
 
 - No supported inputs: skip the author without creating/replacing a file.
-- At least one input parses successfully: save its results, including an empty
-  array for successful zero-result inputs.
+- Successfully parsed inputs produce zero publications: skip the author without
+  creating or replacing a normalized file. Existing normalized files are retained.
+- At least one publication is converted: save the combined nonempty dataset.
 - A file fails: discard all of its records, report its path/error, and continue.
-  If another file succeeds, save those results with `partial` status.
-- Every input fails: retain existing JSON and return `failed` status.
+  If other files produce publications, save those results with `partial` status.
+- No publications and any input errors, including every input failing: retain
+  existing JSON and return `failed` status. No empty partial file is saved.
 - Saving fails: retain existing JSON, report the failure, and continue other authors.
 
 The CLI prints completed/partial/skipped author outcomes and saved counts/paths
 to stdout, with file and saving errors on stderr. Its final summary counts all
 four statuses. Exit codes are `0` for successful/skipped processing, `1` when any
 author has partial/failed results or database validation fails, and `2` for CLI
-usage errors. No credentials or downloads are invoked by normalization.
+usage errors. Skips report that there are no publications to normalize. No
+credentials or downloads are invoked by normalization.
 
 ## Reviewed JSON to final Markdown
 
@@ -423,7 +456,9 @@ the final output; removed records disappear. Do not filter by publication author
 names or supplement the review from another dataset.
 
 The existing renderer lives in `publication_markdown/markdown_builder.py`, with
-the interface `build_markdown(author, publications) -> MarkdownBuildResult`.
+the interface
+`build_markdown(author, final_filepath, publications) -> MarkdownBuildResult`.
+The manager supplies the destination path; the builder renders and saves it.
 Its result contains `author`, optional `markdown_path`, and optional `error`,
 without a source field. Preserve single-line headings, Unicode, schema field
 order, labels, blank lines, empty field labels, and the final newline.
@@ -433,17 +468,23 @@ order, labels, blank lines, empty field labels, and the final newline.
 The combined final path is:
 
 ```text
-data/<author-slug>/final/<canonical author name>-final.md
+data/<author-slug>/final/<author-slug>-final-<date>.md
 ```
 
-`config.FINAL_MARKDOWN_FILENAME_FORMAT` defines the filename. For a nonempty
-validated review, render all publications and use the shared atomic storage
-helper to replace the final file only after a complete UTF-8 write. Repeated
-runs replace that fixed file rather than creating dated or per-source outputs.
+`config.FINAL_MARKDOWN_DIRECTORY_FORMAT` defines the directory relative to
+`config.DATA_DIRECTORY`, using `{author_slug}`. The filename template
+`config.FINAL_MARKDOWN_FILENAME_FORMAT` uses `{author_slug}` and `{timestamp}`.
+The timestamp is the current date formatted with `config.FINAL_MARKDOWN_DATE_FORMAT`
+(default `%Y-%m-%d`) in `config.DOWNLOAD_TIMEZONE` (default `Europe/Vienna`).
+For a nonempty validated review, render all publications and use the shared
+atomic storage helper to replace the final file only after a complete UTF-8
+write. Runs on the same date replace the same file; runs on later dates create
+separate files and retain earlier dated outputs.
 
-For a valid empty review (`[]`), remove only that exact final file. An absent
-file is a successful no-op; do not create/remove directories or remove other
-files. Missing or invalid reviews never trigger deletion.
+For a valid empty review (`[]`), remove only that exact final file for the current
+date. An absent file is a successful no-op; do not create/remove directories or
+remove other files, including earlier dated outputs. Missing or invalid reviews
+never trigger deletion.
 
 `run_markdown(selection) -> list[MarkdownResult]` validates all selected authors
 before processing them. Results contain `author`, `status` (`generated`,

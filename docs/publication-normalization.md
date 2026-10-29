@@ -47,7 +47,7 @@ data/mainak-majumder/
     acm/
       export.bib
   normalized/
-    Mainak Majumder-publications.json
+    mainak-majumder-publications.json
 ```
 
 Source folders are optional. Older files directly under `download/` are ignored;
@@ -90,28 +90,34 @@ and other content types are retained. Input is UTF-8, with an optional BOM.
 
 Each output is a plain JSON array with exactly the `Publication` fields. Authors,
 affiliations, and keywords are JSON arrays; other fields are strings. Missing
-values remain empty. The filename uses the canonical database name, including
-spaces and accents; its containing author directory keeps the existing slug.
+values remain empty. The filename and its containing author directory use the
+author slug: the database name lowercased with spaces replaced by hyphens.
+The directory and filename templates in `src/config.py` both accept `{author_slug}`.
 
 Records are combined in IEEE, ScienceDirect, Springer, ACM order, preserving
 page/file record order. Repeated publications are retained. The workflow assigns
 all records in an author's raw folders to that author's output; it does not
 match or filter publication author names.
 
-Each run rebuilds and atomically replaces the output instead of appending.
+Authors with at least one converted publication have their output rebuilt and
+atomically replaced instead of appended. Authors with zero publications are
+skipped: no new normalized file or directory is created, and existing normalized
+files are left unchanged.
 
 | Situation | Result |
 | --- | --- |
 | No supported raw files | Author skipped; existing normalized JSON retained |
-| Valid empty input | Empty JSON array saved |
-| Some inputs fail and another parses successfully | Failed files discarded; successful records saved as partial results |
+| Valid inputs produce zero publications | Author skipped; existing normalized JSON retained |
+| Some inputs fail and others produce publications | Failed files discarded; successful records saved as partial results |
+| Inputs produce zero publications and some fail | Failure reported; existing normalized JSON retained; no empty file saved |
 | Every input fails | Existing normalized JSON retained |
 | Saving fails | Existing normalized JSON retained; other authors continue |
 
 The console reports counts, paths, skips, partial results, and the failing input
 paths. Exit `0` means processing succeeded or skipped; exit `1` means validation,
 parsing, source-selection, or saving failed somewhere; exit `2` means invalid CLI
-syntax. A partial result is saved but returns exit `1`. Raw files remain intact.
+syntax. Zero-publication skips return exit `0` when there are no input errors.
+A partial result is saved but returns exit `1`. Raw files remain intact.
 
 For the separate review and Markdown step, manually prepare an `updated/` JSON
 copy as described in the [Markdown guide](publication-markdown.md). Markdown

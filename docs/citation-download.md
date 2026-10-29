@@ -97,6 +97,35 @@ A search combines the author's full YAML name with any configured affiliation.
 There is no year filter. Publications with missing or unmatched affiliations may
 be absent from the results.
 
+## Manual ACM queries
+
+From the project root, generate queries for one author, several authors, or all
+authors in `db/authors.yaml`:
+
+```bash
+python src/generate_acm_queries.py --author "Mainak Majumder"
+python src/generate_acm_queries.py --author "Mainak Majumder, Alois Zoitl"
+python src/generate_acm_queries.py all
+```
+
+The script reuses `helpers.author_builder` for case-insensitive author selection
+and each author's YAML affiliations. It replaces `data/acm-queries/queries.txt`
+with one query per line, preserving selected-author order and YAML spelling.
+Each query requires the author and any one of their affiliations:
+
+```text
+ContribAuthor:("Ada Researcher") AND Affiliation:("University A" OR "Institute B")
+```
+
+Names and affiliations are quoted as exact phrases, with special characters
+escaped literally. In [ACM Advanced Search](https://dl.acm.org/search/advanced),
+open **View Query Syntax** and paste one complete line into **Edit Query**.
+If that control is absent, first run a search and use its edit-search button.
+The script only generates text; search and publication export remain manual.
+Invalid selections or database content fail before replacing the output.
+Exit codes are `0` for success, `1` for validation or saving failures, and `2`
+for invalid command usage.
+
 ## Saved files
 
 A completed download produces a file such as:

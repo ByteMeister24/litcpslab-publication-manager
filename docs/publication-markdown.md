@@ -26,8 +26,9 @@ publication_markdown all
 ```
 
 `python -m publication_markdown` accepts the same arguments. `--author all` is
-also supported. Author matching ignores case, while filenames use the canonical
-database spelling. There is no directory or source argument. No API keys or
+also supported. Author matching ignores case, while filenames use the author
+slug: the database name lowercased with spaces replaced by hyphens.
+There is no directory or source argument. No API keys or
 network access are needed.
 
 ## Prepare a review
@@ -35,7 +36,7 @@ network access are needed.
 Normalization produces a file such as:
 
 ```text
-data/mainak-majumder/normalized/Mainak Majumder-publications.json
+data/mainak-majumder/normalized/mainak-majumder-publications.json
 ```
 
 Manually copy the dataset you want to review into the author's `updated/` folder.
@@ -89,17 +90,22 @@ syntax valid and use UTF-8.
 For the example author, the combined output is:
 
 ```text
-data/mainak-majumder/final/Mainak Majumder-final.md
+data/mainak-majumder/final/mainak-majumder-final-2026-10-29.md
 ```
+
+The filename contains the current date in `Europe/Vienna`, using the default
+format `%Y-%m-%d`. `FINAL_MARKDOWN_DIRECTORY_FORMAT`,
+`FINAL_MARKDOWN_FILENAME_FORMAT`, `FINAL_MARKDOWN_DATE_FORMAT`, and
+`DOWNLOAD_TIMEZONE` in `src/config.py` control the output path and date.
 
 Each publication uses the existing heading, labels, spacing, and field order.
 Reviewed publication order and duplicates are retained. Successful generation
-atomically replaces the same final file, so review additions and removals are
-reflected on the next run.
+atomically replaces the same day's final file. A run on a later date creates a
+new file and retains earlier dated outputs.
 
-**A latest reviewed file containing `[]` removes that exact final Markdown
-file.** If the file is already absent, the run succeeds without creating any
-directories. Other files and directories are preserved.
+**A latest reviewed file containing `[]` removes only the current day's final
+Markdown file.** If the file is already absent, the run succeeds without creating
+any directories. Earlier dated outputs and other files and directories are preserved.
 
 Missing reviews skip the author and preserve previous output. Invalid or
 unreadable reviews, rendering errors, or storage failures report an error and

@@ -238,7 +238,8 @@ Existing `review-<fingerprint>-<UUID>.json` files remain supported and retain
 their names. No migration is required. Future saves use readable names.
 
 An empty saved review is valid, but the app asks for confirmation because the
-Markdown workflow uses an empty review to remove its final Markdown output.
+Markdown workflow uses an empty review to remove the current day's final
+Markdown output. Earlier dated outputs are preserved.
 Cancelling the addition of a publication does not add a blank record.
 
 If another browser saved the same author's list while it was open, a stale save
