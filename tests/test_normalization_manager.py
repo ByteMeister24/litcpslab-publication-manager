@@ -63,8 +63,8 @@ class NormalizationManagerTests(unittest.TestCase):
             writer.writerow({"Item Title": title, "Authors": "Ada Researcher, René Researcher"})
         return path
 
-    def normalized_file(self, slug="ada-researcher", name="Ada Researcher"):
-        return self.data / slug / "normalized" / f"{name}-publications.json"
+    def normalized_file(self, slug="ada-researcher"):
+        return self.data / slug / "normalized" / f"{slug}-publications.json"
 
     def existing_output(self, content="Previous normalized JSON"):
         path = self.normalized_file()
@@ -183,12 +183,51 @@ class NormalizationManagerTests(unittest.TestCase):
         self.assertEqual(previous.read_text(), "Previous normalized JSON")
         self.assertFalse((self.data / "rené-researcher").exists())
 
-    def test_successful_zero_result_file_replaces_existing_output_with_empty_array(self):
+    def test_successful_zero_result_file_skips_and_preserves_existing_output(self):
         previous = self.existing_output()
         self.api_file(payload=[page(0, [])])
-        result = run_normalization(("Ada Researcher",))[0]
-        self.assertEqual((result.status, result.publication_count), ("success", 0))
-        self.assertEqual(json.loads(previous.read_text()), [])
+        before = previous.read_bytes(), previous.stat().st_mtime_ns
+        with patch("utils.storage.save_file") as save:
+            result = run_normalization(("Ada Researcher",))[0]
+        self.assertEqual((result.status, result.publication_count), ("skipped", 0))
+        self.assertIsNone(result.normalized_path)
+        self.assertEqual(result.errors, ())
+        self.assertEqual((previous.read_bytes(), previous.stat().st_mtime_ns), before)
+        save.assert_not_called()
+
+    def test_zero_result_inputs_for_each_format_do_not_create_normalized_files(self):
+        cases = (
+            ("ieee", "empty.json", json.dumps([page(0, [])])),
+            ("sciencedirect", "empty.json", json.dumps([{"search-results": {"opensearch:totalResults": "0"}}])),
+            ("springer", "empty.csv", ",".join(REQUIRED_COLUMNS) + "\n"),
+            ("acm", "empty.bib", ""),
+        )
+        for source, filename, content in cases:
+            with self.subTest(source=source), tempfile.TemporaryDirectory() as directory, \
+                    patch.object(config, "DATA_DIRECTORY", Path(directory)), patch("utils.storage.save_file") as save:
+                path = self.source_file(source, filename, content)
+                before = path.read_bytes()
+                result = run_normalization(("Ada Researcher",))[0]
+                self.assertEqual((result.status, result.publication_count), ("skipped", 0))
+                self.assertIsNone(result.normalized_path)
+                self.assertFalse((Path(directory) / "ada-researcher" / "normalized").exists())
+                self.assertEqual(path.read_bytes(), before)
+                save.assert_not_called()
+
+    def test_zero_result_author_is_skipped_and_other_authors_continue(self):
+        self.api_file(payload=[page(0, [])])
+        self.springer_file(slug="rené-researcher")
+        results = run_normalization("all")
+        self.assertEqual([result.status for result in results], ["skipped", "success"])
+        self.assertFalse(self.normalized_file().exists())
+        self.assertEqual(len(self.read_result(results[1])), 1)
+
+    def test_empty_source_does_not_skip_author_with_publications_from_another_source(self):
+        self.api_file(payload=[page(0, [])])
+        self.springer_file()
+        result, = run_normalization(("Ada Researcher",))
+        self.assertEqual((result.status, result.publication_count), ("success", 1))
+        self.assertEqual(self.read_result(result)[0]["title"], "Springer")
 
     def test_all_failed_inputs_preserve_previous_json_and_continue_other_authors(self):
         previous = self.existing_output()
@@ -199,7 +238,7 @@ class NormalizationManagerTests(unittest.TestCase):
         results = run_normalization("all")
         self.assertEqual([result.status for result in results], ["failed", "success"])
         self.assertEqual(previous.read_text(), "Previous normalized JSON")
-        self.assertEqual(results[1].normalized_path.name, "René Researcher-publications.json")
+        self.assertEqual(results[1].normalized_path.name, "rené-researcher-publications.json")
         self.assertEqual(len(results[0].errors), 2)
 
     def test_error_in_one_article_discards_all_records_from_that_file(self):
@@ -209,14 +248,17 @@ class NormalizationManagerTests(unittest.TestCase):
         self.assertEqual(result.status, "partial")
         self.assertEqual([record["title"] for record in self.read_result(result)], ["Springer"])
 
-    def test_successful_empty_file_plus_failed_file_saves_empty_partial_result(self):
-        self.existing_output()
+    def test_successful_empty_file_plus_failed_file_reports_error_without_writing_output(self):
+        previous = self.existing_output()
         self.api_file(payload=[page(0, [])])
-        self.source_file("acm", "invalid.bib", '@article{unterminated, title={broken')
-        with self.assertLogs("bibtexparser", level="WARNING"):
+        malformed = self.source_file("acm", "invalid.bib", '@article{unterminated, title={broken')
+        with self.assertLogs("bibtexparser", level="WARNING"), patch("utils.storage.save_file") as save:
             result = run_normalization(("Ada Researcher",))[0]
-        self.assertEqual((result.status, result.publication_count), ("partial", 0))
-        self.assertEqual(self.read_result(result), [])
+        self.assertEqual((result.status, result.publication_count), ("failed", 0))
+        self.assertIsNone(result.normalized_path)
+        self.assertIn(str(malformed), result.errors[0])
+        self.assertEqual(previous.read_text(), "Previous normalized JSON")
+        save.assert_not_called()
 
     def test_reruns_replace_instead_of_append_and_are_deterministic(self):
         self.springer_file()

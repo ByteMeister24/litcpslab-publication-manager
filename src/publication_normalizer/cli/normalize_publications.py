@@ -42,7 +42,7 @@ def main(argv: list[str] | None = None) -> int:
         for error in result.errors:
             print(f"Normalization error: {result.author}: {error}", file=sys.stderr)
         if result.status == "skipped":
-            print(f"Normalization skipped: {result.author}: no supported raw files.")
+            print(f"Normalization skipped: {result.author}: no publications to normalize.")
         elif result.normalized_path is not None:
             label = "partial" if result.status == "partial" else "completed"
             print(f"Normalization {label}: {result.author}: {result.publication_count} publication(s); "

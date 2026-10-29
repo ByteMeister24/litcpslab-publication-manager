@@ -14,6 +14,7 @@ import unittest
 from unittest.mock import patch
 
 from support import AUTHOR_YAML, PROJECT_ROOT
+import config
 from publication_normalizer.cli.normalize_publications import main, parse_request
 from publication_normalizer.normalization_manager import NormalizationResult
 from publication_normalizer.source_normalizers.springer import REQUIRED_COLUMNS
@@ -96,6 +97,25 @@ class NormalizerCLITests(unittest.TestCase):
             self.assertIn("--author", result.stdout)
             self.assertEqual(list(Path(directory).iterdir()), [])
 
+    def test_zero_publications_print_skip_and_return_zero_without_creating_output(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            authors = root / "authors.yaml"
+            authors.write_text(AUTHOR_YAML, encoding="utf-8")
+            empty = root / "data" / "ada-researcher" / "download" / "acm" / "empty.bib"
+            empty.parent.mkdir(parents=True)
+            empty.write_text("", encoding="utf-8")
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with patch.object(config, "AUTHORS_FILE", authors), patch.object(config, "DATA_DIRECTORY", root / "data"), \
+                    patch("publication_normalizer.normalization_manager.get_creation_timestamp", return_value=1.0), \
+                    redirect_stdout(stdout), redirect_stderr(stderr):
+                status = main(["--author", "Ada Researcher"])
+            self.assertEqual(status, 0)
+            self.assertIn("Normalization skipped: Ada Researcher: no publications to normalize.", stdout.getvalue())
+            self.assertIn("0 succeeded; 0 partial; 0 failed; 1 skipped", stdout.getvalue())
+            self.assertEqual(stderr.getvalue(), "")
+            self.assertFalse((root / "data" / "ada-researcher" / "normalized").exists())
+
     def test_real_conversion_needs_no_api_modules_credentials_or_network(self):
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory) / "project with spaces René"
@@ -134,7 +154,7 @@ with patch.dict(sys.modules, {name: None for name in (
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("Normalization completed: Ada Researcher", result.stdout)
-            normalized = project / "data" / "ada-researcher" / "normalized" / "Ada Researcher-publications.json"
+            normalized = project / "data" / "ada-researcher" / "normalized" / "ada-researcher-publications.json"
             self.assertEqual(json.loads(normalized.read_text())[0]["title"], "Über research")
             self.assertEqual(raw.read_bytes(), before)
             self.assertFalse((project / ".env").exists())

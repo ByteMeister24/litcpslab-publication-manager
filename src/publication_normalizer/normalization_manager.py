@@ -50,7 +50,6 @@ def _select_file(directory: Path, extensions: tuple[str, ...]) -> Path | None:
 def _normalize_publications(author: Author) -> NormalizationResult:
     publications = []
     errors = []
-    parsed_files = 0
 
     normalized_directory = config.DATA_DIRECTORY / config.NORMALIZED_DIRECTORY_FORMAT.format(
                 author_slug=author.slug)
@@ -78,9 +77,8 @@ def _normalize_publications(author: Author) -> NormalizationResult:
             continue
 
         publications.extend(converted)
-        parsed_files += 1
 
-    if parsed_files == 0:
+    if not publications:
         return NormalizationResult(author.name, "failed" if errors else "skipped", errors=tuple(errors))
 
     try:
