@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIRECTORY = PROJECT_ROOT / "data"
 
@@ -18,9 +17,6 @@ NORMALIZED_FILENAME_FORMAT = "{author_slug}-publications-normalized.json"
 
 ENV_FILE = PROJECT_ROOT / ".env"
 
-UPDATED_JSON_DIRECTORY_FORMAT = "{author_slug}/updated/"
-
-FINAL_MARKDOWN_DIRECTORY_FORMAT = "{author_slug}/final"
 FINAL_MARKDOWN_FILENAME_FORMAT = "{author_slug}-final-{timestamp}.md"
 FINAL_MARKDOWN_DATE_FORMAT = "%Y-%m-%d"
 

@@ -196,7 +196,7 @@ These deployment and execution options follow Google's
 7. Check Drive: the original input JSON should be unchanged, while the saved
    folder contains an author subfolder with a new review JSON file.
 8. Select **Refresh status**, then **Download all saved reviews (.zip)**.
-   Confirm that the ZIP has the reviewed JSON and the expected directory layout.
+   Confirm that the ZIP contains the latest reviewed JSON files directly, with no subdirectories.
 
 Use a pilot upload first if you do not want trial edits in the real review round.
 The local automated tests cover the app logic and browser interaction, but a
@@ -254,11 +254,11 @@ person's completed review.
 2. Select **Download all saved reviews (.zip)**. It exports only the latest
    saved review for each author. Authors who have not saved are omitted;
    explicitly saved empty lists are included as `[]`.
-3. Extract the ZIP into the project directory, merging its `data/` folder with
-   the project's existing `data/` folder. It contains paths such as:
+3. Extract the ZIP into any folder you choose. It contains only JSON files at
+   its root, with no parent folder or author subdirectories. For example:
 
    ```text
-   data/mainak-majumder/updated/mainak-majumder-reviewed-2026-10-29T14-30-00.json
+   mainak-majumder-reviewed-2026-10-29T14-30-00.json
    ```
 
    New reviews keep their readable saved filenames, including any same-second
@@ -266,18 +266,19 @@ person's completed review.
    Drive creation time; their original Drive files are unchanged. Each exported
    document is a plain `Publication` array, without app-specific fields. Raw and
    normalized files are not present in the ZIP and are not overwritten.
-4. If you configured a different data directory or updated-folder layout, copy
-   the author `updated/` contents into those configured locations instead.
+4. Copy the extracted JSON files into your chosen destination. For the local
+   Markdown workflow, place them directly in `data/reviewed/`, keeping their
+   exported filenames. Keep one review per author in that folder.
 5. Run the existing workflow in your project environment:
 
    ```bash
    publication_markdown all
    ```
 
-The Markdown workflow selects each author's latest JSON by filesystem creation
-time. Import the newest export, and avoid re-extracting older exports over a
-later review round: extracting a file can give it a new creation time. See the
-[Markdown guide](publication-markdown.md) for its CLI and validation behavior.
+The Markdown workflow matches each author by the exported filename. Multiple
+matching reviews for one author produce an error and preserve that author's
+existing final output. See the [Markdown guide](publication-markdown.md) for
+its CLI and validation behavior.
 
 ## 10. Later changes and new review rounds
 

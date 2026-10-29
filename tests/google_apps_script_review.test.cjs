@@ -154,7 +154,7 @@ function runTests() {
     assert.equal(loaded.publications[0].title, 'Existing review');
     assert.equal(f.app.getCatalog().authors[0].reviewed, true);
     const zipped = JSON.parse(Buffer.from(f.app.exportReviews().base64, 'base64').toString());
-    assert.equal(zipped.blobs[0].name, 'data/ada-researcher/updated/ada-researcher-reviewed-2026-10-29T14-30-00.json');
+    assert.equal(zipped.blobs[0].name, 'ada-researcher-reviewed-2026-10-29T14-30-00.json');
     assert.equal(JSON.parse(zipped.blobs[0].text)[0].title, 'Existing review');
     f.app.saveReview('ada-researcher', [{title: 'Readable successor'}], loaded.revision);
     assert.equal(f.app.loadAuthor('ada-researcher').publications[0].title, 'Readable successor');
@@ -229,12 +229,12 @@ function runTests() {
     const archive = f.app.exportReviews();
     const zipped = JSON.parse(Buffer.from(archive.base64, 'base64').toString());
     assert.equal(archive.authorCount, 1);
-    assert.match(zipped.blobs[0].name, /^data\/ada-researcher\/updated\/ada-researcher-reviewed-.+\.json$/);
+    assert.match(zipped.blobs[0].name, /^ada-researcher-reviewed-.+\.json$/);
     assert.equal(zipped.blobs[0].mime, 'application/json');
     assert.equal(zipped.blobs[0].text, '[]\n');
   });
 
-  test('ZIP includes only the latest review for each author with Unicode paths', () => {
+  test('ZIP includes only the latest review per author at its root with Unicode filenames', () => {
     const f = fixture(); const first = f.app.loadAuthor('ada-researcher');
     f.app.saveReview('ada-researcher', [{title: 'Old'}], first.revision);
     const next = f.app.loadAuthor('ada-researcher');
@@ -244,7 +244,10 @@ function runTests() {
     const zipped = JSON.parse(Buffer.from(f.app.exportReviews().base64, 'base64').toString());
     assert.equal(zipped.blobs.length, 2);
     assert.equal(JSON.parse(zipped.blobs[0].text)[0].title, 'Newest');
-    assert.match(zipped.blobs[1].name, /data\/rené-researcher\/updated\//);
+    assert.deepEqual(zipped.blobs.map(blob => blob.name), [
+      'ada-researcher-reviewed-2026-10-29T14-30-00-2.json',
+      'rené-researcher-reviewed-2026-10-29T14-30-00.json',
+    ]);
     assert.equal(f.reviews.children[0].files.length, 2);
   });
 

@@ -93,8 +93,7 @@ function exportReviews() {
       const publications = readPublications_(latest.file);
       const name = readableReviewName_(latest.file.getName(), author.id) ? latest.file.getName()
         : reviewFilename_(author.id, latest.file.getDateCreated());
-      const path = 'data/' + author.id + '/updated/' + name;
-      blobs.push(Utilities.newBlob(JSON.stringify(publications, null, 2) + '\n', 'application/json', path));
+      blobs.push(Utilities.newBlob(JSON.stringify(publications, null, 2) + '\n', 'application/json', name));
     });
     if (!blobs.length) throw new Error('No reviews have been saved yet.');
     const filename = 'publication-reviews-' + stamp + '.zip';

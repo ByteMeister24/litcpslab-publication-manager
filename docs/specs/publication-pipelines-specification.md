@@ -415,30 +415,25 @@ validation failures return `1` before any outputs are changed.
 
 ### Reviewed input selection
 
-`config.UPDATED_JSON_DIRECTORY_FORMAT` defaults to `{author_slug}/updated/`.
-`{author_slug}` is the existing author slug. Relative templates are rooted at
-`config.DATA_DIRECTORY`, independently of the working directory. Absolute templates
-are also supported. The final output location is independent of this input setting.
-
-Review creation and editing are manual. The workflow reads only JSON files in the
-configured author review directory. Filenames are unrestricted; for example:
+Reviewed JSON files are stored directly in `config.DATA_DIRECTORY / "reviewed"`,
+independently of the working directory. The Google app exports one latest saved
+review per author, using filenames such as:
 
 ```text
-data/<author-slug>/updated/reviewed-publications.json
+data/reviewed/<author-slug>-reviewed-2026-10-29T14-30-00.json
 ```
 
-Use `utils.file_timestamps.get_creation_timestamp` to select the JSON file with
-the greatest filesystem creation timestamp. Extension matching is
-case-insensitive; other extensions and subdirectories are ignored. Filename
-timestamps and modification times do not affect selection. For equal creation
-times, select the first filename in sorted order. An unavailable or unreadable
-creation timestamp fails the author without selecting another file. Only the
-selected file's contents are read; malformed older contents do not affect a
-valid latest review.
+Match the complete author slug before the filename's last `-reviewed-` marker.
+The remaining filename portion holds the export timestamp and optional collision
+suffix. Extension matching is case-insensitive; unmatched filenames, other
+extensions, and subdirectories are ignored. The publication author fields are
+metadata, not the owner of the reviewed dataset.
 
-A missing review directory or no matching files skips the author and preserves
-existing final Markdown. An unreadable directory or selected file fails the
-author. Invalid latest JSON never falls back to an earlier review or to
+Exactly one matching file is expected per author. Multiple matching files fail
+that author explicitly and preserve their existing final Markdown; no file is
+chosen by timestamp. A missing review directory or no matching file skips the
+author and preserves existing output. An unreadable directory or matching file
+fails the author. Invalid JSON never falls back to another review or to
 normalized/raw data. The workflow never creates, copies, or edits review inputs.
 
 ### JSON contract and rendering
@@ -468,11 +463,11 @@ order, labels, blank lines, empty field labels, and the final newline.
 The combined final path is:
 
 ```text
-data/<author-slug>/final/<author-slug>-final-<date>.md
+data/final/<author-slug>-final-<date>.md
 ```
 
-`config.FINAL_MARKDOWN_DIRECTORY_FORMAT` defines the directory relative to
-`config.DATA_DIRECTORY`, using `{author_slug}`. The filename template
+All final files are saved directly in `config.DATA_DIRECTORY / "final"`.
+The filename template
 `config.FINAL_MARKDOWN_FILENAME_FORMAT` uses `{author_slug}` and `{timestamp}`.
 The timestamp is the current date formatted with `config.FINAL_MARKDOWN_DATE_FORMAT`
 (default `%Y-%m-%d`) in `config.DOWNLOAD_TIMEZONE` (default `Europe/Vienna`).
@@ -551,9 +546,11 @@ without falling back to older history. The catalog can still list other authors.
 
 The catalog reports saved status. Batch export includes only the latest saved
 review per author, selected by Drive creation time, including explicit empty
-reviews. ZIP entries follow `data/<author-slug>/updated/<readable-review-name>.json`
-and contain only `Publication` fields, so the existing Markdown reader can use
-them after extraction. New reviews retain their saved filename; older hash-named
+reviews. ZIP entries use only `<readable-review-name>.json` at the archive root,
+with no directories. Users can extract them into any folder and copy the JSON
+files to their chosen destination; the Markdown workflow reads `data/reviewed/`.
+Each JSON array contains only `Publication` fields.
+New reviews retain their saved filename; older hash-named
 reviews get a readable export name derived from Drive creation time. Unsaved
 authors and unsaved browser edits are excluded.
 The app does not synchronize local files automatically or deploy itself.

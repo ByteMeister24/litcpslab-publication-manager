@@ -36,30 +36,29 @@ network access are needed.
 Normalization produces a file such as:
 
 ```text
-data/mainak-majumder/normalized/mainak-majumder-publications.json
+data/normalized/mainak-majumder-publications-normalized.json
 ```
 
-Manually copy the dataset you want to review into the author's `updated/` folder.
-You can choose any JSON filename, for example:
+Place one reviewed JSON file per author directly in `data/reviewed/`. Keep the
+Google app's exported filename, for example:
 
 ```text
-data/mainak-majumder/updated/reviewed-publications.json
+data/reviewed/mainak-majumder-reviewed-2026-10-29T14-30-00.json
 ```
 
-Edit this reviewed copy yourself. You can correct metadata, add publications,
-remove publications, or reorder them. The workflow neither creates reviewed
-copies nor changes any input files. It selects the JSON file with the newest
-filesystem creation time using `utils.file_timestamps.get_creation_timestamp`.
-Filenames and modification times do not determine which review is latest. Only
-JSON files directly in this folder are considered; extension matching ignores
-case. Equal creation times use the first filename in alphabetical order. If a
-creation time cannot be read, or the selected review is malformed, the author
-fails without choosing an older review.
+The filename identifies the owner through `<author-slug>-reviewed-`, followed
+by the export's timestamp and optional collision suffix. Publication coauthors
+inside the JSON do not determine ownership. The app exports the latest saved
+review for each author, so the workflow expects one matching file per author.
+Multiple matching files fail that author without changing their final output;
+keep only the review you intend to use in this folder.
 
-The configurable input template is `UPDATED_JSON_DIRECTORY_FORMAT` in
-`src/config.py`, defaulting to `{author_slug}/updated/`. `{author_slug}` means
-the author slug, such as `mainak-majumder`. Relative paths start at the configured
-data directory; absolute templates work too.
+You can also copy a normalized dataset here, name it using this pattern, and
+review it manually. Correct metadata, add or remove publications, or reorder
+them in the reviewed copy. The workflow neither creates these copies nor changes
+any input files. Only JSON files directly in `data/reviewed/` are considered;
+extension matching ignores case. Unmatched filenames and subdirectories are
+ignored. No filesystem timestamp lookup is required.
 
 ## Reviewed JSON format
 
@@ -90,25 +89,25 @@ syntax valid and use UTF-8.
 For the example author, the combined output is:
 
 ```text
-data/mainak-majumder/final/mainak-majumder-final-2026-10-29.md
+data/final/mainak-majumder-final-2026-10-29.md
 ```
 
 The filename contains the current date in `Europe/Vienna`, using the default
-format `%Y-%m-%d`. `FINAL_MARKDOWN_DIRECTORY_FORMAT`,
-`FINAL_MARKDOWN_FILENAME_FORMAT`, `FINAL_MARKDOWN_DATE_FORMAT`, and
-`DOWNLOAD_TIMEZONE` in `src/config.py` control the output path and date.
+format `%Y-%m-%d`. `FINAL_MARKDOWN_FILENAME_FORMAT`,
+`FINAL_MARKDOWN_DATE_FORMAT`, and `DOWNLOAD_TIMEZONE` in `src/config.py` control
+the filename and date. All authors' outputs are saved directly in `data/final/`.
 
 Each publication uses the existing heading, labels, spacing, and field order.
 Reviewed publication order and duplicates are retained. Successful generation
 atomically replaces the same day's final file. A run on a later date creates a
 new file and retains earlier dated outputs.
 
-**A latest reviewed file containing `[]` removes only the current day's final
-Markdown file.** If the file is already absent, the run succeeds without creating
+**A matching reviewed file containing `[]` removes only that author's current-day
+final Markdown file.** If the file is already absent, the run succeeds without creating
 any directories. Earlier dated outputs and other files and directories are preserved.
 
-Missing reviews skip the author and preserve previous output. Invalid or
-unreadable reviews, rendering errors, or storage failures report an error and
+Missing reviews skip the author and preserve previous output. Duplicate, invalid,
+or unreadable reviews, rendering errors, or storage failures report an error and
 preserve previous output. Processing continues with other selected authors.
 Normalized files are never used as a fallback.
 
