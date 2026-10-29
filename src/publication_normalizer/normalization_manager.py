@@ -54,7 +54,7 @@ def _normalize_publications(author: Author) -> NormalizationResult:
 
     normalized_directory = config.DATA_DIRECTORY / config.NORMALIZED_DIRECTORY_FORMAT.format(
                 author_slug=author.slug)
-    normalized_filename = config.NORMALIZED_FILENAME_FORMAT.format(author_slug=author.name)
+    normalized_filename = config.NORMALIZED_FILENAME_FORMAT.format(author_slug=author.slug)
     normalized_filepath = normalized_directory / normalized_filename
     
     for source, extensions, normalize_file in SOURCE_NORMALIZERS:
