@@ -30,42 +30,42 @@ does not preserve the database name's capitalization.
 
 ### Option A: use the optional preparation helper
 
-`prepare_upload.py` gathers the normalized files into one new folder and
-generates this index. It is a coordinator convenience, not part of the deployed
-app. Colleagues never run it. It reads the database and existing normalized
-JSON, validates records using the existing reader, and writes upload copies;
-it does not modify your database or original publication files.
+`prepare_upload.py` creates or refreshes `data/normalized/authors.json` beside
+the existing normalized files. It is a coordinator convenience, not part of the
+deployed app. Colleagues never run it. It reads the database and existing normalized
+JSON, validates records using the existing reader, and writes only the index.
+Publication files keep their existing names and contents.
 
 After installing the project with `python -m pip install -e .`, use the existing
 project environment and the short `prepare_upload` command:
 
 ```bash
 source .venv/bin/activate
-prepare_upload --output /tmp/publication-review-upload
+prepare_upload
 ```
 
 By default this includes all database authors with normalized files. Valid empty
 lists are included, and missing files are reported as skipped. For a small pilot:
 
 ```bash
-prepare_upload \
-  --author "Mainak Majumder" \
-  --output /tmp/publication-review-pilot
+prepare_upload --author "Mainak Majumder"
 ```
 
-The output directory must be new. Choose another path for another preparation
-run. The helper follows your configured normalized directory and filename
-formats and accepts author names case-insensitively. Upload the contents of the
-new folder, including `authors.json`, in step 2.
+Each run replaces the index for the current selection after validating all
+selected inputs. If validation or saving fails, the previous index is retained.
+The helper reads the `normalized` folder under `config.DATA_DIRECTORY`, follows
+the configured publication filename format, and accepts author names
+case-insensitively. Upload `authors.json` and the publication files it references
+from that folder in step 2.
 
 You can also run `python -m publication_review.prepare_upload` with the same
-arguments. Relative output paths start at your current working directory;
-absolute paths work from any directory.
+arguments. The data directory comes from project configuration, so the command
+works from any working directory.
 
-### Option B: upload your existing JSON files directly
+### Option B: create the index manually
 
-You can skip the Python helper. Gather the normalized JSON files you want to
-share, and create an `authors.json` file with this structure:
+You can skip the Python helper and create `authors.json` beside the normalized
+JSON files you want to share, using this structure:
 
 ```json
 {
@@ -74,12 +74,12 @@ share, and create an `authors.json` file with this structure:
     {
       "id": "mainak-majumder",
       "name": "Mainak Majumder",
-      "sourceFile": "mainak-majumder-publications.json"
+      "sourceFile": "mainak-majumder-publications-normalized.json"
     },
     {
       "id": "rene-researcher",
       "name": "René Researcher",
-      "sourceFile": "rene-researcher-publications.json"
+      "sourceFile": "rene-researcher-publications-normalized.json"
     }
   ]
 }
@@ -96,7 +96,8 @@ array of `Publication` records. No JSON-to-spreadsheet conversion is required.
 
 1. Open [Google Drive](https://drive.google.com/).
 2. Create an input folder, for example **Publication review — inputs**.
-3. Open it and upload **all the files from step 1**, including `authors.json`.
+3. Open it and upload **`authors.json` and the publication files it references**
+   from step 1.
    Put the files directly in this folder, not in another nested folder. You can
    select and upload all of them together.
 4. Create a second, empty folder, for example **Publication review — saved**.
@@ -286,7 +287,7 @@ To update the app code while retaining its link, change the files in Apps Script
 then select **Deploy → Manage deployments → Edit → New version → Deploy**.
 Saving code in the editor alone does not update an existing versioned deployment.
 
-For a new set of normalized inputs, prepare a new upload folder and create new
+For a new set of normalized inputs, regenerate `authors.json` and create new
 input and saved-review folders in Drive. Update both Script Properties to the
 new folder IDs. The app reads those properties on each request; changing them
 does not require publishing a new code version. Keep the old folders as the

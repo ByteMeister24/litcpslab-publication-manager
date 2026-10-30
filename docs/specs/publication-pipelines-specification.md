@@ -539,15 +539,26 @@ existing workflow entry points or make them depend on Google services.
 The coordinator uploads an `authors.json` manifest and normalized JSON files to
 a private input folder on Google Drive. The manifest maps canonical database
 names and author slugs to input filenames. `prepare_upload.py` optionally
-assembles those copies and the manifest from local configuration; users can
-instead upload existing JSON files and create the manifest manually. Originals
+creates or refreshes `data/normalized/authors.json` from local configuration;
+users can instead upload existing JSON files and create the manifest manually. Originals
 and the author database remain unchanged.
 
-The installed `prepare_upload --output <new-directory> --author <names-or-all>`
+The installed `prepare_upload [--author <names-or-all>]`
 command calls `publication_review.prepare_upload:main`. It uses the same
 arguments as `python -m publication_review.prepare_upload`; omitting `--author`
-selects all authors. Output paths may be absolute or relative to the working
-directory. This preparation command does not contact Google services.
+selects all authors. There is no output-directory argument. The helper reads
+`config.DATA_DIRECTORY / "normalized"` and uses the configured publication
+filenames as each manifest entry's `sourceFile`, without copying, renaming, or
+reserializing publication files. The manifest keeps `version: 1` and the existing
+`id`, `name`, and `sourceFile` author fields.
+
+`prepare_upload(selection: Selection = "all") -> tuple[int, list[str]]` returns
+the indexed author count and skipped author names. Missing inputs are skipped;
+valid empty lists are included. All present selected inputs must pass the existing
+JSON reader before the index is atomically replaced through `storage.save_file()`.
+No matching inputs or any validation/saving failure leaves an existing index
+unchanged. The CLI reports the index path, indexed count, and skipped authors.
+This preparation command does not contact Google services.
 
 Apps Script hosts `google_apps_script/Index.html` and runs `Code.gs` as the
 deploying account. Script Properties identify separate input and saved-review
