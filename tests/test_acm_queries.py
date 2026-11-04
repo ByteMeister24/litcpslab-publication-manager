@@ -11,7 +11,12 @@ from unittest.mock import patch
 
 from support import AUTHOR_YAML, PROJECT_ROOT
 import config
-from generate_acm_queries import build_query, generate_queries, main, parse_request
+from scripts.generate_acm_queries import (
+    build_query,
+    generate_queries,
+    main,
+    parse_request,
+)
 from helpers.author_builder import Author
 
 
@@ -24,8 +29,10 @@ class ACMQueryTests(unittest.TestCase):
         self.authors_file.write_text(AUTHOR_YAML, encoding="utf-8")
         self.data_directory = self.root / "data"
         self.output = self.data_directory / "acm-queries" / "queries.txt"
-        for name, value in (("AUTHORS_FILE", self.authors_file),
-                            ("DATA_DIRECTORY", self.data_directory)):
+        for name, value in (
+            ("AUTHORS_FILE", self.authors_file),
+            ("DATA_DIRECTORY", self.data_directory),
+        ):
             patcher = patch.object(config, name, value)
             patcher.start()
             self.addCleanup(patcher.stop)
@@ -45,14 +52,16 @@ class ACMQueryTests(unittest.TestCase):
 
     def test_special_characters_are_escaped_as_literals_in_both_fields(self):
         text = '+ - && || ! ( ) { } [ ] ^ " ~ * ? : / \\'
-        escaped = r'\+ \- \&\& \|\| \! \( \) \{ \} \[ \] \^ \" \~ \* \? \: \/ \\'
+        escaped = r"\+ \- \&\& \|\| \! \( \) \{ \} \[ \] \^ \" \~ \* \? \: \/ \\"
         self.assertEqual(
             build_query(Author(text, (text,))),
             f'ContribAuthor:("{escaped}") AND Affiliation:("{escaped}")',
         )
 
     def test_quotes_and_boolean_words_cannot_add_query_clauses(self):
-        author = Author('Ada "OR" Researcher', ("Research AND Development", "Jean-Luc's Lab"))
+        author = Author(
+            'Ada "OR" Researcher', ("Research AND Development", "Jean-Luc's Lab")
+        )
         self.assertEqual(
             build_query(author),
             'ContribAuthor:("Ada \\"OR\\" Researcher") AND '
@@ -60,9 +69,13 @@ class ACMQueryTests(unittest.TestCase):
         )
 
     def test_one_or_multiple_names_and_all_use_shared_selection_syntax(self):
-        self.assertEqual(parse_request(["--author", "Ada Researcher"]), ("Ada Researcher",))
         self.assertEqual(
-            parse_request(["--author", " René Researcher, Ada Researcher, René Researcher "]),
+            parse_request(["--author", "Ada Researcher"]), ("Ada Researcher",)
+        )
+        self.assertEqual(
+            parse_request(
+                ["--author", " René Researcher, Ada Researcher, René Researcher "]
+            ),
             ("René Researcher", "Ada Researcher"),
         )
         for args in (["all"], ["--author", "all"]):
@@ -70,9 +83,16 @@ class ACMQueryTests(unittest.TestCase):
                 self.assertEqual(parse_request(args), "all")
 
     def test_invalid_cli_arguments_exit_with_usage_code_two(self):
-        cases = ([], ["Ada Researcher"], ["--author"], ["--author", ""],
-                 ["--author", "A,,B"], ["--author", "all,A"],
-                 ["all", "--author", "all"], ["--source", "acm"])
+        cases = (
+            [],
+            ["Ada Researcher"],
+            ["--author"],
+            ["--author", ""],
+            ["--author", "A,,B"],
+            ["--author", "all,A"],
+            ["all", "--author", "all"],
+            ["--source", "acm"],
+        )
         for args in cases:
             with self.subTest(args=args), redirect_stderr(io.StringIO()):
                 with self.assertRaises(SystemExit) as caught:
@@ -80,13 +100,17 @@ class ACMQueryTests(unittest.TestCase):
                 self.assertEqual(caught.exception.code, 2)
 
     def test_selected_authors_keep_canonical_names_order_and_yaml_affiliations(self):
-        result = generate_queries(("rené researcher", "ADA RESEARCHER", "RENÉ RESEARCHER"))
+        result = generate_queries(
+            ("rené researcher", "ADA RESEARCHER", "RENÉ RESEARCHER")
+        )
         self.assertEqual(result, self.output)
-        self.assertEqual(self.output.read_text(encoding="utf-8"),
-                         'ContribAuthor:("René Researcher") AND '
-                         'Affiliation:("University A" OR "Institute B" OR "Former University")\n'
-                         'ContribAuthor:("Ada Researcher") AND '
-                         'Affiliation:("University A" OR "Institute B")\n')
+        self.assertEqual(
+            self.output.read_text(encoding="utf-8"),
+            'ContribAuthor:("René Researcher") AND '
+            'Affiliation:("University A" OR "Institute B" OR "Former University")\n'
+            'ContribAuthor:("Ada Researcher") AND '
+            'Affiliation:("University A" OR "Institute B")\n',
+        )
 
     def test_all_writes_database_order_and_rerun_replaces_with_selected_author(self):
         generate_queries("all")
@@ -117,8 +141,9 @@ class ACMQueryTests(unittest.TestCase):
         generate_queries("all")
         before = self.output.read_bytes()
         stderr = io.StringIO()
-        with patch("utils.storage.os.replace", side_effect=OSError("Cannot replace queries")), \
-                redirect_stderr(stderr):
+        with patch(
+            "utils.storage.os.replace", side_effect=OSError("Cannot replace queries")
+        ), redirect_stderr(stderr):
             self.assertEqual(main(["--author", "Ada Researcher"]), 1)
         self.assertIn("Cannot replace queries", stderr.getvalue())
         self.assertEqual(self.output.read_bytes(), before)
@@ -133,8 +158,16 @@ class ACMQueryTests(unittest.TestCase):
 
     def test_script_help_works_outside_project_directory(self):
         result = subprocess.run(
-            [sys.executable, "-B", str(PROJECT_ROOT / "src" / "generate_acm_queries.py"), "--help"],
-            cwd=self.root, capture_output=True, text=True, check=False,
+            [
+                sys.executable,
+                "-B",
+                str(PROJECT_ROOT / "src" / "generate_acm_queries.py"),
+                "--help",
+            ],
+            cwd=self.root,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("--author", result.stdout)

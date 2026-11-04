@@ -20,6 +20,9 @@ Additional publishers and PDF downloading are outside its current scope.
 A standalone ACM query script supports manual searching and export; it does
 not retrieve publications or invoke any of the three workflows.
 
+A standalone ODT comparison script lists citations whose titles are absent from
+a supplied normalized JSON file. It does not invoke or change the three workflows.
+
 IEEE and ScienceDirect conversion helpers belong to the normalization package;
 the collector does not import them. Markdown rendering belongs to the third
 workflow.
@@ -36,34 +39,35 @@ For a shared browser-based review page, see the
 
 Implementation paths below are relative to `src/`.
 
-| Component | Responsibility |
-| --- | --- |
-| `publication_collector/cli/download_publications.py` | Parse CLI arguments into `DownloadRequest`, call the manager, print outcomes and a console summary, and return an exit code |
-| `publication_collector/download_manager.py` | Validate selections, resolve sources, process author/source pairs sequentially, and collect returned outcomes |
-| `publication_collector/download_models.py` | Define `DownloadRequest`, `DownloadConfirmation`, and `DownloadError`; reuse the shared `helpers.selection.Selection` type |
-| `publication_collector/source_downloaders/ieee_xplore.py` | Own IEEE settings, query construction, retrieval, page validation, and publication counting |
-| `publication_collector/source_downloaders/sciencedirect.py` | Own ScienceDirect settings, query construction, retrieval, page validation, and publication counting |
-| `publication_collector/source_downloaders/common.py` | Load credentials, run the supplied source functions, construct the download filepath and JSON content, save complete raw pages, and construct a confirmation or sanitized error |
-| `publication_collector/__main__.py` | Run the collector as a Python module |
-| `publication_normalizer/cli/normalize_publications.py` | Parse author selections and print normalization outcomes, paths, errors, and exit status |
-| `publication_normalizer/normalization_manager.py` | Define per-author `NormalizationResult` outcomes, select inputs in source order, collect file-level results, remove duplicates, and save complete or partial per-author datasets |
-| `publication_normalizer/duplicate_checker.py` | Return a new publication list retaining the first copy of each DOI or unambiguous title identity without changing metadata |
-| `publication_normalizer/source_normalizers/` | Read IEEE/ScienceDirect native pages, map Springer CSV fields, and convert ACM BibTeX |
-| `publication_normalizer/__main__.py` | Run normalization as a Python module |
-| `publication_markdown/cli/generate_markdown.py` | Parse author selections and print generated, removed, skipped, and failed outcomes |
-| `publication_markdown/markdown_manager.py` | Select reviewed inputs, construct the final output path, coordinate generation, and remove the exact final file for empty reviews |
-| `publication_markdown/json_reader.py` | Validate a complete reviewed JSON array and construct `Publication` instances |
-| `publication_markdown/markdown_builder.py` | Render publications using the existing schema and save combined Markdown to the supplied final path |
-| `publication_markdown/markdown_models.py` | Define `MarkdownBuildResult` and per-author `MarkdownResult` outcomes |
-| `publication_markdown/__main__.py` | Run Markdown generation as a Python module |
-| `publication_model.py` | Define the shared `Publication` dataclass |
-| `helpers/author_builder.py` | Define `Author`, validate the complete author database, and return selected authors |
-| `helpers/selection.py` | Define shared selection types and comma-list CLI parsing |
-| `generate_acm_queries.py` | Select database authors, construct ACM search queries, and save a plain text file for manual use |
-| `utils/yaml_loader.py` | Parse the complete YAML mapping safely and reject duplicate keys |
-| `utils/storage.py` | Atomically publish completed text files, replacing existing files only when requested |
-| `utils/file_timestamps.py` | Read filesystem creation timestamps for uniform normalization input selection |
-| `config.py` | Define shared project paths, timezone, and filename formats |
+| Component                                                   | Responsibility                                                                                                                                                                   |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `publication_collector/cli/download_publications.py`        | Parse CLI arguments into `DownloadRequest`, call the manager, print outcomes and a console summary, and return an exit code                                                      |
+| `publication_collector/download_manager.py`                 | Validate selections, resolve sources, process author/source pairs sequentially, and collect returned outcomes                                                                    |
+| `publication_collector/download_models.py`                  | Define `DownloadRequest`, `DownloadConfirmation`, and `DownloadError`; reuse the shared `helpers.selection.Selection` type                                                       |
+| `publication_collector/source_downloaders/ieee_xplore.py`   | Own IEEE settings, query construction, retrieval, page validation, and publication counting                                                                                      |
+| `publication_collector/source_downloaders/sciencedirect.py` | Own ScienceDirect settings, query construction, retrieval, page validation, and publication counting                                                                             |
+| `publication_collector/source_downloaders/common.py`        | Load credentials, run the supplied source functions, construct the download filepath and JSON content, save complete raw pages, and construct a confirmation or sanitized error  |
+| `publication_collector/__main__.py`                         | Run the collector as a Python module                                                                                                                                             |
+| `publication_normalizer/cli/normalize_publications.py`      | Parse author selections and print normalization outcomes, paths, errors, and exit status                                                                                         |
+| `publication_normalizer/normalization_manager.py`           | Define per-author `NormalizationResult` outcomes, select inputs in source order, collect file-level results, remove duplicates, and save complete or partial per-author datasets |
+| `publication_normalizer/duplicate_checker.py`               | Return a new publication list retaining the first copy of each DOI or unambiguous title identity without changing metadata                                                       |
+| `publication_normalizer/source_normalizers/`                | Read IEEE/ScienceDirect native pages, map Springer CSV fields, and convert ACM BibTeX                                                                                            |
+| `publication_normalizer/__main__.py`                        | Run normalization as a Python module                                                                                                                                             |
+| `publication_markdown/cli/generate_markdown.py`             | Parse author selections and print generated, removed, skipped, and failed outcomes                                                                                               |
+| `publication_markdown/markdown_manager.py`                  | Select reviewed inputs, construct the final output path, coordinate generation, and remove the exact final file for empty reviews                                                |
+| `publication_markdown/json_reader.py`                       | Validate a complete reviewed JSON array and construct `Publication` instances                                                                                                    |
+| `publication_markdown/markdown_builder.py`                  | Render publications using the existing schema and save combined Markdown to the supplied final path                                                                              |
+| `publication_markdown/markdown_models.py`                   | Define `MarkdownBuildResult` and per-author `MarkdownResult` outcomes                                                                                                            |
+| `publication_markdown/__main__.py`                          | Run Markdown generation as a Python module                                                                                                                                       |
+| `publication_model.py`                                      | Define the shared `Publication` dataclass                                                                                                                                        |
+| `helpers/author_builder.py`                                 | Define `Author`, validate the complete author database, and return selected authors                                                                                              |
+| `helpers/selection.py`                                      | Define shared selection types and comma-list CLI parsing                                                                                                                         |
+| `generate_acm_queries.py`                                   | Select database authors, construct ACM search queries, and save a plain text file for manual use                                                                                 |
+| `scripts/find_missing_publications.py`                      | Extract ODT titles, compare them with supplied normalized JSON, and atomically save unmatched full citations                                                                     |
+| `utils/yaml_loader.py`                                      | Parse the complete YAML mapping safely and reject duplicate keys                                                                                                                 |
+| `utils/storage.py`                                          | Atomically publish completed text files, replacing existing files only when requested                                                                                            |
+| `utils/file_timestamps.py`                                  | Read filesystem creation timestamps for uniform normalization input selection                                                                                                    |
+| `config.py`                                                 | Define shared project paths, timezone, and filename formats                                                                                                                      |
 
 The manager owns `SUPPORTED_SOURCES` and `DOWNLOADERS`. Source API URLs, page
 sizes, timeouts, and credential-key names belong to their source modules.
@@ -75,12 +79,12 @@ The collector does not import normalization or Markdown modules.
 
 `Selection` is a tuple of strings or the literal string `"all"`.
 
-| Dataclass | Fields |
-| --- | --- |
-| `Author` | `name: str`, `affiliations: tuple[str, ...]`; defined in `helpers/author_builder.py` |
-| `DownloadRequest` | `authors: Selection`, `sources: Selection` |
-| `DownloadConfirmation` | `author: str`, `source: str`, `publication_count: int`, `raw_file_path: Path` |
-| `DownloadError` | `author: str`, `source: str`, `error: str` |
+| Dataclass              | Fields                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| `Author`               | `name: str`, `affiliations: tuple[str, ...]`; defined in `helpers/author_builder.py` |
+| `DownloadRequest`      | `authors: Selection`, `sources: Selection`                                           |
+| `DownloadConfirmation` | `author: str`, `source: str`, `publication_count: int`, `raw_file_path: Path`        |
+| `DownloadError`        | `author: str`, `source: str`, `error: str`                                           |
 
 The collector's public coordination interface is:
 
@@ -193,16 +197,16 @@ Credential values are redacted before errors leave the source.
 
 ## Publisher retrieval
 
-| Setting | IEEE Xplore | ScienceDirect |
-| --- | --- | --- |
-| Endpoint | `https://ieeexploreapi.ieee.org/api/v1/search/articles` | `https://api.elsevier.com/content/metadata/article` |
-| Response format | JSON | JSON with `view=COMPLETE` |
-| Page size | 200 | 25 |
-| Initial position | Record 1 | Offset 0 |
-| Next position | Retrieved count + 1 | Retrieved count |
-| Credentials | `apikey` query parameter | `X-ELS-APIKey` header |
-| Timeout | 30 seconds per request | 30 seconds per request |
-| Automatic retries | None | None |
+| Setting           | IEEE Xplore                                             | ScienceDirect                                       |
+| ----------------- | ------------------------------------------------------- | --------------------------------------------------- |
+| Endpoint          | `https://ieeexploreapi.ieee.org/api/v1/search/articles` | `https://api.elsevier.com/content/metadata/article` |
+| Response format   | JSON                                                    | JSON with `view=COMPLETE`                           |
+| Page size         | 200                                                     | 25                                                  |
+| Initial position  | Record 1                                                | Offset 0                                            |
+| Next position     | Retrieved count + 1                                     | Retrieved count                                     |
+| Credentials       | `apikey` query parameter                                | `X-ELS-APIKey` header                               |
+| Timeout           | 30 seconds per request                                  | 30 seconds per request                              |
+| Automatic retries | None                                                    | None                                                |
 
 Both sources combine the canonical author name with any configured affiliation,
 without a year filter. Search values must be nonblank literal text without
@@ -256,6 +260,54 @@ validation or saving failures retain any existing file. Return `0` for success,
 `1` for validation or saving failures, and `2` for invalid CLI usage. Do not load
 credentials, contact ACM, or download, normalize, or render publications.
 
+## ODT publication comparison
+
+From the project root, using the installed project environment, run:
+
+```bash
+python -m scripts.find_missing_publications \
+  --odt /path/to/pubRR.odt \
+  --normalized data/normalized/rick-rabiser-publications-normalized.json \
+  --output data/comparisons/rick-rabiser-missing-publications.txt
+```
+
+All three paths are required and are interpreted relative to the current working
+directory unless absolute. The output must differ from both inputs, including
+when a symlink refers to an input. No author-database selection, credentials,
+network access, or additional dependencies are needed.
+
+Read `content.xml` from the ODT archive and process body paragraphs in document
+order, including paragraphs in lists and sections. Combine inline styled text
+without inserting spaces inside words; respect explicit ODT spaces, tabs, and
+line breaks. Exclude headings, notes, comments, and tracked-change definitions.
+Ignore empty paragraphs and section labels without a colon. Preserve the complete
+citation text, collapsing whitespace into single spaces.
+
+For every remaining paragraph, the title is the text after the **first colon**
+and before the **next period**, trimmed. Apply this rule without manual review,
+special corrections, or inferred venue boundaries. Subsequent colons, commas,
+dashes, and other characters remain part of the extracted title. A paragraph
+containing a colon but no terminating period or no nonblank title fails validation;
+a document without publication entries also fails.
+
+The normalized input must be a UTF-8 JSON array (an optional BOM is accepted) of
+publication objects with nonblank string `title` fields. Other metadata is not
+used. An empty array is valid and means all ODT entries are missing. Compare titles
+using `" ".join(title.split()).casefold()` and exact equality. Punctuation remains
+significant; there is no DOI matching, fuzzy matching, or Title Case requirement.
+
+Save every unmatched full citation as UTF-8 text, separated by a blank line, in ODT
+order, preserving repeated entries. A nonempty report ends with a newline; zero
+missing entries produces an empty file. Print extracted, matched, and missing
+entry counts and the absolute report path to stdout. Repeated ODT entries each
+contribute to these counts; duplicate normalized titles do not multiply matches.
+
+Validate both inputs completely before calling `utils.storage.save_file()` with
+`replace=True`. Reruns atomically replace the report; validation and storage
+failures preserve any existing report. Both input files remain unchanged. Exit
+codes are `0` for a successful comparison, `1` for input or saving failures, and
+`2` for invalid CLI usage.
+
 ## Storage
 
 Paths are rooted at shared `config.PROJECT_ROOT`, independently of the current
@@ -299,12 +351,12 @@ the normalizer does not import the collector package.
 Only source directories defined by `config.DOWNLOAD_DIRECTORY_FORMAT` are read.
 The default layout uses source subfolders under `data/<author-slug>/download/`:
 
-| Source folder | Matching extensions |
-| --- | --- |
-| `ieee` | `.json` |
-| `sciencedirect` | `.json` |
-| `springer` | `.csv` |
-| `acm` | `.bib`, `.bibtex` |
+| Source folder   | Matching extensions |
+| --------------- | ------------------- |
+| `ieee`          | `.json`             |
+| `sciencedirect` | `.json`             |
+| `springer`      | `.csv`              |
+| `acm`           | `.bib`, `.bibtex`   |
 
 Extension matching is case-insensitive. Other extensions and older flat files
 directly under `download/` are ignored. Sources are processed in the table order;
@@ -341,14 +393,14 @@ rejects the whole file.
 Springer CSV is read as UTF-8 with an optional BOM. The following columns are
 required; their values may be empty:
 
-| CSV column | `Publication` field |
-| --- | --- |
-| `Item Title` | `title` |
+| CSV column          | `Publication` field |
+| ------------------- | ------------------- |
+| `Item Title`        | `title`             |
 | `Publication Title` | `publication_title` |
-| `Item DOI` | `doi` |
-| `Authors` | `authors` |
-| `Publication Year` | `year` |
-| `URL` | `pdf_url` |
+| `Item DOI`          | `doi`               |
+| `Authors`           | `authors`           |
+| `Publication Year`  | `year`              |
+| `URL`               | `pdf_url`           |
 
 Authors are comma-separated and trimmed, with empty items omitted. The user
 corrects undelimited author cells manually; the parser does not infer name
