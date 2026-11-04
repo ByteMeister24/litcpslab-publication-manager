@@ -10,7 +10,6 @@ from helpers.author_builder import Author
 from publication_collector.download_models import DownloadConfirmation, DownloadError
 from publication_collector.source_downloaders.common import download_source
 
-
 __all__ = ["download"]
 
 
@@ -42,15 +41,23 @@ def _build_query(author: Author) -> str:
     """Constrain the full author name and every affiliation to their own fields."""
     if not author.name.strip() or not author.affiliations:
         raise ValueError("An author name and at least one affiliation are required.")
-    
+
     for value in (author.name,) + author.affiliations:
         # IEEE does not document escaping embedded quotation marks in phrases.
-        if not value.strip() or any(char in value for char in '"\\*?') or any(ord(char) < 32 for char in value):
-            raise ValueError("Search names and affiliations must be non-empty literal text "
-                                "without double quotes, backslashes, wildcards, or control characters.")
-    
-    affiliations = " OR ".join(f'"Author Affiliations":"{value}"' for value in author.affiliations)
-    
+        if (
+            not value.strip()
+            or any(char in value for char in '"\\*?')
+            or any(ord(char) < 32 for char in value)
+        ):
+            raise ValueError(
+                "Search names and affiliations must be non-empty literal text "
+                "without double quotes, backslashes, wildcards, or control characters."
+            )
+
+    affiliations = " OR ".join(
+        f'"Author Affiliations":"{value}"' for value in author.affiliations
+    )
+
     return f'"Authors":"{author.name}" AND ({affiliations})'
 
 
@@ -66,19 +73,27 @@ def _fetch_page(api_key: str, query: str, start_record: int) -> dict:
         "sort_field": "article_number",
         "sort_order": "asc",
     }
-    request = Request(API_URL + "?" + urlencode(parameters), headers={"Accept": "application/json"})
+    request = Request(
+        API_URL + "?" + urlencode(parameters), headers={"Accept": "application/json"}
+    )
     try:
         with urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
             return json.load(response)
     except HTTPError as error:
         error.close()
-        raise RuntimeError(f"IEEE returned HTTP {error.code} at record {start_record}.") from None
+        raise RuntimeError(
+            f"IEEE returned HTTP {error.code} at record {start_record}."
+        ) from None
     except (URLError, OSError, HTTPException) as error:
         # Exception messages can include the full URL; expose only the error type.
-        raise RuntimeError(f"IEEE request failed at record {start_record} "
-                            f"({type(error).__name__}).") from None
+        raise RuntimeError(
+            f"IEEE request failed at record {start_record} "
+            f"({type(error).__name__})."
+        ) from None
     except (ValueError, UnicodeError):
-        raise ValueError(f"IEEE returned invalid JSON at record {start_record}.") from None
+        raise ValueError(
+            f"IEEE returned invalid JSON at record {start_record}."
+        ) from None
 
 
 def _record_count(page: dict) -> int:
@@ -105,35 +120,41 @@ def _download_pages(query: str, api_key: str) -> list[dict]:
     while total is None or retrieved < total:
         page = _fetch_page(api_key, query, retrieved + 1)
         count = _record_count(page)
-        
+
         if total is None:
             total = count
         elif count != total:
-            raise ValueError("IEEE result count changed during retrieval; rerun the download.")
+            raise ValueError(
+                "IEEE result count changed during retrieval; rerun the download."
+            )
 
         articles = page.get("articles", [] if total == 0 else None)
-        
+
         if not isinstance(articles, list) or len(articles) > PAGE_SIZE:
             raise ValueError("IEEE response has an invalid articles list.")
-        
+
         if retrieved + len(articles) > total or (not articles and retrieved < total):
             raise ValueError("IEEE returned incomplete or inconsistent search results.")
-        
+
         for article in articles:
-            number = article.get("article_number") if isinstance(article, dict) else None
-            
+            number = (
+                article.get("article_number") if isinstance(article, dict) else None
+            )
+
             if isinstance(number, int) and not isinstance(number, bool) and number > 0:
                 number = str(number)
-            
+
             if not isinstance(number, str) or not number.strip():
                 raise ValueError("IEEE returned an article without an article_number.")
-            
+
             if number in article_numbers:
-                raise ValueError("IEEE repeated an article during pagination; rerun the download.")
-            
+                raise ValueError(
+                    "IEEE repeated an article during pagination; rerun the download."
+                )
+
             article_numbers.add(number)
 
         retrieved += len(articles)
         pages.append(page)
-    
+
     return pages
