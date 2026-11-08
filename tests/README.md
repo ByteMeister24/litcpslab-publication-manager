@@ -8,9 +8,6 @@ tests/
 ├── publication_collector/
 │   ├── cli/
 │   └── source_downloaders/
-├── publication_finder/
-│   ├── cli/
-│   └── source_downloaders/
 ├── publication_markdown/
 │   └── cli/
 ├── publication_normalizer/
@@ -37,7 +34,6 @@ Run commands from the repository root. For all Python tests:
 For one package or subpackage:
 
 ```bash
-.venv/bin/python -B -m unittest discover -s tests/publication_finder -t . -v
 .venv/bin/python -B -m unittest discover -s tests/publication_collector/source_downloaders -t . -v
 ```
 
@@ -46,7 +42,7 @@ directories such as `tests/helpers/` do not shadow application packages.
 Individual modules can also be run by their full test-package name:
 
 ```bash
-.venv/bin/python -B -m unittest tests.publication_finder.test_finder_queries -v
+.venv/bin/python -B -m unittest tests.publication_collector.source_downloaders.test_ieee_source -v
 ```
 
 The browser review application's Apps Script tests run separately:

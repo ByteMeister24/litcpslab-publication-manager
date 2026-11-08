@@ -17,10 +17,6 @@ The implemented source collection workflow supports IEEE Xplore and ScienceDirec
 It does not normalize metadata or create Markdown.
 Additional publishers and PDF downloading are outside its current scope.
 
-The independent `publication_finder` pipeline has a separate
-[specification](publication-finder-specification.md) and
-[usage guide](../publication-finder.md).
-
 A standalone ACM query script supports manual searching and export; it does
 not retrieve publications or invoke any of the three workflows.
 
