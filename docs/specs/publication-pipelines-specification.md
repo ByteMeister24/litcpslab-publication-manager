@@ -17,6 +17,10 @@ The implemented source collection workflow supports IEEE Xplore and ScienceDirec
 It does not normalize metadata or create Markdown.
 Additional publishers and PDF downloading are outside its current scope.
 
+The independent `publication_finder` pipeline has a separate
+[specification](publication-finder-specification.md) and
+[usage guide](../publication-finder.md).
+
 A standalone ACM query script supports manual searching and export; it does
 not retrieve publications or invoke any of the three workflows.
 
@@ -74,6 +78,20 @@ sizes, timeouts, and credential-key names belong to their source modules.
 The CLI owns console output; the manager and sources do not print. The shared
 source workflow invokes storage directly; the manager performs no file writes.
 The collector does not import normalization or Markdown modules.
+
+## Test organization
+
+The `tests/` tree mirrors the package directories under `src/`, including
+`cli/`, `source_downloaders/`, and `source_normalizers/` subpackages. Shared
+synthetic fixtures remain in `tests/support.py`. Integration tests stay with
+the package coordinating the behavior they exercise.
+
+Python suites use the `tests.<package>` namespace. Run discovery from the project
+root with `.venv/bin/python -B -m unittest discover -s tests -t . -v`; the explicit
+top-level directory prevents test packages from shadowing application packages.
+Use a package-specific start directory to run only that package's tests.
+The Apps Script suite lives under `tests/publication_review/google_apps_script/`
+and runs separately with Node.js. See [test commands](../../tests/README.md).
 
 ## Data contracts
 

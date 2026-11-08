@@ -20,10 +20,21 @@ py-modules = ["config", "publication_model"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["publication_collector*", "publication_normalizer*", "publication_markdown*", "publication_review*", "helpers*", "utils*"]
+include = [
+    "publication_collector*",
+    "publication_normalizer*",
+    "publication_markdown*",
+    "publication_review*",
+    "helpers*",
+    "utils*",
+]
 
 [tool.setuptools.package-data]
-publication_review = ["google_apps_script/*.gs", "google_apps_script/*.html", "google_apps_script/*.json"]
+publication_review = [
+    "google_apps_script/*.gs",
+    "google_apps_script/*.html",
+    "google_apps_script/*.json",
+]
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }

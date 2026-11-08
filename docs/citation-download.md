@@ -177,12 +177,13 @@ URLs are preserved in native metadata when returned; PDF files are not downloade
 ## Offline verification
 
 ```bash
-.venv/bin/python -B -m unittest discover -s tests -v
+.venv/bin/python -B -m unittest discover -s tests -t . -v
 ```
 
-Collector tests are split between CLI behavior (`test_collector_cli.py`),
-coordination (`test_download_manager.py`), source-specific retrieval, and the
-shared download workflow. They use synthetic credentials, temporary directories,
+Collector tests are grouped under `tests/publication_collector/`, with CLI
+behavior in `cli/`, coordination in `test_download_manager.py`, and source
+retrieval and the shared download workflow in `source_downloaders/`.
+They use synthetic credentials, temporary directories,
 and mocked HTTP. Regressions cover the package entry point,
 selection, pagination, credential redaction, raw storage, and continued processing
 after failures. Normalization and rendering tests remain separate.

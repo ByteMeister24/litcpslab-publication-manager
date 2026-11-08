@@ -332,8 +332,8 @@ The preparation helper has Python tests; the server has tests using in-memory
 Apps Script/Drive substitutes. The JavaScript tests use only Node.js built-ins:
 
 ```bash
-.venv/bin/python -m unittest discover -s tests -p 'test_review_upload.py'
-node tests/google_apps_script_review.test.cjs
+.venv/bin/python -m unittest discover -s tests/publication_review -t . -p 'test_review_upload.py'
+node tests/publication_review/google_apps_script/google_apps_script_review.test.cjs
 ```
 
 Node.js is only needed to run those developer tests, not to deploy or use the app.

@@ -15,12 +15,16 @@ from utils import storage
 
 def _load_api_key(source_name: str, api_key_name: str) -> str:
     if not config.ENV_FILE.is_file():
-        raise ValueError(f"{source_name} credential file is missing: {config.ENV_FILE}.")
+        raise ValueError(
+            f"{source_name} credential file is missing: {config.ENV_FILE}."
+        )
     try:
         settings = dotenv_values(config.ENV_FILE, interpolate=False)
     except Exception as error:
         # Parser errors can contain credentials before a key is available for redaction.
-        raise ValueError(f"Cannot read {source_name} credential file ({type(error).__name__}).") from None
+        raise ValueError(
+            f"Cannot read {source_name} credential file ({type(error).__name__})."
+        ) from None
     api_key = (settings.get(api_key_name) or "").strip()
     if not api_key:
         raise ValueError(f"{api_key_name} is missing or empty in {config.ENV_FILE}.")
@@ -47,17 +51,30 @@ def download_source(
         publication_count = count_publications(pages)
 
         stage = "Raw saving"
-        content = json.dumps(pages, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
-        timestamp = datetime.now(ZoneInfo(config.DOWNLOAD_TIMEZONE)).strftime(config.DOWNLOAD_TIMESTAMP_FORMAT)
-        download_directory = config.DATA_DIRECTORY / config.DOWNLOAD_DIRECTORY_FORMAT.format(
-            author_slug=author.slug, source=source,
+        content = (
+            json.dumps(pages, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+        )
+        timestamp = datetime.now(ZoneInfo(config.DOWNLOAD_TIMEZONE)).strftime(
+            config.DOWNLOAD_TIMESTAMP_FORMAT
+        )
+        download_directory = (
+            config.DATA_DIRECTORY
+            / config.DOWNLOAD_DIRECTORY_FORMAT.format(
+                author_slug=author.slug,
+                source=source,
+            )
         )
         filepath = download_directory / config.DOWNLOAD_FILENAME_FORMAT.format(
-            author_slug=author.slug, source=source, timestamp=timestamp)
+            author_slug=author.slug, source=source, timestamp=timestamp
+        )
         storage.save_file(filepath, content, replace=False)
 
-        return DownloadConfirmation(author=author.name, source=source, publication_count=publication_count,
-                                    raw_file_path=filepath)
+        return DownloadConfirmation(
+            author=author.name,
+            source=source,
+            publication_count=publication_count,
+            raw_file_path=filepath,
+        )
     except Exception as error:
         message = f"{stage} failed: {error}"
         if api_key:

@@ -1,11 +1,6 @@
 """Synthetic fixtures shared by offline pipeline tests."""
 
-from pathlib import Path
-import sys
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT / "src"))
+from tests import PROJECT_ROOT
 
 AUTHOR_YAML = """Ada Researcher:
   - University A

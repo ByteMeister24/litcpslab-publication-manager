@@ -154,7 +154,7 @@ generation reads reviewed copies, not these generated normalized files.
 ## Verification
 
 ```bash
-.venv/bin/python -B -m unittest discover -s tests -v
+.venv/bin/python -B -m unittest discover -s tests -t . -v
 ```
 
 Tests cover publisher mappings, creation-time selection for all four formats,
