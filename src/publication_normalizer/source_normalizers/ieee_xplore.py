@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Convert saved ieee_xplore metadata into Publication instances."""
 
 from pathlib import Path

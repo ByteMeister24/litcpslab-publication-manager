@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Author isolation for Google app exports in the shared reviewed directory."""
 
 from datetime import datetime

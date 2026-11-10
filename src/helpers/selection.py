@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Shared comma-separated CLI selection parsing."""
 
 from typing import Literal

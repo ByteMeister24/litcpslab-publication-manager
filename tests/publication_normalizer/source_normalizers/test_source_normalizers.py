@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Persisted JSON, Springer CSV, and ACM BibTeX conversion contracts."""
 
 import csv

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Select saved inputs, normalize them, and publish one combined file per author."""
 
 from dataclasses import asdict, dataclass

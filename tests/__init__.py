@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Source-aligned test suites, importable as ``tests.<package>``."""
 
 from pathlib import Path

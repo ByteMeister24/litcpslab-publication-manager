@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Unit tests for parsing complete YAML files into author mappings."""
 
 from pathlib import Path

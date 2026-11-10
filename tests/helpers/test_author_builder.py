@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Unit tests for author validation and selection using parsed mappings."""
 
 from typing import cast

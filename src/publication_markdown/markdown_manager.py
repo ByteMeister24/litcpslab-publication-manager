@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Match reviewed JSON to each author and publish or remove their final file."""
 
 from pathlib import Path

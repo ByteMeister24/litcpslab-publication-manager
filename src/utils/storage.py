@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Publish completed raw downloads and Markdown without exposing partial writes."""
 import os
 from pathlib import Path

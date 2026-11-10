@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """ODT title extraction, exact matching, and atomic missing-citation reports."""
 
 from contextlib import redirect_stderr, redirect_stdout

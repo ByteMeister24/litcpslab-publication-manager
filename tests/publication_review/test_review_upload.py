@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Index normalized publications without copying or modifying their files."""
 
 from contextlib import redirect_stderr, redirect_stdout

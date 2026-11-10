@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Synthetic fixtures shared by offline pipeline tests."""
 
 from tests import PROJECT_ROOT

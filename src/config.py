@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Project-wide configuration; API settings belong to their source modules."""
 
 from pathlib import Path

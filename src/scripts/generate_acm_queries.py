@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Generate text queries for manual searching in ACM's Edit Query field."""
 
 import argparse

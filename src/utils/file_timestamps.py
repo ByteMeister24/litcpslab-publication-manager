@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Read filesystem creation timestamps."""
 
 from datetime import datetime

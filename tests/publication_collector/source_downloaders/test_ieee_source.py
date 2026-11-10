@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Uniform IEEE source contract, direct file credentials, and normalization."""
 
 import copy

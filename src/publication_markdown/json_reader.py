@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Read and validate a complete reviewed dataset before rendering any records."""
 
 from dataclasses import fields

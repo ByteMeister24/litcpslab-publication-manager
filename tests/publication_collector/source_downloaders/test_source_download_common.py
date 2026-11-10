@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Publisher-independent workflow and failure contracts."""
 
 import json

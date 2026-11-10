@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Coordinate author/source downloads without file writes."""
 from helpers.author_builder import get_selected_authors
 from helpers.selection import Selection

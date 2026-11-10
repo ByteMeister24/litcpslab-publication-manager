@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Markdown schema rendering and publication to an explicitly supplied path."""
 
 from pathlib import Path

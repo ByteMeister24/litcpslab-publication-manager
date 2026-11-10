@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Shared download workflow; publisher modules supply queries and record counts."""
 
 from collections.abc import Callable

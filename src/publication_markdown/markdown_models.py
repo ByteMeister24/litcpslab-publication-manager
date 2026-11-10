@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Builder and per-author workflow outcomes."""
 
 from dataclasses import dataclass

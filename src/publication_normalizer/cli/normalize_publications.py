@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Select database authors and report normalized JSON results in the console."""
 
 import argparse

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """CLI for downloading publication metadata."""
 
 import argparse

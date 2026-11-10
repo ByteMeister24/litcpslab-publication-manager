@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Offline tests for ACM BibTeX normalization."""
 
 from contextlib import redirect_stderr, redirect_stdout

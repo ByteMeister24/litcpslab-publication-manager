@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Filesystem creation times and explicit failures when they are unavailable."""
 
 from pathlib import Path

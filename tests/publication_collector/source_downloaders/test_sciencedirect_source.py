@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Offline ScienceDirect retrieval, normalization, and pipeline integration tests."""
 
 import copy

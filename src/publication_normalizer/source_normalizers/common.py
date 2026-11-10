@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Read the native response-page arrays saved by the collector."""
 
 import json

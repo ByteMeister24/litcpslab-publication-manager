@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Offline ACM query construction, author selection, and text output tests."""
 
 from contextlib import redirect_stderr, redirect_stdout

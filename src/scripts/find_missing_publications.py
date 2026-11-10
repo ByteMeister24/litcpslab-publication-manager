@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """List ODT citations whose titles are absent from normalized publication JSON."""
 
 import argparse

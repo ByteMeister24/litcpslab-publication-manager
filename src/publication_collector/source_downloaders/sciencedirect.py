@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Retrieve ScienceDirect article metadata while preserving native JSON pages."""
 
 from http.client import HTTPException

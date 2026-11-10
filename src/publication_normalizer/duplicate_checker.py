@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Remove repeated publications using comparison keys without changing metadata."""
 
 from publication_model import Publication

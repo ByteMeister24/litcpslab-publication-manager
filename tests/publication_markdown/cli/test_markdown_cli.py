@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """CLI outcomes and independent, offline execution of reviewed JSON rendering."""
 
 from contextlib import redirect_stderr, redirect_stdout

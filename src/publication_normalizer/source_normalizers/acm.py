@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Convert a BibTeX file into the project's Publication instances."""
 from pathlib import Path
 

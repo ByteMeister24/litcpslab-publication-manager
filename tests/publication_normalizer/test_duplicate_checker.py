@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """DOI identities, title fallback, ambiguity, and unchanged first records."""
 
 from itertools import permutations

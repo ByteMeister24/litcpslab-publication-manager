@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Map a manually exported Springer Nature search-results CSV to Publication."""
 
 import csv

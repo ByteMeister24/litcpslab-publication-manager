@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Run normalization with ``python -m publication_normalizer``."""
 
 import sys

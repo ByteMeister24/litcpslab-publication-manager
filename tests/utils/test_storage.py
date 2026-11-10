@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Atomic publication of new files and replacement of existing files."""
 
 from pathlib import Path

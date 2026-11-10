@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Publication data contracts shared by conversion utilities."""
 
 from dataclasses import dataclass

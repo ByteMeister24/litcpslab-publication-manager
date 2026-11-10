@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Retrieve complete IEEE Xplore metadata while keeping native response pages."""
 
 from http.client import HTTPException

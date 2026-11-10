@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 /* Run with Node.js: node tests/publication_review/google_apps_script/google_apps_script_review.test.cjs. No npm packages needed. */
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');

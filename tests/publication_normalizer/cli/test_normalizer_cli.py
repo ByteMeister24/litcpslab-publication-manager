@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """CLI selections, exit codes, and credential-free execution outside the checkout."""
 
 from contextlib import redirect_stderr, redirect_stdout

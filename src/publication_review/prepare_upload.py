@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Index existing normalized JSON files with their canonical author names."""
 
 import argparse

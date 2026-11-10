@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 /* Configure SOURCE_FOLDER_ID and REVIEW_FOLDER_ID in Script Properties. */
 
 const PUBLICATION_FIELDS = [

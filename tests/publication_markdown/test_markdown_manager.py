@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Reviewed input selection, final publication, failure boundaries, and deletion."""
 
 from datetime import datetime

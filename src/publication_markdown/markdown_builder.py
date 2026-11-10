@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Render and save common publications using the project's Markdown schema."""
 
 import config

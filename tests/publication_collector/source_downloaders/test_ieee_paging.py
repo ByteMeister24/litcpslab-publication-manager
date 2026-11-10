@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """IEEE transport and pagination regression tests; all HTTP is mocked."""
 
 from http.client import IncompleteRead

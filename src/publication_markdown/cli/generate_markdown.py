@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Select authors and print final Markdown outcomes."""
 
 import argparse

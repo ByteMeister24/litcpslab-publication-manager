@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Load the complete YAML author mapping into Author dataclasses."""
 
 from dataclasses import dataclass

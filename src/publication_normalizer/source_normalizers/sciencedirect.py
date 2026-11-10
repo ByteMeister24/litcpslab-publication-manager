@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Convert saved sciencedirect metadata into Publication instances."""
 
 from datetime import date

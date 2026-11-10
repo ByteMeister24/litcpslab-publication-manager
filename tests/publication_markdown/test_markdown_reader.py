@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Reviewed JSON validates the complete Publication contract without changing inputs."""
 
 from dataclasses import asdict

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Offline author/source coordination, raw storage, and failure handling."""
 
 from contextlib import redirect_stderr, redirect_stdout

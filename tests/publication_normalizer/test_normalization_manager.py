@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Selection, partial results, immutable raw inputs, and atomic normalized output."""
 
 from dataclasses import asdict

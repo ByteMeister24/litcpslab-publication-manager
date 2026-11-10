@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Mainak Majumder (@ByteMeister24)
+
 """Requests and outcomes for the publication download workflow."""
 
 from dataclasses import dataclass
